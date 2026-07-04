@@ -120,7 +120,7 @@ const DIFFS = [
   { name: '難し過ぎる',   w: 24, h: 19, chestLo: 6, chestHi: 6, margin: 1.8,  flat: 2, exp: 410 },
   { name: '最高難易度',   w: 30, h: 24, chestLo: 8, chestHi: 8, margin: 1.7,  flat: 0, exp: 520 },
 ];
-const CHAR_SPEED = 4;      // マス/秒（キビキビ・でも見て追える速度）
+const CHAR_SPEED = 3;      // マス/秒（キビキビ・でも見て追える速度）
 const TRACE_DELAY_MS = 500; // なぞりから追従までの遅れ
 
 function targetSeconds(diff, pathLen) {
@@ -176,10 +176,9 @@ const PASSIVE = {
   m: { icon: '💥', name: 'たいあたり',       desc: 'つるはし無しで 体当たりで かべを こわせる（クールタイムあり）' },
   f: { icon: '✨', name: 'おたからマスター', desc: 'コインとダイヤの タイムカットが つよくなる' },
 };
-/* 体当たりCT：LV1=60秒→1LVごとに-0.5秒→LV99カンストで10.5秒 */
+/* 体当たりCT：LV1=60秒→1LVごとに-0.5秒→LV99カンストで11秒 */
 function tackleCT(level) {
-  if (level >= MAX_LV) return 10.5;
-  return Math.max(10.5, 60 - 0.5 * (level - 1));
+  return Math.max(11, 60 - 0.5 * (Math.min(level, MAX_LV) - 1));
 }
 /* おたからマスター：LV×0.005ずつ係数が下がる（＝カットが強くなる） */
 function coinFactor(level, isF) { return isF ? 0.90 - 0.005 * Math.min(level, MAX_LV) : 0.90; }

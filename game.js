@@ -30,7 +30,7 @@ const CONF_COLS = ['#f5c542', '#ff6b6b', '#4ecdc4', '#7bd44a', '#6f9dff', '#e08b
 const DESCS = {
   default: 'ゆびで なぞると 0.5びょうおくれて キャラが はしるよ',
   pick:    '⛏️つるはし：かべを 1まい こわせる（つかいきり・さいだい2こ）',
-  ladder:  '🪜ハシゴ：かべに かける。かけた ほうこうにだけ とおれる（さいだい3こ）',
+  ladder:  '🪜ハシゴ：かべに 立てかける。かけた ほうこうにだけ とおれる（のぼるのに 2びょう）',
   coin:    '🪙コイン：さいごの タイムを カット（ふくり・さいだい5まい）',
   diamond: '💎ダイヤ：さいごの タイムを おおきくカット（ふくり・さいだい5こ）',
   tackle:  '💥たいあたり：つるはしなしで かべを こわせる（クールタイムあり）',
@@ -227,6 +227,19 @@ function moveChar(dt) {
       const d = dirBetween(c.rx, c.ry, nxt.rx, nxt.ry);
       if (d < 0 || !L.canPass(st.m, c.rx, c.ry, d, st.ladders)) { st.plan.shift(); continue; }
       st.plan.shift();
+      const wiL = L.wallIndex(st.m, c.rx, c.ry, d);
+      if (st.m.g[wiL] !== 0 && st.ladders[wiL] === d + 1) {
+        // ハシゴ越え：2秒かけて上る。演出中はタイマー停止→上り終えたら即再開
+        c.dir = d;
+        Snd.sfx('ladder');
+        st.cuts.start('climb', 2000, { d, fx: c.x, fy: c.y, tx: nxt.rx, ty: nxt.ry, steps: 0 }, cut => {
+          c.rx = cut.data.tx; c.ry = cut.data.ty;
+          c.x = roomX(c.rx); c.y = roomY(c.ry);
+          c.moving = null;
+          onEnterRoom();
+        });
+        break;
+      }
       c.moving = { fx: c.x, fy: c.y, tx: nxt.rx, ty: nxt.ry, prog: 0, dist: P };
       c.dir = d;
     }
@@ -473,6 +486,9 @@ function tick(dt) {
           Snd.sfx(pick ? 'pickHit' : 'thud');
           st.shake = pick ? 5 : 7;
         }
+      } else if (cutA.kind === 'climb') { // のぼり中の足音
+        const stp = Math.min(4, 1 + ((cutA.t / 500) | 0));
+        if (stp > (cutA.data.steps || 0)) { cutA.data.steps = stp; Snd.sfx('climbStep'); }
       }
     } else {
       st.timer.update(dt); // 演出中はタイマーが止まっている
@@ -527,6 +543,8 @@ function render() {
     // 行ごとに 壁→エンティティ（2.5D風の前後関係）
     const charRow = clamp(rowAt(st.char.y), 0, m.bh - 1);
     const goalRow = 2 * (m.h - 1) + 1;
+    const cutNow = st.cuts.active;
+    const climbing = cutNow && cutNow.kind === 'climb';
     for (let by = y0; by <= y1; by++) {
       for (let bx = x0; bx <= x1; bx++) {
         const v = m.g[by * m.bw + bx];
@@ -538,8 +556,9 @@ function render() {
         const ry = (pair[0] / m.w) | 0;
         if (2 * ry + 1 === by) drawChest(st, pair[0], pair[1]);
       }
-      if (by === charRow) drawChar(st);
+      if (by === charRow && !climbing) drawChar(st);
     }
+    if (climbing) drawChar(st); // のぼり中は壁のさらに上に見える
     drawTargets(st);
     drawCutFx(st);
     for (const p of st.particles) {
@@ -592,19 +611,35 @@ function drawCracks(x, y, w, h, lvl) {
   }
   ctx.stroke();
 }
+function ladderShape(baseX, baseY, len, angle) {
+  // 基点(足もと)から上へ伸びるハシゴを描く。angleで傾けて「立てかけ」感を出す
+  ctx.save(); ctx.translate(baseX, baseY); ctx.rotate(angle);
+  ctx.fillStyle = '#8a5a2e';
+  ctx.fillRect(-7, -len, 3, len);
+  ctx.fillRect(4, -len, 3, len);
+  ctx.fillStyle = '#b8834a';
+  const n = Math.max(2, Math.round(len / 9));
+  for (let i = 0; i < n; i++) ctx.fillRect(-7, -len + 3 + i * ((len - 6) / Math.max(1, n - 1)), 14, 2.5);
+  ctx.restore();
+}
 function drawLadder(bx, by, d) {
-  // 壁の上面に、渡す方向へ少しはみ出して描く（薄い壁でも見やすい）
-  const x = bPos(bx), y = bPos(by) - WH, w = bSize(bx), h = bSize(by);
-  const cx = x + w / 2, cy = y + h / 2;
-  ctx.fillStyle = '#a9743f';
-  if (d === 1 || d === 3) { // よこ向きに渡す
-    ctx.fillRect(x - 4, cy - 6, w + 8, 3); ctx.fillRect(x - 4, cy + 3, w + 8, 3);
-    for (let i = 0; i < 3; i++) ctx.fillRect(x - 3 + i * ((w + 3) / 2), cy - 6, 3, 12);
-  } else { // たて向きに渡す
-    ctx.fillRect(cx - 6, y - 4, 3, h + 8); ctx.fillRect(cx + 3, y - 4, 3, h + 8);
-    for (let i = 0; i < 3; i++) ctx.fillRect(cx - 6, y - 3 + i * ((h + 3) / 2), 12, 3);
+  // 設置した側から壁に「立てかけた」ハシゴ。d=とおれる方向
+  const x = bPos(bx), yTop = bPos(by) - WH, w = bSize(bx), h = bSize(by);
+  const cx = x + w / 2, cy = yTop + h / 2;
+  if (d === 0) {
+    // 南側から北へ：手前の面に立てかける＝全身が見える
+    ladderShape(cx, bPos(by) + h + 3, h + WH + 10, 0);
+  } else if (d === 2) {
+    // 北側から南へ：壁のむこう側なので、先端だけ壁の上からのぞく
+    ladderShape(cx, yTop + 7, 15, 0);
+  } else if (d === 1) {
+    // 西側から東へ：左の床から斜めに立てかける
+    ladderShape(x - 6, bPos(by) + h * 0.85, h * 0.85 + WH + 6, 0.42);
+  } else {
+    // 東側から西へ：右の床から斜めに立てかける
+    ladderShape(x + w + 6, bPos(by) + h * 0.85, h * 0.85 + WH + 6, -0.42);
   }
-  // 通れる方向の矢印
+  // とおれる方向の矢印（壁の上面）
   ctx.fillStyle = 'rgba(255,255,255,0.9)';
   ctx.beginPath();
   const a = 5;
@@ -653,10 +688,23 @@ function drawChest(st, ri, chd) {
 function drawChar(st) {
   const c = st.char;
   const set = SPR[S.save.gender];
+  const cutA = st.cuts.active;
+  if (cutA && cutA.kind === 'climb') {
+    // ハシゴのぼり：2秒かけて壁を乗り越える（山なりに持ち上がる）
+    const dd = cutA.data;
+    const k = Math.min(1, cutA.t / cutA.dur);
+    const ex = roomX(dd.tx), ey = roomY(dd.ty);
+    const px = dd.fx + (ex - dd.fx) * k;
+    const py = dd.fy + (ey - dd.fy) * k;
+    const hump = Math.sin(Math.PI * k) * (WH + 6);
+    const key2 = dd.d === 0 ? 'up' : dd.d === 1 ? 'right' : dd.d === 3 ? 'left' : 'down';
+    const f2 = ((cutA.t / 180) | 0) % 2; // 手足をバタバタ
+    ctx.drawImage(set[key2][f2], Math.round(px - 10), Math.round(py + T * 0.4 - 28 - hump), 20, 28);
+    return;
+  }
   const key = c.dir === 0 ? 'up' : c.dir === 1 ? 'right' : c.dir === 3 ? 'left' : 'down';
   let frame = c.moving ? c.frame : 0;
   let ox = 0, oy = 0;
-  const cutA = st.cuts.active;
   if (cutA && cutA.kind === 'break' && cutA.data.via === 'tackle') {
     // 体当たり：壁に向かって突進→跳ね返るを繰り返す
     const cyc = (cutA.t % 700) / 700;
@@ -818,7 +866,7 @@ function buildSkillCards() {
     const card = document.createElement('button');
     card.className = 'skillCard' + (seld ? ' sel' : '') + (unlocked ? '' : ' locked');
     const val = k === 'm'
-      ? ('クールタイム ' + L.tackleCT(lv) + 'びょう（LV99で10.5びょう）')
+      ? ('クールタイム ' + L.tackleCT(lv) + 'びょう（LV99で11びょう）')
       : ('🪙×' + L.coinFactor(lv, true).toFixed(3) + '・💎×' + L.diaFactor(lv, true).toFixed(3) + '（LVで強化）');
     card.innerHTML = '<b>' + PS.icon + ' ' + PS.name + '</b><span>' + PS.desc + '</span><span class="val">' + val + '</span>'
       + (unlocked ? (seld ? '<span class="tag">✅ セットちゅう</span>' : '<span class="tag"> </span>') : '<span class="tag">🔒 LV5で かいほう</span>');

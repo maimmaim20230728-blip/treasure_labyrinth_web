@@ -177,6 +177,7 @@ const FX = {
     o.connect(g); g.connect(master); o.start(t); o.stop(t + 0.32);
   },
   ladder()   { [0, 0.09, 0.18].forEach((d, i) => _note(now() + d, 300 + i * 40, 0.07, 'triangle', 0.14, master)); },
+  climbStep(){ _note(now(), 320, 0.06, 'triangle', 0.12, master); _noise(now(), 0.03, 0.08, 1600); },
   levelup()  { [523, 659, 784, 1047].forEach((f, i) => _note(now() + i * 0.09, f, 0.18, 'square', 0.11, master)); },
   fanfare()  {
     const t = now();
