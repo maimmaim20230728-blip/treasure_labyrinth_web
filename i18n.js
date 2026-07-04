@@ -8,12 +8,12 @@ const I18N = {
     ['nl', 'Nederlands'], ['pl', 'Polski'], ['ru', 'Русский'], ['tr', 'Türkçe'], ['hi', 'हिन्दी'],
     ['id', 'Bahasa Indonesia'], ['ar', 'العربية'], ['bn', 'বাংলা'], ['sw', 'Kiswahili'],
   ],
-  /* 中性キャラの呼び名 */
+  /* 中性キャラ（ロボット）の呼び名 */
   mids: {
-    ja: 'ミント', en: 'Mint', zh: '薄荷', 'zh-TW': '薄荷', ko: '민트',
-    es: 'Menta', pt: 'Menta', fr: 'Menthe', de: 'Minze', it: 'Menta',
-    nl: 'Munt', pl: 'Mięta', ru: 'Мята', tr: 'Nane', hi: 'पुदीना',
-    id: 'Mint', ar: 'نعناع', bn: 'পুদিনা', sw: 'Minti',
+    ja: 'ロボ', en: 'Robo', zh: '机器人', 'zh-TW': '機器人', ko: '로보',
+    es: 'Robo', pt: 'Robô', fr: 'Robo', de: 'Robo', it: 'Robo',
+    nl: 'Robo', pl: 'Robot', ru: 'Робо', tr: 'Robo', hi: 'रोबो',
+    id: 'Robo', ar: 'روبو', bn: 'রোবো', sw: 'Roboti',
   },
   /* コングラチュレーション（[最高難易度クリア, LV99到達]） */
   congrats: {

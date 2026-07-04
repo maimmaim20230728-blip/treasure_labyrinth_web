@@ -119,37 +119,46 @@ const PIX = {
 };
 const PAL_M = { H: '#4a3020', S: '#f2c9a0', K: '#20242c', B: '#3b6fd6', L: '#27407e' };
 const PAL_F = { H: '#6b3b1e', S: '#f2c9a0', K: '#20242c', B: '#e0526b', L: '#93304a' };
-/* 中性キャラ「ミント」：明るいミント色のフード＋クリームのベール。
-   にっこり閉じた目と金の星かざりで、中立の配慮はそのまま親しみやすく */
-const PAL_N = { H: '#3da98c', S: '#f4efe2', K: '#2a2e38', B: '#57bfa2', L: '#3a9078', G: '#f5c542' };
-/* ミント専用ドット絵（顔は出さず、ベールに にっこり閉じ目） */
+/* 中性キャラ「ロボ」：金属グレーのボディ＋水色に光るアイ＋アンテナ。
+   人種・性別・文化に依存しないロボットで多様性に配慮 */
+const PAL_N = {
+  H: '#9aa4b0', // 頭部の金属
+  S: '#c3ccd6', // 明るい面
+  K: '#22262c', // 使わないが一応
+  B: '#7c8794', // ボディ金属
+  L: '#5a6470', // 脚・影
+  E: '#3fe0ff', // 発光アイ（シアン）
+  A: '#f5c542', // アンテナ先端の球
+  P: '#4a525e', // パネルの線
+};
+/* ロボ専用ドット絵（H=頭金属 S=明面 B=胴 L=脚 E=光る目 A=アンテナ球 P=パネル） */
 const PIX_N = {
   down: [[
-    '..HHHHHH..', '.HHHGGHHH.', '.HSSSSSSH.', '.HKKSSKKH.', '.HSSSSSSH.',
-    '..SSSSSS..', '..BBBBBB..', '.BBBBBBBB.', '.SBBGGBBS.', '..BBBBBB..',
-    '..LLLLLL..', '..LL..LL..', '..KK..KK..', '..........',
+    '...A......', '...A......', '..HHHHHH..', '.HHHHHHHH.', '.HEEHHEEH.',
+    '..HHHHHH..', '..BBBBBB..', '.BBPBBPBB.', '.BBBBBBBB.', '..BBBBBB..',
+    '..LLLLLL..', '..LL..LL..', '..LL..LL..', '..........',
   ], [
-    '..HHHHHH..', '.HHHGGHHH.', '.HSSSSSSH.', '.HKKSSKKH.', '.HSSSSSSH.',
-    '..SSSSSS..', '..BBBBBB..', '.BBBBBBBB.', '.SBBGGBBS.', '..BBBBBB..',
-    '..LLLLLL..', '.LL....LL.', '.KK....KK.', '..........',
+    '......A...', '......A...', '..HHHHHH..', '.HHHHHHHH.', '.HEEHHEEH.',
+    '..HHHHHH..', '..BBBBBB..', '.BBPBBPBB.', '.BBBBBBBB.', '..BBBBBB..',
+    '..LLLLLL..', '.LL....LL.', '.LL....LL.', '..........',
   ]],
   up: [[
-    '..HHHHHH..', '.HHHHHHHH.', '.HHHHHHHH.', '.HHHHHHHH.', '.SHHHHHHS.',
-    '..SSSSSS..', '..BBBBBB..', '.BBBBBBBB.', '.SBBBBBBS.', '..BBBBBB..',
-    '..LLLLLL..', '..LL..LL..', '..KK..KK..', '..........',
+    '...A......', '...A......', '..HHHHHH..', '.HHHHHHHH.', '.HHHHHHHH.',
+    '..HHHHHH..', '..BBBBBB..', '.BBBBBBBB.', '.BBPPPPBB.', '..BBBBBB..',
+    '..LLLLLL..', '..LL..LL..', '..LL..LL..', '..........',
   ], [
-    '..HHHHHH..', '.HHHHHHHH.', '.HHHHHHHH.', '.HHHHHHHH.', '.SHHHHHHS.',
-    '..SSSSSS..', '..BBBBBB..', '.BBBBBBBB.', '.SBBBBBBS.', '..BBBBBB..',
-    '..LLLLLL..', '.LL....LL.', '.KK....KK.', '..........',
+    '......A...', '......A...', '..HHHHHH..', '.HHHHHHHH.', '.HHHHHHHH.',
+    '..HHHHHH..', '..BBBBBB..', '.BBBBBBBB.', '.BBPPPPBB.', '..BBBBBB..',
+    '..LLLLLL..', '.LL....LL.', '.LL....LL.', '..........',
   ]],
   side: [[
-    '..HHHHHH..', '.HHHGHHHH.', '.HHSSSSS..', '.HHSKKSS..', '.HHSSSSS..',
-    '..SSSSS...', '..BBBBB...', '..BBBBBB..', '..BBGBSB..', '..BBBBB...',
-    '...LLLL...', '...LL.L...', '...KK.K...', '..........',
+    '...A......', '...A......', '..HHHHHH..', '.HHHHHHHH.', '.HHEEHH...',
+    '..HHHHH...', '..BBBBB...', '..BBPBBB..', '..BBBBBB..', '..BBBBB...',
+    '...LLLL...', '...LL.L...', '...LL.L...', '..........',
   ], [
-    '..HHHHHH..', '.HHHGHHHH.', '.HHSSSSS..', '.HHSKKSS..', '.HHSSSSS..',
-    '..SSSSS...', '..BBBBB...', '..BBBBBB..', '..BBGBSB..', '..BBBBB...',
-    '...LLLL...', '..LL..LL..', '..KK...K..', '..........',
+    '...A......', '...A......', '..HHHHHH..', '.HHHHHHHH.', '.HHEEHH...',
+    '..HHHHH...', '..BBBBB...', '..BBPBBB..', '..BBBBBB..', '..BBBBB...',
+    '...LLLL...', '..LL..LL..', '..LL...L..', '..........',
   ]],
 };
 const SPR = {};
