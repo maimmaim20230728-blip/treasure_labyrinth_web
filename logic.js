@@ -184,12 +184,96 @@ function tackleCT(level) {
 function coinFactor(level, isF) { return isF ? 0.90 - 0.005 * Math.min(level, MAX_LV) : 0.90; }
 function diaFactor(level, isF)  { return isF ? 0.85 - 0.005 * Math.min(level, MAX_LV) : 0.85; }
 
+/* ---- 追加パッシブスキル（③〜⑩・レベルで自動取得） ---- */
+const SKILLS = [
+  { id: 'speed',  lv: 5,  icon: '🥾' }, // ③スピードアップ
+  { id: 'chest',  lv: 7,  icon: '🎁' }, // ④宝箱出現アップ
+  { id: 'lucky',  lv: 10, icon: '🍀' }, // ⑤からっぽ率低下
+  { id: 'hawk',   lv: 15, icon: '🦅' }, // ⑥鷹の目
+  { id: 'craft',  lv: 20, icon: '🛠️' }, // ⑦精密作業
+  { id: 'warp',   lv: 25, icon: '🌀' }, // ⑧ワープ
+  { id: 'hansel', lv: 30, icon: '🍞' }, // ⑨ヘンゼル
+  { id: 'clone',  lv: 35, icon: '👥' }, // ⑩分身の術
+];
+/* ③LV5で4マス/秒。LV10から5レベルごとに+1 */
+function speedCells(level) {
+  if (level < 5) return CHAR_SPEED;
+  return 4 + Math.floor(Math.max(0, Math.min(level, MAX_LV) - 5) / 5);
+}
+/* ④LV7で+1%。LV8から1レベルごとに+1%（宝箱の数に掛ける倍率で表現） */
+function chestRateBonus(level) {
+  return level >= 7 ? (Math.min(level, MAX_LV) - 6) / 100 : 0;
+}
+/* ⑤LV10で20%→19%。LV15から5レベルごとに-1% */
+function emptyRatePct(level) {
+  if (level < 10) return 20;
+  return Math.max(1, 19 - Math.floor((Math.min(level, MAX_LV) - 10) / 5));
+}
+/* からっぽ率を指定して宝箱を抽選（残りは4種で均等割り） */
+function rollChestWeighted(emptyPct, rnd) {
+  const r = (rnd || Math.random)() * 100;
+  if (r < emptyPct) return 'empty';
+  return CHEST_ITEMS[(((rnd || Math.random)()) * 4) | 0]; // empty以外の4種
+}
+/* ⑥LV15で視界+1。LV16から1レベルごとに+1（全部見えたら頭打ち） */
+function viewRangeFor(level, base) {
+  const b = base == null ? 7 : base;
+  if (level < 15) return b;
+  return Math.min(40, b + (Math.min(level, MAX_LV) - 14));
+}
+/* ⑦LV20:2回 LV40:3回 LV70:4回 LV99:5回（つるはしの使用回数／ハシゴの再設置回数） */
+function toolUses(level) {
+  if (level >= 99) return 5;
+  if (level >= 70) return 4;
+  if (level >= 40) return 3;
+  if (level >= 20) return 2;
+  return 1;
+}
+/* ⑧「ゴールから11マス」の最寄りリングへワープできる確率(%)。LV25=0.1%、以降+0.1%/LV */
+function warpClosestPct(level) {
+  if (level < 25) return 0;
+  return Math.min(100, 0.1 + 0.1 * (Math.min(level, MAX_LV) - 25));
+}
+/* ⑨LV30:1段 LV35:2段 LV40:3段（足あとの濃さの段階数） */
+function hanselShades(level) {
+  if (level >= 40) return 3;
+  if (level >= 35) return 2;
+  if (level >= 30) return 1;
+  return 0;
+}
+/* ⑩LV35:1人 LV40:2人 LV50:3人（分身は1マス/秒固定） */
+function cloneCount(level) {
+  if (level >= 50) return 3;
+  if (level >= 40) return 2;
+  if (level >= 35) return 1;
+  return 0;
+}
+const CLONE_SPEED = 1;
+
+/* ---- スキル装備スロット（選んだスキルだけが効く） ----
+   LV10〜29=2こ / LV30〜59=3こ / LV60以降=4こ（それ以前は1こ） */
+function slotCount(level) {
+  if (level >= 60) return 4;
+  if (level >= 30) return 3;
+  if (level >= 10) return 2;
+  return 1;
+}
+/* 習得済みか（①②のm/fは自分の性別なら最初から・LV5で両方解禁） */
+function skillAcquired(id, level, gender) {
+  if (id === 'm' || id === 'f') return level >= 5 || gender === id;
+  const sk = SKILLS.find(s => s.id === id);
+  return !!sk && level >= sk.lv;
+}
+
 const api = {
   DX, DY, mulberry32, generate, wallIndex, canPass, shortestPath, bfsLimited,
   DIFFS, CHAR_SPEED, TRACE_DELAY_MS, targetSeconds, chestCount,
   CHEST_ITEMS, rollChest, ITEM_CAPS, finalTimeMs,
   StageTimer, CutsceneCtrl,
   MAX_LV, lvCum, levelFor, PASSIVE, tackleCT, coinFactor, diaFactor,
+  SKILLS, speedCells, chestRateBonus, emptyRatePct, rollChestWeighted,
+  viewRangeFor, toolUses, warpClosestPct, hanselShades, cloneCount, CLONE_SPEED,
+  slotCount, skillAcquired,
 };
 if (typeof module !== 'undefined' && module.exports) module.exports = api;
 else root.Logic = api;

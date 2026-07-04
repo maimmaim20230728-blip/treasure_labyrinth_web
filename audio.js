@@ -178,6 +178,16 @@ const FX = {
   },
   ladder()   { [0, 0.09, 0.18].forEach((d, i) => _note(now() + d, 300 + i * 40, 0.07, 'triangle', 0.14, master)); },
   climbStep(){ _note(now(), 320, 0.06, 'triangle', 0.12, master); _noise(now(), 0.03, 0.08, 1600); },
+  warp() { // 魔方陣のうねり上がるサウンド
+    const t = now();
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(220, t);
+    o.frequency.exponentialRampToValueAtTime(880, t + 0.55);
+    g.gain.setValueAtTime(0.12, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.7);
+    o.connect(g); g.connect(master); o.start(t); o.stop(t + 0.72);
+    [1175, 1568, 2093].forEach((f, i) => _note(t + 0.55 + i * 0.08, f, 0.12, 'sine', 0.09, master));
+  },
   levelup()  { [523, 659, 784, 1047].forEach((f, i) => _note(now() + i * 0.09, f, 0.18, 'square', 0.11, master)); },
   fanfare()  {
     const t = now();

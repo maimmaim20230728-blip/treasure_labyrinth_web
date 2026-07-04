@@ -27,16 +27,17 @@ button { cursor: pointer; font-family: inherit; }
   padding: 6px 8px; padding-top: calc(6px + env(safe-area-inset-top));
   background: #10122a; border-bottom: 2px solid var(--border);
 }
-#timeBox { font-weight: bold; font-size: 16px; white-space: nowrap; flex-shrink: 0; }
-#timeTarget { font-size: 11px; opacity: 0.8; margin-left: 3px; font-weight: normal; }
+#timeBox { white-space: nowrap; flex-shrink: 0; line-height: 1.15; }
+#timeNow { font-size: 27px; font-weight: bold; letter-spacing: 1px; }
+#timeTarget { font-size: 13px; opacity: 0.85; }
 #diffName {
-  font-size: 12px; opacity: 0.9; flex: 1; text-align: center;
+  font-size: 14px; opacity: 0.9; flex: 1; text-align: center;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0;
 }
-.camBtns { display: flex; gap: 4px; flex-shrink: 0; }
+.camBtns { display: flex; gap: 5px; flex-shrink: 0; }
 .camBtns button {
-  font-size: 16px; background: var(--panel); color: var(--txt);
-  border: 2px solid var(--border); border-radius: 8px; padding: 5px 8px;
+  font-size: 18px; background: var(--panel); color: var(--txt);
+  border: 2px solid var(--border); border-radius: 10px; padding: 8px 10px;
 }
 
 /* アイテム欄（独立枠・不透明・迷路とは重ならない） */
@@ -45,15 +46,18 @@ button { cursor: pointer; font-family: inherit; }
   background: #10122a; border-top: 2px solid var(--border);
   padding: 6px 8px calc(8px + env(safe-area-inset-bottom));
 }
-#slots { display: flex; gap: 6px; justify-content: center; }
+#slots { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; }
 .slot {
-  font-size: 20px; background: var(--panel); color: var(--txt);
-  border: 2px solid var(--border); border-radius: 12px; padding: 6px 10px; min-width: 62px;
+  display: flex; flex-direction: column; align-items: center; gap: 1px;
+  font-size: 24px; background: var(--panel); color: var(--txt);
+  border: 2px solid var(--border); border-radius: 14px; padding: 8px 8px 6px; min-width: 62px;
 }
-.slot span { font-size: 13px; margin-left: 2px; }
+.sIco { line-height: 1.05; }
+.sIco b { font-size: 14px; margin-left: 3px; }
+.sLbl { font-size: 10px; opacity: 0.85; font-weight: normal; white-space: nowrap; }
 .slot.dim { opacity: 0.45; }
 .slot.sel { border-color: var(--gold); box-shadow: 0 0 8px var(--gold); }
-#desc { margin-top: 6px; text-align: center; font-size: 14px; min-height: 20px; opacity: 0.95; }
+#desc { margin-top: 6px; text-align: center; font-size: 15px; min-height: 21px; opacity: 0.95; }
 
 /* 横向き：アイテム欄は左側に縦並びで固定 */
 @media (orientation: landscape) {
@@ -131,6 +135,19 @@ button.big {
 .skillCard.sel { border-color: var(--gold); box-shadow: 0 0 10px var(--gold); }
 .skillCard.locked { opacity: 0.55; }
 .tag { font-size: 12px; opacity: 0.9; }
+#skillSel { justify-content: flex-start; padding-top: calc(24px + env(safe-area-inset-top)); }
+#skillList { display: flex; flex-direction: column; gap: 6px; width: min(380px, 92vw); padding-bottom: 8px; }
+.skillRow {
+  display: flex; align-items: center; gap: 8px; text-align: left;
+  background: var(--panel); border: 2px solid var(--border); border-radius: 10px; padding: 8px 10px;
+  color: var(--txt); font-family: inherit;
+}
+.skillRow.locked { opacity: 0.5; }
+.skillRow.sel { border-color: var(--gold); box-shadow: 0 0 8px var(--gold); }
+.srIco { font-size: 22px; }
+.srBody { flex: 1; display: flex; flex-direction: column; font-size: 12px; min-width: 0; }
+.srBody b { font-size: 14px; }
+.srVal { color: var(--gold); font-size: 11px; max-width: 100px; white-space: normal; text-align: right; }
 
 /* クリア画面（紙吹雪が見えるよう半透明） */
 #clearOv { background: rgba(10, 12, 28, 0.75); }

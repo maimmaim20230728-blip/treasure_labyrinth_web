@@ -100,6 +100,48 @@ console.log('2) つるはし+ハシゴ乱用でも詰み無し: 済');
   console.log('5) タイマー/演出制御: 済');
 }
 
+// 5b) 追加パッシブスキル③〜⑩の計算式
+{
+  // ③スピードアップ：LV5で4、LV10から5レベルごとに+1
+  ok(L.speedCells(1) === 3 && L.speedCells(4) === 3, '速度: 未習得は3');
+  ok(L.speedCells(5) === 4 && L.speedCells(9) === 4, '速度: LV5-9は4');
+  ok(L.speedCells(10) === 5 && L.speedCells(15) === 6, '速度: LV10=5/LV15=6');
+  // ④宝箱出現：LV7で+1%、以降+1%/LV
+  ok(L.chestRateBonus(6) === 0 && Math.abs(L.chestRateBonus(7) - 0.01) < 1e-9, '宝箱率: LV7=+1%');
+  ok(Math.abs(L.chestRateBonus(8) - 0.02) < 1e-9 && Math.abs(L.chestRateBonus(99) - 0.93) < 1e-9, '宝箱率: LV8=+2%/LV99=+93%');
+  // ⑤からっぽ率：LV10で19%、LV15から5レベルごとに-1%
+  ok(L.emptyRatePct(9) === 20 && L.emptyRatePct(10) === 19, 'からっぽ: LV10=19%');
+  ok(L.emptyRatePct(14) === 19 && L.emptyRatePct(15) === 18 && L.emptyRatePct(99) === 2, 'からっぽ: LV15=18%/LV99=2%');
+  // 重み付き抽選の分布（からっぽ10%指定）
+  const r = L.mulberry32(777); const cnt = { empty: 0 };
+  for (let i = 0; i < 50000; i++) { const it = L.rollChestWeighted(10, r); cnt[it] = (cnt[it] || 0) + 1; }
+  const ePct = cnt.empty / 500;
+  ok(ePct > 9 && ePct < 11, `重み抽選: からっぽ${ePct}%（期待10%）`);
+  // ⑥鷹の目：LV15で+1、以降+1/LV
+  ok(L.viewRangeFor(14) === 7 && L.viewRangeFor(15) === 8 && L.viewRangeFor(16) === 9, '視界: LV15=8/LV16=9');
+  ok(L.viewRangeFor(99) === 40, '視界: 上限40で頭打ち');
+  // ⑦精密作業
+  ok(L.toolUses(19) === 1 && L.toolUses(20) === 2 && L.toolUses(40) === 3 && L.toolUses(70) === 4 && L.toolUses(99) === 5, '道具回数 2/3/4/5');
+  // ⑧ワープ：LV25=0.1%、+0.1%/LV
+  ok(L.warpClosestPct(24) === 0 && Math.abs(L.warpClosestPct(25) - 0.1) < 1e-9, 'ワープ: LV25=0.1%');
+  ok(Math.abs(L.warpClosestPct(26) - 0.2) < 1e-9 && Math.abs(L.warpClosestPct(99) - 7.5) < 1e-9, 'ワープ: LV26=0.2%/LV99=7.5%');
+  // ⑨ヘンゼル・⑩分身
+  ok(L.hanselShades(29) === 0 && L.hanselShades(30) === 1 && L.hanselShades(35) === 2 && L.hanselShades(40) === 3, 'ヘンゼル段階');
+  ok(L.cloneCount(34) === 0 && L.cloneCount(35) === 1 && L.cloneCount(40) === 2 && L.cloneCount(50) === 3, '分身人数');
+  ok(L.CLONE_SPEED === 1, '分身は1マス/秒固定');
+  // 装備スロット数：LV10-29=2 / LV30-59=3 / LV60+=4
+  ok(L.slotCount(1) === 1 && L.slotCount(9) === 1, 'スロット: LV9まで1');
+  ok(L.slotCount(10) === 2 && L.slotCount(29) === 2, 'スロット: LV10-29=2');
+  ok(L.slotCount(30) === 3 && L.slotCount(59) === 3, 'スロット: LV30-59=3');
+  ok(L.slotCount(60) === 4 && L.slotCount(99) === 4, 'スロット: LV60+=4');
+  // 習得判定：自分の性別は最初から・異性はLV5・③はLV5
+  ok(L.skillAcquired('m', 1, 'm') && !L.skillAcquired('f', 1, 'm'), '習得: 自性別のみLV1');
+  ok(L.skillAcquired('f', 5, 'm'), '習得: LV5で異性も');
+  ok(!L.skillAcquired('speed', 4, 'm') && L.skillAcquired('speed', 5, 'm'), '習得: ③はLV5');
+  ok(!L.skillAcquired('clone', 34, 'f') && L.skillAcquired('clone', 35, 'f'), '習得: ⑩はLV35');
+  console.log('5b) 追加スキル③〜⑩+装備スロット: 済');
+}
+
 // 6) 難易度が上がるほど目標タイムの余裕係数が減る（単調性）
 for (let i = 1; i < L.DIFFS.length; i++) {
   ok(L.DIFFS[i].margin <= L.DIFFS[i - 1].margin, 'margin単調減少');

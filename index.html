@@ -19,7 +19,7 @@
 <div id="appWrap">
   <div id="mainCol">
     <div id="hudTop" class="hidden">
-      <div id="timeBox">⏱ <span id="timeNow">0:00.0</span><span id="timeTarget"></span></div>
+      <div id="timeBox"><div id="timeNow">0:00.0</div><div id="timeTarget"></div></div>
       <div id="diffName"></div>
       <div class="camBtns">
         <button id="btnZoomOut" title="ズームアウト">➖</button>
@@ -32,11 +32,12 @@
   </div>
   <div id="hudBottom" class="hidden">
     <div id="slots">
-      <button class="slot" id="slotPick">⛏️<span id="cntPick">×0</span></button>
-      <button class="slot" id="slotLadder">🪜<span id="cntLadder">×0</span></button>
-      <button class="slot" id="slotCoin">🪙<span id="cntCoin">×0</span></button>
-      <button class="slot" id="slotDia">💎<span id="cntDia">×0</span></button>
-      <button class="slot hidden" id="slotFist">💥<span id="cntFist">OK</span></button>
+      <button class="slot" id="slotPick"><span class="sIco">⛏️<b id="cntPick">×0</b></span><small class="sLbl" id="lblPick">つるはし</small></button>
+      <button class="slot" id="slotLadder"><span class="sIco">🪜<b id="cntLadder">×0</b></span><small class="sLbl" id="lblLadder">ハシゴ</small></button>
+      <button class="slot" id="slotCoin"><span class="sIco">🪙<b id="cntCoin">×0</b></span><small class="sLbl" id="lblCoin">コイン</small></button>
+      <button class="slot" id="slotDia"><span class="sIco">💎<b id="cntDia">×0</b></span><small class="sLbl" id="lblDia">ダイヤ</small></button>
+      <button class="slot hidden" id="slotFist"><span class="sIco">💥<b id="cntFist">OK</b></span><small class="sLbl" id="lblFist">たいあたり</small></button>
+      <button class="slot hidden" id="slotWarp"><span class="sIco">🌀<b id="cntWarp">OK</b></span><small class="sLbl" id="lblWarp">ワープ</small></button>
     </div>
     <div id="desc"></div>
   </div>
@@ -70,6 +71,7 @@
   <h2>パッシブスキル</h2>
   <p id="skillNote"></p>
   <div id="skillCards"></div>
+  <div id="skillList"></div>
   <button id="btnBackTitle2">← タイトルへ</button>
 </div>
 
