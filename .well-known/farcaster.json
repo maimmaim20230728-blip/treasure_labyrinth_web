@@ -9,11 +9,13 @@
     "name": "宝の迷宮",
     "iconUrl": "https://treasure-labyrinth-web.vercel.app/icons/icon-512.png",
     "homeUrl": "https://treasure-labyrinth-web.vercel.app/",
-    "imageUrl": "https://treasure-labyrinth-web.vercel.app/og.png",
-    "buttonTitle": "あそぶ",
+    "imageUrl": "https://treasure-labyrinth-web.vercel.app/icons/farcaster-embed.png",
+    "buttonTitle": "🧭 あそぶ / Play",
     "splashImageUrl": "https://treasure-labyrinth-web.vercel.app/icons/icon-192.png",
     "splashBackgroundColor": "#141628",
+    "subtitle": "なぞって すすむ ドットめいろ",
+    "description": "指でなぞるだけ。子どもの知育から大人の脳トレまで、完全オフライン・広告なしで遊べるドット絵の迷路ゲーム。7段階の難易度・9つの迷宮・10種のスキル・19言語対応。",
     "primaryCategory": "games",
-    "tags": ["game", "maze", "retro", "puzzle", "japanese"]
+    "tags": ["game", "maze", "retro", "puzzle", "offline"]
   }
 }
