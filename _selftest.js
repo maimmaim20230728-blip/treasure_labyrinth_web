@@ -148,5 +148,37 @@ for (let i = 1; i < L.DIFFS.length; i++) {
 }
 console.log('6) 難易度テーブル単調性: 済');
 
+// 7) 19言語辞書の整合性（キー欠落・配列長・プレースホルダ保持）
+{
+  const I = require('./i18n.js');
+  const langs = I.langs.map(p => p[0]);
+  ok(langs.length === 19, `言語数19（実際${langs.length}）`);
+  const ja = I.dict.ja;
+  const jaKeys = Object.keys(ja);
+  let issues = 0;
+  for (const lg of langs) {
+    const d = I.dict[lg];
+    if (!d) { ok(false, lg + ' 辞書なし'); continue; }
+    for (const k of jaKeys) {
+      if (d[k] == null) { issues++; console.log('NG: ' + lg + ' キー欠落 ' + k); }
+      else if (Array.isArray(ja[k]) && (!Array.isArray(d[k]) || d[k].length !== ja[k].length)) {
+        issues++; console.log('NG: ' + lg + ' 配列長ちがい ' + k);
+      }
+    }
+    for (const id of Object.keys(ja.sk)) {
+      if (!d.sk || !Array.isArray(d.sk[id]) || d.sk[id].length !== 2) { issues++; console.log('NG: ' + lg + ' sk.' + id); }
+    }
+    for (const k of ['got', 'full', 'ctWait', 'newSkill', 'slotsUp', 'equipNote', 'learnAt',
+      'vSpeed', 'vChest', 'vLucky', 'vHawk', 'vCraft', 'vWarp', 'vHansel', 'vClone', 'vCT', 'vMaster']) {
+      const phs = String(ja[k]).match(/\{[a-z]+\}/g) || [];
+      for (const ph of phs) if (!String(d[k]).includes(ph)) {
+        issues++; console.log('NG: ' + lg + ' ' + k + ' プレースホルダ欠落 ' + ph);
+      }
+    }
+  }
+  ok(issues === 0, `辞書整合性 問題${issues}件`);
+  console.log('7) 19言語辞書の整合性: 済');
+}
+
 console.log(fails === 0 ? 'ALL OK' : 'FAILURES: ' + fails);
 process.exit(fails ? 1 : 0);

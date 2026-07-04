@@ -136,6 +136,13 @@ button.big {
 .skillCard.locked { opacity: 0.55; }
 .tag { font-size: 12px; opacity: 0.9; }
 #skillSel { justify-content: flex-start; padding-top: calc(24px + env(safe-area-inset-top)); }
+#langSel { justify-content: flex-start; padding-top: calc(24px + env(safe-area-inset-top)); }
+#langList { display: grid; grid-template-columns: repeat(2, minmax(140px, 1fr)); gap: 8px; width: min(360px, 90vw); }
+.langBtn {
+  background: var(--panel); color: var(--txt);
+  border: 2px solid var(--border); border-radius: 10px; padding: 11px 8px; font-size: 15px;
+}
+.langBtn.sel { border-color: var(--gold); box-shadow: 0 0 8px var(--gold); }
 #skillList { display: flex; flex-direction: column; gap: 6px; width: min(380px, 92vw); padding-bottom: 8px; }
 .skillRow {
   display: flex; align-items: center; gap: 8px; text-align: left;

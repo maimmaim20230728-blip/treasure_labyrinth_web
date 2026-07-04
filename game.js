@@ -7,6 +7,26 @@ const L = window.Logic;
 const $ = id => document.getElementById(id);
 const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
 
+/* ---- 多言語（i18n.js の19言語辞書を参照） ---- */
+function t(key) {
+  const d = (S.save && I18N.dict[S.save.lang]) || I18N.dict.ja;
+  return d[key] != null ? d[key] : I18N.dict.ja[key];
+}
+function tf(key, vars) {
+  let s = t(key);
+  for (const k in vars) s = s.split('{' + k + '}').join(vars[k]);
+  return s;
+}
+function detectLang() {
+  const cands = (navigator.languages || [navigator.language || 'ja']).map(x => String(x).toLowerCase());
+  for (const c of cands) {
+    if (c.startsWith('zh')) return (c.includes('tw') || c.includes('hant') || c.includes('hk')) ? 'zh-TW' : 'zh';
+    const two = c.slice(0, 2);
+    if (I18N.dict[two]) return two;
+  }
+  return 'en';
+}
+
 /* ---- 定数 ---- */
 const T = 32;      // 部屋1マスのワールドpx
 const H = T / 2;   // 壁の厚み＝部屋の半分（ハシゴが見やすく・なぞりも楽）
@@ -30,34 +50,40 @@ const THEMES = [
 ];
 const CONF_COLS = ['#f5c542', '#ff6b6b', '#4ecdc4', '#7bd44a', '#6f9dff', '#e08bff'];
 
+/* 説明文（言語切替に追従するようgetterで遅延参照） */
 const DESCS = {
-  default: 'ゆびで なぞると 0.5びょうおくれて キャラが はしるよ',
-  pick:    '⛏️つるはし：かべを 1まい こわせる（つかいきり・さいだい2こ）',
-  ladder:  '🪜ハシゴ：かべに 立てかける。かけた ほうこうにだけ とおれる（のぼるのに 2びょう）',
-  coin:    '🪙コイン：さいごの タイムを カット（ふくり・さいだい5まい）',
-  diamond: '💎ダイヤ：さいごの タイムを おおきくカット（ふくり・さいだい5こ）',
-  tackle:  '💥たいあたり：つるはしなしで かべを こわせる（クールタイムあり）',
-  warp:    '🌀ワープ：1かいだけ べつのばしょへ とべる（ゴールのちかくには とばない）',
-  pickTarget:   'こわしたい かべを タップ！（ほかを タップで キャンセル）',
-  ladderTarget: 'ハシゴを かけたい かべを タップ！',
+  get default() { return t('dDefault'); },
+  get pick() { return t('dPick'); },
+  get ladder() { return t('dLadder'); },
+  get coin() { return t('dCoin'); },
+  get diamond() { return t('dDia'); },
+  get tackle() { return t('dTackle'); },
+  get warp() { return t('dWarp'); },
+  get pickTarget() { return t('dPickT'); },
+  get ladderTarget() { return t('dLadderT'); },
 };
 
-/* 全スキル（①②＋③〜⑩）の表示情報 */
+/* 全スキル（①②＋③〜⑩）の表示情報（名前・説明は19言語辞書から） */
+function mkSkill(id, val) {
+  return { get name() { return t('sk')[id][0]; }, get desc() { return t('sk')[id][1]; }, val };
+}
 const SKILL_INFO = {
-  m: { name: 'たいあたり',       desc: 'つるはしなしで かべを こわせる（クールタイムあり）', val: lv => 'CT ' + L.tackleCT(lv) + 'びょう' },
-  f: { name: 'おたからマスター', desc: 'コインとダイヤの タイムカットが つよくなる',       val: lv => '🪙×' + L.coinFactor(lv, true).toFixed(3) + '・💎×' + L.diaFactor(lv, true).toFixed(3) },
-  speed:  { name: 'スピードアップ',   desc: 'あしが はやくなる',                    val: lv => 'はやさ ' + L.speedCells(lv) + 'マス/びょう' },
-  chest:  { name: 'たからばこアップ', desc: 'めいろの たからばこが ふえる',          val: lv => 'しゅつげん ＋' + Math.round(L.chestRateBonus(lv) * 100) + '%' },
-  lucky:  { name: 'からっぽガード',   desc: 'たからばこの からっぽが へる',          val: lv => 'からっぽ ' + L.emptyRatePct(lv) + '%' },
-  hawk:   { name: 'たかのめ',         desc: 'とおくまで 見えるように なる',          val: lv => 'しかい ' + L.viewRangeFor(lv) + 'マス' },
-  craft:  { name: 'せいみつさぎょう', desc: 'つるはしを くりかえし つかえる。のぼった ハシゴを かいしゅうできる', val: lv => 'どうぐ ' + L.toolUses(lv) + 'かい' },
-  warp:   { name: 'ワープ',           desc: 'まよったら 1かいだけ べつのばしょへ',    val: lv => 'ちかくワープ ' + L.warpClosestPct(lv).toFixed(1) + '%' },
-  hansel: { name: 'ヘンゼル',         desc: 'あるいた ゆかの いろが かわる',         val: lv => 'あしあと ' + L.hanselShades(lv) + 'だんかい' },
-  clone:  { name: 'ぶんしんのじゅつ', desc: 'はんとうめいの ぶんしんが たからばこを とってきてくれる', val: lv => 'ぶんしん ' + L.cloneCount(lv) + 'にん' },
+  m: mkSkill('m', lv => tf('vCT', { n: L.tackleCT(lv) })),
+  f: mkSkill('f', lv => tf('vMaster', { a: L.coinFactor(lv, true).toFixed(3), b: L.diaFactor(lv, true).toFixed(3) })),
+  speed: mkSkill('speed', lv => tf('vSpeed', { n: L.speedCells(lv) })),
+  chest: mkSkill('chest', lv => tf('vChest', { n: Math.round(L.chestRateBonus(lv) * 100) })),
+  lucky: mkSkill('lucky', lv => tf('vLucky', { n: L.emptyRatePct(lv) })),
+  hawk: mkSkill('hawk', lv => tf('vHawk', { n: L.viewRangeFor(lv) })),
+  craft: mkSkill('craft', lv => tf('vCraft', { n: L.toolUses(lv) })),
+  warp: mkSkill('warp', lv => tf('vWarp', { n: L.warpClosestPct(lv).toFixed(1) })),
+  hansel: mkSkill('hansel', lv => tf('vHansel', { n: L.hanselShades(lv) })),
+  clone: mkSkill('clone', lv => tf('vClone', { n: L.cloneCount(lv) })),
 };
 const SKILL_ICONS = { m: '💥', f: '✨' };
 const SKILL_ORDER = ['m', 'f'];
 L.SKILLS.forEach(sk => { SKILL_ICONS[sk.id] = sk.icon; SKILL_ORDER.push(sk.id); });
+const ITEM_IDX = { pick: 0, ladder: 1, coin: 2, diamond: 3 };
+const ITEM_EMO = { pick: '⛏️', ladder: '🪜', coin: '🪙', diamond: '💎' };
 
 /* ---- ドット絵キャラ（10×14・2フレーム歩行） ---- */
 const PIX = {
@@ -129,6 +155,7 @@ function loadSave() {
   S.save = Object.assign({ gender: 'm', exp: 0, badges: [0, 0, 0, 0, 0, 0, 0], equipped: null, sound: true }, s || {});
   if (!Array.isArray(S.save.badges) || S.save.badges.length !== 7) S.save.badges = [0, 0, 0, 0, 0, 0, 0];
   if (!Array.isArray(S.save.equipped)) S.save.equipped = [S.save.gender];
+  if (!S.save.lang || !I18N.dict[S.save.lang]) S.save.lang = detectLang();
   sanitizeEquip();
   Snd.setEnabled(S.save.sound);
 }
@@ -210,7 +237,7 @@ function startStage(di) {
     counts: { pick: 0, ladder: 0, coin: 0, diamond: 0 },
     char: { rx: start.rx, ry: start.ry, x: roomX(start.rx), y: roomY(start.ry), dir: 2, frame: 0, animT: 0, moving: null },
     cam: { x: roomX(start.rx), y: roomY(start.ry) },
-    theme: THEMES[(Math.random() * THEMES.length) | 0],
+    themeIdx: (Math.random() * THEMES.length) | 0,
     particles: [], shake: 0, cleared: false, tackleReadyAt: 0,
     // ---- 装備スキルだけ反映 ----
     speed: eq.has('speed') ? L.speedCells(lv) : L.CHAR_SPEED,          // ③スピードアップ
@@ -222,6 +249,7 @@ function startStage(di) {
     visits: new Uint8Array(diff.w * diff.h),
     clones: [],                                                        // ⑩分身の術
   };
+  st.theme = THEMES[st.themeIdx];
   st.cuts = new L.CutsceneCtrl(st.timer);
   // 宝箱配置（スタート・ゴール以外からランダム。④宝箱出現アップで増量）
   const n = Math.max(1, Math.round(L.chestCount(diff) * (1 + (eq.has('chest') ? L.chestRateBonus(lv) : 0))));
@@ -238,9 +266,9 @@ function startStage(di) {
   S.stage = st; S.zoom = 1; S.targetMode = null; S.tracing = false;
   showScreen('play');
   updateSlots(); descDefault();
-  $('diffName').textContent = diff.name;
-  $('timeTarget').textContent = 'もくひょう ' + fmt(st.targetMs);
-  toast('～ ' + st.theme.name + ' ～');
+  $('diffName').textContent = t('diffs')[di];
+  $('timeTarget').textContent = t('target') + ' ' + fmt(st.targetMs);
+  toast('～ ' + t('themes')[st.themeIdx] + ' ～');
   Snd.bgm('maze' + (1 + ((Math.random() * 3) | 0)));
 }
 
@@ -295,7 +323,7 @@ function moveChar(dt) {
             st.ladderRetrievals--;
             st.ladders[cut.data.wi] = 0;
             st.counts.ladder++;
-            toast('🪜ハシゴを かいしゅうした！');
+            toast(t('ladderBack'));
             updateSlots();
           }
           onEnterRoom();
@@ -341,15 +369,15 @@ function onEnterRoom() {
 function stEmptyPct(st) { return st.eq.has('lucky') ? L.emptyRatePct(st.lv) : 20; }
 function applyChest(res) {
   const st = S.stage;
-  if (res === 'empty') { toast('からっぽ だった…💨'); Snd.sfx('empty'); return; }
+  if (res === 'empty') { toast(t('empty2')); Snd.sfx('empty'); return; }
   const cap = L.ITEM_CAPS[res];
-  const names = { pick: '⛏️つるはし', ladder: '🪜ハシゴ', coin: '🪙コイン', diamond: '💎ダイヤ' };
+  const nm = ITEM_EMO[res] + t('items')[ITEM_IDX[res]];
   if (st.counts[res] >= cap) {
-    toast(names[res] + 'は もう もてない…おいていった');
+    toast(tf('full', { item: nm }));
     Snd.sfx('empty');
   } else {
     st.counts[res]++;
-    toast(names[res] + 'を てにいれた！');
+    toast(tf('got', { item: nm }));
     Snd.sfx(res === 'coin' ? 'coin' : res === 'diamond' ? 'diamond' : 'item');
   }
   updateSlots();
@@ -482,25 +510,25 @@ function doClear() {
     showScreen('clear');
     if (newLv > prevLv) {
       showLvup(newLv); Snd.sfx('levelup');
-      if (newLv >= 5 && prevLv < 5) setTimeout(() => toast('⚙スキルせんたくが かいほうされた！'), 1900);
+      if (newLv >= 5 && prevLv < 5) setTimeout(() => toast(t('skillFree')), 1900);
       // 新スキル習得・スロット増加の告知
       const learned = L.SKILLS.filter(sk => prevLv < sk.lv && newLv >= sk.lv);
-      learned.forEach((sk, i) => setTimeout(() => toast('✨あたらしいスキル ' + sk.icon + SKILL_INFO[sk.id].name + '！'), 2600 + i * 1900));
+      learned.forEach((sk, i) => setTimeout(() => toast(tf('newSkill', { s: sk.icon + SKILL_INFO[sk.id].name })), 2600 + i * 1900));
       if ([10, 30, 60].some(b => prevLv < b && newLv >= b)) {
-        setTimeout(() => toast('🎰スキルスロットが ふえた！（' + L.slotCount(newLv) + 'こ）'), 2600 + learned.length * 1900);
+        setTimeout(() => toast(tf('slotsUp', { n: L.slotCount(newLv) })), 2600 + learned.length * 1900);
       }
     }
   }, 650);
 }
 function buildClearOverlay(raw, fin, ok, e, lv, coinF, diaF) {
   const st = S.stage, c = st.counts;
-  $('clearTitle').textContent = ok ? '🎉 おたから ゲット！ 🎉' : '✨ ゴール！';
-  let html = '<div class="crow">めいろの タイム <b>' + fmt(raw) + '</b></div>';
-  if (c.coin) html += '<div class="crow">🪙×' + c.coin + '　タイム ×' + Math.pow(coinF, c.coin).toFixed(3) + '（ふくり）</div>';
-  if (c.diamond) html += '<div class="crow">💎×' + c.diamond + '　タイム ×' + Math.pow(diaF, c.diamond).toFixed(3) + '（ふくり）</div>';
-  html += '<div class="crow cbig">さいしゅうタイム <b>' + fmt(fin) + '</b></div>';
-  html += '<div class="crow">もくひょう ' + fmt(st.targetMs) + (ok ? '　🏆 たっせい！' : '　つぎは もくひょうに チャレンジ！') + '</div>';
-  html += '<div class="crow">EXP <b>+' + e + '</b>　（LV ' + lv + '）</div>';
+  $('clearTitle').textContent = ok ? t('clearBig') : t('clearSoft');
+  let html = '<div class="crow">' + t('mazeTime') + ' <b>' + fmt(raw) + '</b></div>';
+  if (c.coin) html += '<div class="crow">🪙×' + c.coin + '　×' + Math.pow(coinF, c.coin).toFixed(3) + ' ' + t('compound') + '</div>';
+  if (c.diamond) html += '<div class="crow">💎×' + c.diamond + '　×' + Math.pow(diaF, c.diamond).toFixed(3) + ' ' + t('compound') + '</div>';
+  html += '<div class="crow cbig">' + t('finalTime') + ' <b>' + fmt(fin) + '</b></div>';
+  html += '<div class="crow">' + t('goalTime') + ' ' + fmt(st.targetMs) + '　' + (ok ? t('achieved') : t('challenge')) + '</div>';
+  html += '<div class="crow">EXP <b>+' + e + '</b>　(LV ' + lv + ')</div>';
   $('clearBody').innerHTML = html;
 }
 
@@ -532,7 +560,7 @@ function doWarp() { // ⑧1回だけランダムワープ。ゴールから10マ
   for (let i = 0; i < dist.length; i++) {
     if (dist[i] >= 11 && i !== cRoom) { cands.push(i); if (dist[i] < minD) minD = dist[i]; }
   }
-  if (!cands.length) { toast('このめいろでは ワープできない'); Snd.sfx('nope'); return; }
+  if (!cands.length) { toast(t('warpNo')); Snd.sfx('nope'); return; }
   st.warpUsed = true;
   // レベルが高いほど「いちばんゴール寄り(11マス)のリング」へ飛べる確率が上がる
   const ring = cands.filter(i => dist[i] === minD);
@@ -542,7 +570,7 @@ function doWarp() { // ⑧1回だけランダムワープ。ゴールから10マ
   setTarget(null);
   Snd.sfx('warp');
   st.cuts.start('warp', 1400, { fx: st.char.x, fy: st.char.y, tx: dest % st.m.w, ty: (dest / st.m.w) | 0, moved: false }, () => {
-    toast('🌀ワープした！');
+    toast(t('warped'));
     onEnterRoom();
   });
   updateSlots();
@@ -890,12 +918,12 @@ function drawPlan(st) {
 }
 function drawGoal(st) {
   const gx = roomX(st.goal.rx), gy = roomY(st.goal.ry);
-  const t = performance.now() / 1000;
+  const t2 = performance.now() / 1000; // ※tはi18n関数なので別名
   // 大きな金の宝箱（部屋幅を少しはみ出すくらい堂々と）
   const w = T * 1.15, h = T * 0.9, x = gx - w / 2, y = gy + T * 0.42 - h;
   const lidH = h * 0.4;
   // 後光（明滅する金色のオーラ）
-  const glow = 0.22 + 0.13 * Math.sin(t * 2.4);
+  const glow = 0.22 + 0.13 * Math.sin(t2 * 2.4);
   ctx.fillStyle = 'rgba(255,220,90,' + glow.toFixed(3) + ')';
   ctx.beginPath(); ctx.arc(gx, gy - h * 0.2, w * 0.85, 0, 6.3); ctx.fill();
   ctx.fillStyle = 'rgba(255,240,160,' + (glow * 0.8).toFixed(3) + ')';
@@ -926,27 +954,28 @@ function drawGoal(st) {
   ctx.fillStyle = '#ff9d8a';
   ctx.fillRect(gx - 2.5, y + lidH - 0.5, 2, 2);
   // キラーン（十字の輝き2つ・交互に瞬く）
-  const tw1 = Math.max(0, Math.sin(t * 3.1));
-  const tw2 = Math.max(0, Math.sin(t * 3.1 + 2.2));
+  const tw1 = Math.max(0, Math.sin(t2 * 3.1));
+  const tw2 = Math.max(0, Math.sin(t2 * 3.1 + 2.2));
   ctx.fillStyle = 'rgba(255,255,230,' + (0.4 + 0.6 * tw1).toFixed(3) + ')';
   drawTwinkle(x + w * 0.16, y + 3, 4 + 3 * tw1);
   ctx.fillStyle = 'rgba(255,255,230,' + (0.4 + 0.6 * tw2).toFixed(3) + ')';
   drawTwinkle(x + w * 0.88, y + h * 0.5, 3.5 + 3 * tw2);
   // 立ちのぼるきらめき
-  ctx.fillStyle = 'rgba(255,236,150,' + (0.5 + 0.5 * Math.sin(t * 3)).toFixed(3) + ')';
-  ctx.fillRect(gx - 2, gy - T * 0.95 - ((t * 12) % 12), 3.5, 3.5);
-  ctx.fillRect(gx + 11, gy - T * 0.7 - ((t * 15) % 13), 3, 3);
-  ctx.fillRect(gx - 13, gy - T * 0.75 - ((t * 9) % 10), 3, 3);
-  // 「ゴール」ラベル（ふわふわ上下）
-  const ly = y - 22 + Math.sin(t * 2) * 2;
+  ctx.fillStyle = 'rgba(255,236,150,' + (0.5 + 0.5 * Math.sin(t2 * 3)).toFixed(3) + ')';
+  ctx.fillRect(gx - 2, gy - T * 0.95 - ((t2 * 12) % 12), 3.5, 3.5);
+  ctx.fillRect(gx + 11, gy - T * 0.7 - ((t2 * 15) % 13), 3, 3);
+  ctx.fillRect(gx - 13, gy - T * 0.75 - ((t2 * 9) % 10), 3, 3);
+  // 「ゴール」ラベル（ふわふわ上下・多言語）
+  const gTxt = t('goalLbl');
+  const ly = y - 22 + Math.sin(t2 * 2) * 2;
   ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-  const lw = ctx.measureText('ゴール').width + 14;
+  const lw = ctx.measureText(gTxt).width + 14;
   ctx.fillStyle = 'rgba(20,16,40,0.75)';
   ctx.fillRect(gx - lw / 2, ly - 9, lw, 18);
   ctx.strokeStyle = '#f5c542'; ctx.lineWidth = 1;
   ctx.strokeRect(gx - lw / 2 + 0.5, ly - 8.5, lw - 1, 17);
   ctx.fillStyle = '#f5c542';
-  ctx.fillText('ゴール', gx, ly + 0.5);
+  ctx.fillText(gTxt, gx, ly + 0.5);
 }
 function drawTwinkle(cx, cy, r) {
   ctx.fillRect(cx - r, cy - 1, r * 2, 2);
@@ -1084,10 +1113,9 @@ function drawCutFx(st) {
     const k = (c.t - c.data.revealAt) / (c.dur - c.data.revealAt);
     const x = roomX(rx), y = roomY(ry) - T * 0.45 - k * T * 0.5;
     const EM = { pick: '⛏️', ladder: '🪜', coin: '🪙', diamond: '💎', empty: '💨' };
-    const NM = { pick: 'つるはし！', ladder: 'ハシゴ！', coin: 'コイン！', diamond: 'ダイヤ！', empty: 'からっぽ…' };
     ctx.font = ((T * 0.8) | 0) + 'px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     ctx.fillText(EM[c.data.res], x, y);
-    const label = NM[c.data.res];
+    const label = c.data.res === 'empty' ? t('rvEmpty') : t('items')[ITEM_IDX[c.data.res]] + '!';
     ctx.font = 'bold 12px sans-serif';
     const tw = ctx.measureText(label).width + 10;
     ctx.fillStyle = 'rgba(0,0,0,0.65)';
@@ -1174,13 +1202,54 @@ function updateSlots() {
 }
 function showScreen(name) {
   S.screen = name;
-  ['title', 'diffSel', 'skillSel', 'clearOv'].forEach(id => $(id).classList.add('hidden'));
+  ['title', 'diffSel', 'skillSel', 'clearOv', 'langSel'].forEach(id => $(id).classList.add('hidden'));
   ['hudTop', 'hudBottom'].forEach(id => $(id).classList.add('hidden'));
   if (name === 'title') { $('title').classList.remove('hidden'); refreshTitle(); Snd.bgm('title'); }
   else if (name === 'diff') { $('diffSel').classList.remove('hidden'); buildDiffList(); Snd.bgm('title'); }
   else if (name === 'skill') { $('skillSel').classList.remove('hidden'); buildSkillCards(); Snd.bgm('skill'); } // 専用BGM
+  else if (name === 'lang') { $('langSel').classList.remove('hidden'); buildLangList(); Snd.bgm('title'); }
   else if (name === 'play') { $('hudTop').classList.remove('hidden'); $('hudBottom').classList.remove('hidden'); }
   else if (name === 'clear') { $('clearOv').classList.remove('hidden'); }
+}
+/* ---- 言語の適用と切替 ---- */
+function applyLang() {
+  document.documentElement.lang = S.save.lang;
+  document.documentElement.dir = S.save.lang === 'ar' ? 'rtl' : 'ltr'; // アラビア語は右→左
+  document.querySelector('#title .sub').textContent = t('sub');
+  $('pickBlue').querySelector('span').textContent = t('blue');
+  $('pickRed').querySelector('span').textContent = t('red');
+  $('btnStart').textContent = t('start');
+  $('btnBackTitle').textContent = t('back');
+  $('btnBackTitle2').textContent = t('back');
+  $('btnBackTitle3').textContent = t('back');
+  document.querySelector('#diffSel h2').textContent = t('chooseMaze');
+  document.querySelector('#skillSel h2').textContent = t('skillsTitle');
+  document.querySelector('#langSel h2').textContent = t('chooseLang');
+  $('btnRetry').textContent = t('retry');
+  $('btnNext').textContent = t('next');
+  const it = t('items');
+  $('lblPick').textContent = it[0]; $('lblLadder').textContent = it[1];
+  $('lblCoin').textContent = it[2]; $('lblDia').textContent = it[3];
+  $('lblFist').textContent = t('sk').m[0]; $('lblWarp').textContent = t('sk').warp[0];
+  if (S.screen === 'play' && S.stage) {
+    $('diffName').textContent = t('diffs')[S.stage.diffIdx];
+    $('timeTarget').textContent = t('target') + ' ' + fmt(S.stage.targetMs);
+    descDefault();
+  }
+}
+function buildLangList() {
+  const el = $('langList'); el.innerHTML = '';
+  I18N.langs.forEach(pair => {
+    const b = document.createElement('button');
+    b.className = 'langBtn' + (S.save.lang === pair[0] ? ' sel' : '');
+    b.textContent = pair[1];
+    b.onclick = () => {
+      S.save.lang = pair[0]; persist();
+      applyLang(); Snd.sfx('tap');
+      showScreen('title');
+    };
+    el.appendChild(b);
+  });
 }
 function refreshTitle() {
   const lv = L.levelFor(S.save.exp);
@@ -1188,14 +1257,15 @@ function refreshTitle() {
   const curBase = L.lvCum(lv);
   const next = (lv < L.MAX_LV) ? L.lvCum(lv + 1) : null;
   $('expFill').style.width = next ? Math.min(100, 100 * (S.save.exp - curBase) / (next - curBase)) + '%' : '100%';
-  $('expTxt').textContent = next ? ('EXP ' + S.save.exp + ' / ' + next) : ('EXP ' + S.save.exp + '（LV99 カンスト！）');
+  $('expTxt').textContent = next ? ('EXP ' + S.save.exp + ' / ' + next) : ('EXP ' + S.save.exp + ' ' + t('expMax'));
   sanitizeEquip();
-  $('passiveNow').textContent = 'そうびスキル（' + S.save.equipped.length + '/' + L.slotCount(lv) + '）: '
-    + S.save.equipped.map(id => SKILL_ICONS[id] + SKILL_INFO[id].name).join('・');
+  $('passiveNow').textContent = t('equip') + ' (' + S.save.equipped.length + '/' + L.slotCount(lv) + '): '
+    + S.save.equipped.map(id => SKILL_ICONS[id] + SKILL_INFO[id].name).join(' / ');
   $('pickBlue').classList.toggle('sel', S.save.gender === 'm');
   $('pickRed').classList.toggle('sel', S.save.gender === 'f');
-  $('btnSkill').textContent = '⚙ スキル';
-  $('btnSound').textContent = S.save.sound ? '🔊 おと ON' : '🔇 おと OFF';
+  $('btnSkill').textContent = '⚙ ' + t('skills');
+  $('btnSound').textContent = S.save.sound ? t('soundOn') : t('soundOff');
+  $('btnLang').textContent = '🌐 ' + (I18N.langs.find(p => p[0] === S.save.lang) || ['', '?'])[1];
 }
 function buildDiffList() {
   const el = $('diffList'); el.innerHTML = '';
@@ -1204,9 +1274,9 @@ function buildDiffList() {
     const b = document.createElement('button');
     b.className = 'diffBtn' + (locked ? ' locked' : '');
     const badge = S.save.badges[i] > 0 ? '<span class="badge">🏅×' + S.save.badges[i] + '</span>' : '<span class="badge"></span>';
-    b.innerHTML = '<span>' + (locked ? '🔒 ' : '') + d.name + '</span><small>' + d.w + '×' + d.h + '</small>' + badge;
+    b.innerHTML = '<span>' + (locked ? '🔒 ' : '') + t('diffs')[i] + '</span><small>' + d.w + '×' + d.h + '</small>' + badge;
     b.onclick = () => {
-      if (locked) { toast('まえの めいろを クリアすると あそべるよ'); Snd.sfx('nope'); return; }
+      if (locked) { toast(t('locked')); Snd.sfx('nope'); return; }
       Snd.sfx('tap'); startStage(i);
     };
     el.appendChild(b);
@@ -1217,7 +1287,7 @@ function buildSkillCards() {
   sanitizeEquip();
   const max = L.slotCount(lv);
   $('skillCards').innerHTML = '';
-  $('skillNote').textContent = 'そうび ' + S.save.equipped.length + ' / ' + max + ' こ（タップで つけはずし・つぎの めいろから はんえい）';
+  $('skillNote').textContent = tf('equipNote', { a: S.save.equipped.length, b: max });
   const listEl = $('skillList'); listEl.innerHTML = '';
   SKILL_ORDER.forEach(id => {
     const info = SKILL_INFO[id];
@@ -1230,12 +1300,12 @@ function buildSkillCards() {
       + '<span class="srBody"><b>' + info.name + (equipped ? '　✅' : '') + '</b><span>' + info.desc + '</span></span>'
       + '<span class="srVal">' + (acquired ? info.val(lv) : '🔒 LV' + req) + '</span>';
     row.onclick = () => {
-      if (!acquired) { toast('LV' + req + 'で おぼえるよ'); Snd.sfx('nope'); return; }
+      if (!acquired) { toast(tf('learnAt', { n: req })); Snd.sfx('nope'); return; }
       if (equipped) {
-        if (S.save.equipped.length <= 1) { toast('さいごの 1つは はずせない'); Snd.sfx('nope'); return; }
+        if (S.save.equipped.length <= 1) { toast(t('lastOne')); Snd.sfx('nope'); return; }
         S.save.equipped = S.save.equipped.filter(x => x !== id);
       } else {
-        if (S.save.equipped.length >= max) { toast('スロットが いっぱい！どれかを はずしてね'); Snd.sfx('nope'); return; }
+        if (S.save.equipped.length >= max) { toast(t('slotsFull')); Snd.sfx('nope'); return; }
         S.save.equipped.push(id);
       }
       persist(); Snd.sfx('tap'); buildSkillCards();
@@ -1250,6 +1320,7 @@ function attachUI() {
   $('btnBackTitle').onclick = () => { Snd.sfx('tap'); showScreen('title'); };
   $('btnBackTitle2').onclick = () => { Snd.sfx('tap'); showScreen('title'); };
   $('btnSkill').onclick = () => { Snd.sfx('tap'); showScreen('skill'); };
+  $('btnLang').onclick = () => { Snd.sfx('tap'); showScreen('lang'); };
   $('btnSound').onclick = () => {
     S.save.sound = !S.save.sound; persist();
     Snd.setEnabled(S.save.sound);
@@ -1263,7 +1334,7 @@ function attachUI() {
   let quitArm = 0;
   $('btnQuit').onclick = () => {
     if (Date.now() - quitArm < 2000) { S.stage = null; quitArm = 0; showScreen('diff'); }
-    else { quitArm = Date.now(); toast('もういちど ✕ で めいろを やめる'); }
+    else { quitArm = Date.now(); toast(t('quit')); }
   };
   $('btnRetry').onclick = () => { Snd.sfx('tap'); startStage(S.stage.diffIdx); };
   $('btnNext').onclick = () => { Snd.sfx('tap'); S.stage = null; showScreen('diff'); };
@@ -1279,8 +1350,8 @@ function attachUI() {
     if (!playActive()) return;
     desc(DESCS.warp);
     const st = S.stage;
-    if (st.warpUsed) { toast('ワープは 1かいだけ'); Snd.sfx('nope'); return; }
-    if (!st.warpOk) { toast('このめいろでは ワープできない'); Snd.sfx('nope'); return; }
+    if (st.warpUsed) { toast(t('warpOnce')); Snd.sfx('nope'); return; }
+    if (!st.warpOk) { toast(t('warpNo')); Snd.sfx('nope'); return; }
     doWarp();
   };
   $('slotLadder').onclick = () => {
@@ -1296,7 +1367,7 @@ function attachUI() {
     desc(DESCS.tackle);
     const st = S.stage;
     const remain = st.tackleReadyAt - st.gameTime;
-    if (remain > 0) { toast('クールタイム あと' + Math.ceil(remain / 1000) + 'びょう'); Snd.sfx('nope'); return; }
+    if (remain > 0) { toast(tf('ctWait', { n: Math.ceil(remain / 1000) })); Snd.sfx('nope'); return; }
     Snd.sfx('tap'); setTarget('tackle');
   };
   $('slotCoin').onclick = () => { desc(DESCS.coin); Snd.sfx('tap'); };
@@ -1330,6 +1401,7 @@ function boot() {
   drawPreview($('cvBlue'), SPR.m.down[0]);
   drawPreview($('cvRed'), SPR.f.down[0]);
   attachUI();
+  applyLang();
   resize();
   showScreen('title');
   requestAnimationFrame(frame);
