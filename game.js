@@ -24,6 +24,9 @@ const THEMES = [
   { name: 'いせきの迷宮', floor: '#ead9b0', floor2: '#e2cfa0', top: '#cfa763', top2: '#c19a58', front: '#97713b', front2: '#856434', line: '#6d522b' },
   { name: 'おかしの迷宮', floor: '#fdeaf1', floor2: '#fbdfe9', top: '#f5aac6', top2: '#ef9cbc', front: '#d97399', front2: '#c9668c', line: '#a75273' },
   { name: 'よるの迷宮',   floor: '#454a6d', floor2: '#3e4364', top: '#8577d6', top2: '#7869c9', front: '#554a9e', front2: '#4a408c', line: '#3a3170' },
+  { name: 'ようがんの迷宮', floor: '#5c4a42', floor2: '#54423a', top: '#b85c2e', top2: '#a84f26', front: '#6e2f18', front2: '#5e2712', line: '#47200e' },
+  { name: 'うみの迷宮',   floor: '#f2e6c0', floor2: '#eaddb2', top: '#4a9ad4', top2: '#418cc4', front: '#2f6da0', front2: '#28608e', line: '#22507a' },
+  { name: 'さくらの迷宮', floor: '#dcecc0', floor2: '#d2e4b4', top: '#f6c6d8', top2: '#f0b8cd', front: '#96604a', front2: '#875540', line: '#6e4433' },
 ];
 const CONF_COLS = ['#f5c542', '#ff6b6b', '#4ecdc4', '#7bd44a', '#6f9dff', '#e08bff'];
 
@@ -183,6 +186,7 @@ function startStage(di) {
     cam: { x: roomX(start.rx), y: roomY(start.ry) },
     theme: THEMES[(Math.random() * THEMES.length) | 0],
     particles: [], shake: 0, cleared: false, tackleReadyAt: 0,
+    viewRange: 7, // 視界：ここまでハッキリ見える（将来スキルで拡張予定）
   };
   st.cuts = new L.CutsceneCtrl(st.timer);
   // 宝箱配置（スタート・ゴール以外からランダム）
@@ -585,6 +589,20 @@ function render() {
       ctx.fillRect(p.x - p.size / 2, p.y - p.size / 2, p.size, p.size);
     }
     ctx.globalAlpha = 1;
+    // 視界：7マスまでハッキリ→8マス以降は遠いほど暗く、遥か遠くはほぼ見えない（クリア後は全体が見える）
+    if (!st.cleared) {
+      const vr = st.viewRange;
+      const rIn = vr * P, rOut = (vr + 9) * P; // 7マス〜16マスにかけて漆黒へ
+      const span = rOut - rIn;
+      const fg = ctx.createRadialGradient(st.char.x, st.char.y, rIn, st.char.x, st.char.y, rOut);
+      fg.addColorStop(0, 'rgba(8,8,22,0)');
+      fg.addColorStop((1 * P) / span, 'rgba(8,8,22,0.35)'); // 8マス：薄暗い
+      fg.addColorStop((3 * P) / span, 'rgba(8,8,22,0.6)');  // 10マス：かなり暗い
+      fg.addColorStop((5 * P) / span, 'rgba(8,8,22,0.82)'); // 12マス：ほの見える程度
+      fg.addColorStop(1, 'rgba(8,8,22,0.97)');              // 16マス以降：ほぼ見えない
+      ctx.fillStyle = fg;
+      ctx.fillRect(st.cam.x - cw / 2 / sc - 12, st.cam.y - ch / 2 / sc - 12, cw / sc + 24, ch / sc + 24);
+    }
   }
   // 紙吹雪（スクリーン座標）
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -1086,6 +1104,6 @@ window.DM = {
     return seg.length;
   },
   skip: () => S.stage && S.stage.cuts.skip(),
-  setTarget, tryTargetTap, candidates, bPos, bSize,
+  setTarget, tryTargetTap, candidates, bPos, bSize, THEMES,
 };
 })();
