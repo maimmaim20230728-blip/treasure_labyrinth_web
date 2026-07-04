@@ -17,7 +17,7 @@ console.log('1) 全難易度×60シード ゴール可能: 済');
 // 2) つるはし2枚＋ハシゴ3本をどう使っても、全部屋からゴール可能（詰み無しの鉄則）
 const rnd = L.mulberry32(42);
 for (let trial = 0; trial < 40; trial++) {
-  const d = L.DIFFS[trial % 7];
+  const d = L.DIFFS[trial % L.DIFFS.length];
   const m = L.generate(d.w, d.h, 7777 + trial);
   const ladders = new Uint8Array(m.bw * m.bh);
   const walls = [];

@@ -109,16 +109,19 @@ function bfsLimited(m, sx, sy, gx, gy, maxSteps, ladders) {
   return null;
 }
 
-/* ---- 難易度テーブル（7段階） ----
+/* ---- 難易度テーブル（8段階・下記DIFFSに統合） ----
    w,h: 部屋数 / chestLo..chestHi: 宝箱数 / margin,flat: 目標タイム係数 / exp: 基礎EXP */
+/* 難易度8段階。名前はi18nの diffs[] を使う（ここのnameは開発メモ）。
+   宝箱数は chestLo〜chestHi のランダム。最高難易度は約5分かかる巨大迷宮 */
 const DIFFS = [
-  { name: 'やさしい',     w: 5,  h: 4,  chestLo: 1, chestHi: 2, margin: 3.2,  flat: 8, exp: 60  },
-  { name: 'ふつう',       w: 8,  h: 7,  chestLo: 2, chestHi: 2, margin: 2.7,  flat: 6, exp: 110 },
-  { name: 'やや難しい',   w: 11, h: 9,  chestLo: 3, chestHi: 3, margin: 2.4,  flat: 5, exp: 170 },
-  { name: '難しい',       w: 15, h: 12, chestLo: 4, chestHi: 4, margin: 2.15, flat: 4, exp: 240 },
-  { name: 'とても難しい', w: 19, h: 15, chestLo: 5, chestHi: 5, margin: 1.95, flat: 3, exp: 320 },
-  { name: '難し過ぎる',   w: 24, h: 19, chestLo: 6, chestHi: 6, margin: 1.8,  flat: 2, exp: 410 },
-  { name: '最高難易度',   w: 30, h: 24, chestLo: 8, chestHi: 8, margin: 1.7,  flat: 0, exp: 520 },
+  { name: 'やさしい',       w: 5,  h: 4,  chestLo: 1,  chestHi: 2,  margin: 3.2,  flat: 8, exp: 60  },
+  { name: 'まだやさしい',   w: 8,  h: 7,  chestLo: 2,  chestHi: 3,  margin: 2.7,  flat: 6, exp: 110 },
+  { name: 'ふつう',         w: 11, h: 9,  chestLo: 3,  chestHi: 4,  margin: 2.4,  flat: 5, exp: 170 },
+  { name: 'やや難しい',     w: 15, h: 12, chestLo: 4,  chestHi: 5,  margin: 2.15, flat: 4, exp: 240 },
+  { name: '難しい',         w: 19, h: 15, chestLo: 5,  chestHi: 7,  margin: 1.95, flat: 3, exp: 320 },
+  { name: 'とても難しい',   w: 24, h: 19, chestLo: 7,  chestHi: 9,  margin: 1.8,  flat: 2, exp: 410 },
+  { name: '難し過ぎる',     w: 30, h: 24, chestLo: 9,  chestHi: 12, margin: 1.7,  flat: 0, exp: 520 },
+  { name: '最高難易度',     w: 48, h: 40, chestLo: 12, chestHi: 16, margin: 1.65, flat: 0, exp: 700 },
 ];
 const CHAR_SPEED = 3;      // マス/秒（キビキビ・でも見て追える速度）
 const TRACE_DELAY_MS = 500; // なぞりから追従までの遅れ

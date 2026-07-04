@@ -208,8 +208,10 @@ const SAVE_KEY = 'tlab.v1';
 function loadSave() {
   let s = null;
   try { s = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); } catch (e) {}
-  S.save = Object.assign({ gender: 'm', exp: 0, badges: [0, 0, 0, 0, 0, 0, 0], equipped: null, sound: true, fontScale: 0, volBgm: 1, volSfx: 1 }, s || {});
-  if (!Array.isArray(S.save.badges) || S.save.badges.length !== 7) S.save.badges = [0, 0, 0, 0, 0, 0, 0];
+  const nd = L.DIFFS.length;
+  S.save = Object.assign({ gender: 'm', exp: 0, badges: [], equipped: null, sound: true, fontScale: 0, volBgm: 1, volSfx: 1 }, s || {});
+  if (!Array.isArray(S.save.badges)) S.save.badges = [];
+  while (S.save.badges.length < nd) S.save.badges.push(0); // 難易度が増えても進捗を保持
   if (!Array.isArray(S.save.equipped)) S.save.equipped = [defaultSkill(S.save.gender)];
   if (!S.save.lang || !I18N.dict[S.save.lang]) S.save.lang = detectLang();
   sanitizeEquip();
@@ -278,7 +280,10 @@ function startStage(di) {
     rx: clamp(((diff.w / 2) | 0) + ((Math.random() * 3) | 0) - 1, 1, diff.w - 2),
     ry: clamp(((diff.h / 2) | 0) + ((Math.random() * 3) | 0) - 1, 1, diff.h - 2),
   });
-  const goal = gOpts[(Math.random() * gOpts.length) | 0];
+  // 最高難易度は必ず対角の隅＝最長ルートを確保（本当に歯ごたえのある巨大迷宮）
+  const goal = (di === L.DIFFS.length - 1)
+    ? { rx: diff.w - 1 - start.rx, ry: diff.h - 1 - start.ry }
+    : gOpts[(Math.random() * gOpts.length) | 0];
   const path = L.shortestPath(m, start.rx, start.ry, goal.rx, goal.ry, null);
   const lv = L.levelFor(S.save.exp);
   sanitizeEquip();
@@ -615,7 +620,7 @@ function doClear() {
       }
     }
     // 🎉最高難易度クリア or LV99到達 → コングラチュレーション大演出
-    const gotMax = st.diffIdx === 6;
+    const gotMax = st.diffIdx === L.DIFFS.length - 1;
     const gotLv99 = newLv >= 99 && prevLv < 99;
     if (gotMax || gotLv99) setTimeout(() => showCongrats(gotMax, gotLv99), 1100);
   }, 650);
