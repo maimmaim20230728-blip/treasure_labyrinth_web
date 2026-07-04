@@ -12,16 +12,20 @@ html, body {
   background: var(--bg); color: var(--txt);
   font-family: 'Segoe UI', 'Hiragino Sans', 'Yu Gothic UI', sans-serif;
 }
-#cv { position: fixed; inset: 0; width: 100%; height: 100%; touch-action: none; display: block; }
 .hidden { display: none !important; }
 button { cursor: pointer; font-family: inherit; }
 
-/* 上部HUD */
+/* 全体レイアウト：迷路とアイテム欄は独立した枠（重ならない） */
+#appWrap { display: flex; flex-direction: column; width: 100%; height: 100%; }
+#mainCol { order: 1; flex: 1; display: flex; flex-direction: column; min-height: 0; min-width: 0; }
+#gameArea { position: relative; flex: 1; min-height: 0; }
+#cv { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; display: block; }
+
+/* 上部HUD（独立枠・不透明） */
 #hudTop {
-  position: fixed; top: 0; left: 0; right: 0; z-index: 5;
   display: flex; align-items: center; gap: 6px;
   padding: 6px 8px; padding-top: calc(6px + env(safe-area-inset-top));
-  background: rgba(14, 16, 34, 0.72);
+  background: #10122a; border-bottom: 2px solid var(--border);
 }
 #timeBox { font-weight: bold; font-size: 16px; white-space: nowrap; flex-shrink: 0; }
 #timeTarget { font-size: 11px; opacity: 0.8; margin-left: 3px; font-weight: normal; }
@@ -35,10 +39,10 @@ button { cursor: pointer; font-family: inherit; }
   border: 2px solid var(--border); border-radius: 8px; padding: 5px 8px;
 }
 
-/* 下部HUD（アイテム個数と説明文を常時表示） */
+/* アイテム欄（独立枠・不透明・迷路とは重ならない） */
 #hudBottom {
-  position: fixed; left: 0; right: 0; bottom: 0; z-index: 5;
-  background: rgba(14, 16, 34, 0.78);
+  order: 2;
+  background: #10122a; border-top: 2px solid var(--border);
   padding: 6px 8px calc(8px + env(safe-area-inset-bottom));
 }
 #slots { display: flex; gap: 6px; justify-content: center; }
@@ -50,6 +54,22 @@ button { cursor: pointer; font-family: inherit; }
 .slot.dim { opacity: 0.45; }
 .slot.sel { border-color: var(--gold); box-shadow: 0 0 8px var(--gold); }
 #desc { margin-top: 6px; text-align: center; font-size: 14px; min-height: 20px; opacity: 0.95; }
+
+/* 横向き：アイテム欄は左側に縦並びで固定 */
+@media (orientation: landscape) {
+  #appWrap { flex-direction: row; }
+  #hudBottom {
+    order: 0; width: 118px; flex-shrink: 0;
+    display: flex; flex-direction: column; gap: 8px;
+    border-top: none; border-right: 2px solid var(--border);
+    padding: 8px 6px calc(8px + env(safe-area-inset-bottom)) calc(6px + env(safe-area-inset-left));
+    overflow-y: auto;
+  }
+  #mainCol { order: 1; }
+  #slots { flex-direction: column; gap: 8px; }
+  .slot { width: 100%; min-width: 0; }
+  #desc { margin-top: auto; font-size: 11px; line-height: 1.35; }
+}
 
 /* オーバーレイ画面 */
 .overlay {

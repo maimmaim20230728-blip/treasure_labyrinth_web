@@ -16,28 +16,30 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<canvas id="cv"></canvas>
-
-<div id="hudTop" class="hidden">
-  <div id="timeBox">⏱ <span id="timeNow">0:00.0</span><span id="timeTarget"></span></div>
-  <div id="diffName"></div>
-  <div class="camBtns">
-    <button id="btnZoomOut" title="ズームアウト">➖</button>
-    <button id="btnZoomIn" title="ズームイン">➕</button>
-    <button id="btnReset" title="してんリセット">🧭</button>
-    <button id="btnQuit" title="やめる">✕</button>
+<div id="appWrap">
+  <div id="mainCol">
+    <div id="hudTop" class="hidden">
+      <div id="timeBox">⏱ <span id="timeNow">0:00.0</span><span id="timeTarget"></span></div>
+      <div id="diffName"></div>
+      <div class="camBtns">
+        <button id="btnZoomOut" title="ズームアウト">➖</button>
+        <button id="btnZoomIn" title="ズームイン">➕</button>
+        <button id="btnReset" title="してんリセット">🧭</button>
+        <button id="btnQuit" title="やめる">✕</button>
+      </div>
+    </div>
+    <div id="gameArea"><canvas id="cv"></canvas></div>
   </div>
-</div>
-
-<div id="hudBottom" class="hidden">
-  <div id="slots">
-    <button class="slot" id="slotPick">⛏️<span id="cntPick">×0</span></button>
-    <button class="slot" id="slotLadder">🪜<span id="cntLadder">×0</span></button>
-    <button class="slot" id="slotCoin">🪙<span id="cntCoin">×0</span></button>
-    <button class="slot" id="slotDia">💎<span id="cntDia">×0</span></button>
-    <button class="slot hidden" id="slotFist">💥<span id="cntFist">OK</span></button>
+  <div id="hudBottom" class="hidden">
+    <div id="slots">
+      <button class="slot" id="slotPick">⛏️<span id="cntPick">×0</span></button>
+      <button class="slot" id="slotLadder">🪜<span id="cntLadder">×0</span></button>
+      <button class="slot" id="slotCoin">🪙<span id="cntCoin">×0</span></button>
+      <button class="slot" id="slotDia">💎<span id="cntDia">×0</span></button>
+      <button class="slot hidden" id="slotFist">💥<span id="cntFist">OK</span></button>
+    </div>
+    <div id="desc"></div>
   </div>
-  <div id="desc"></div>
 </div>
 
 <div id="title" class="overlay">

@@ -1038,6 +1038,8 @@ function attachUI() {
   $('slotCoin').onclick = () => { desc(DESCS.coin); Snd.sfx('tap'); };
   $('slotDia').onclick = () => { desc(DESCS.diamond); Snd.sfx('tap'); };
   window.addEventListener('resize', resize);
+  // HUDの表示/非表示や横向き切替で迷路エリアの大きさが変わったら追従
+  if (window.ResizeObserver) new ResizeObserver(resize).observe($('gameArea'));
   attachInput();
 }
 
