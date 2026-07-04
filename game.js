@@ -160,17 +160,27 @@ function updateCam(dt) {
 function startStage(di) {
   const diff = L.DIFFS[di];
   const m = L.generate(diff.w, diff.h);
-  const path = L.shortestPath(m, 0, 0, diff.w - 1, diff.h - 1, null);
+  // スタート＝四隅のどこかランダム／ゴール＝残り三隅 or 真ん中付近からランダム
+  const corners = [[0, 0], [diff.w - 1, 0], [0, diff.h - 1], [diff.w - 1, diff.h - 1]];
+  const si = (Math.random() * 4) | 0;
+  const start = { rx: corners[si][0], ry: corners[si][1] };
+  const gOpts = corners.filter((c, i) => i !== si).map(c => ({ rx: c[0], ry: c[1] }));
+  gOpts.push({
+    rx: clamp(((diff.w / 2) | 0) + ((Math.random() * 3) | 0) - 1, 1, diff.w - 2),
+    ry: clamp(((diff.h / 2) | 0) + ((Math.random() * 3) | 0) - 1, 1, diff.h - 2),
+  });
+  const goal = gOpts[(Math.random() * gOpts.length) | 0];
+  const path = L.shortestPath(m, start.rx, start.ry, goal.rx, goal.ry, null);
   const st = {
-    diffIdx: di, diff, m,
+    diffIdx: di, diff, m, start, goal,
     ladders: new Uint8Array(m.bw * m.bh),
     chests: new Map(),
     timer: new L.StageTimer(),
     plan: [], gameTime: 0,
     targetMs: L.targetSeconds(diff, path.length - 1) * 1000,
     counts: { pick: 0, ladder: 0, coin: 0, diamond: 0 },
-    char: { rx: 0, ry: 0, x: roomX(0), y: roomY(0), dir: 2, frame: 0, animT: 0, moving: null },
-    cam: { x: roomX(0), y: roomY(0) },
+    char: { rx: start.rx, ry: start.ry, x: roomX(start.rx), y: roomY(start.ry), dir: 2, frame: 0, animT: 0, moving: null },
+    cam: { x: roomX(start.rx), y: roomY(start.ry) },
     theme: THEMES[(Math.random() * THEMES.length) | 0],
     particles: [], shake: 0, cleared: false, tackleReadyAt: 0,
   };
@@ -178,7 +188,8 @@ function startStage(di) {
   // 宝箱配置（スタート・ゴール以外からランダム）
   const n = L.chestCount(diff);
   const cand = [];
-  for (let i = 1; i < diff.w * diff.h - 1; i++) cand.push(i);
+  const sIdx = start.ry * diff.w + start.rx, gIdx = goal.ry * diff.w + goal.rx;
+  for (let i = 0; i < diff.w * diff.h; i++) if (i !== sIdx && i !== gIdx) cand.push(i);
   for (let i = cand.length - 1; i > 0; i--) { const j = (Math.random() * (i + 1)) | 0; const t = cand[i]; cand[i] = cand[j]; cand[j] = t; }
   for (let i = 0; i < n; i++) st.chests.set(cand[i], { opened: false, result: null });
   S.stage = st; S.zoom = 1; S.targetMode = null; S.tracing = false;
@@ -273,7 +284,7 @@ function onEnterRoom() {
     });
     return;
   }
-  if (c.rx === st.m.w - 1 && c.ry === st.m.h - 1) doClear();
+  if (c.rx === st.goal.rx && c.ry === st.goal.ry) doClear();
 }
 function applyChest(res) {
   const st = S.stage;
@@ -550,7 +561,7 @@ function render() {
     drawPlan(st);
     // 行ごとに 壁→エンティティ（2.5D風の前後関係）
     const charRow = clamp(rowAt(st.char.y), 0, m.bh - 1);
-    const goalRow = 2 * (m.h - 1) + 1;
+    const goalRow = 2 * st.goal.ry + 1;
     const cutNow = st.cuts.active;
     const climbing = cutNow && cutNow.kind === 'climb';
     for (let by = y0; by <= y1; by++) {
@@ -676,18 +687,68 @@ function drawPlan(st) {
   ctx.beginPath(); ctx.arc(roomX(lastP.rx), roomY(lastP.ry), 6, 0, 6.3); ctx.stroke();
 }
 function drawGoal(st) {
-  const m = st.m, gx = roomX(m.w - 1), gy = roomY(m.h - 1);
+  const gx = roomX(st.goal.rx), gy = roomY(st.goal.ry);
   const t = performance.now() / 1000;
-  const w = T * 0.8, h = T * 0.62, x = gx - w / 2, y = gy + T * 0.38 - h;
-  ctx.fillStyle = '#8a5a2e'; ctx.fillRect(x, y + h * 0.35, w, h * 0.65);
-  ctx.fillStyle = '#f5c542';
-  if (st.cleared) ctx.fillRect(x - 1, y - h * 0.25, w + 2, h * 0.3);
-  else ctx.fillRect(x, y, w, h * 0.4);
-  ctx.fillStyle = '#7a4a20'; ctx.fillRect(x + w * 0.44, y + h * 0.3, w * 0.12, h * 0.4);
+  // 大きな金の宝箱（部屋幅を少しはみ出すくらい堂々と）
+  const w = T * 1.15, h = T * 0.9, x = gx - w / 2, y = gy + T * 0.42 - h;
+  const lidH = h * 0.4;
+  // 後光（明滅する金色のオーラ）
+  const glow = 0.22 + 0.13 * Math.sin(t * 2.4);
+  ctx.fillStyle = 'rgba(255,220,90,' + glow.toFixed(3) + ')';
+  ctx.beginPath(); ctx.arc(gx, gy - h * 0.2, w * 0.85, 0, 6.3); ctx.fill();
+  ctx.fillStyle = 'rgba(255,240,160,' + (glow * 0.8).toFixed(3) + ')';
+  ctx.beginPath(); ctx.arc(gx, gy - h * 0.2, w * 0.55, 0, 6.3); ctx.fill();
+  // クリア後はふたが奥へ開く
+  if (st.cleared) {
+    ctx.fillStyle = '#c79a2e';
+    ctx.fillRect(x - 1, y - lidH * 0.8, w + 2, lidH * 0.8);
+    ctx.strokeStyle = '#8a5a1c'; ctx.lineWidth = 2;
+    ctx.strokeRect(x - 1, y - lidH * 0.8, w + 2, lidH * 0.8);
+    ctx.fillStyle = '#3a2a08';
+    ctx.fillRect(x + 3, y + lidH - 3, w - 6, 7); // 開いた口
+  }
+  // 本体（金＋濃金の縁取り）
+  ctx.fillStyle = '#e8b93a';
+  ctx.fillRect(x, y + (st.cleared ? lidH : 0), w, h - (st.cleared ? lidH : 0));
+  if (!st.cleared) { // 閉じたふた（明るめの金）
+    ctx.fillStyle = '#f7d35e';
+    ctx.fillRect(x - 1, y, w + 2, lidH);
+  }
+  ctx.strokeStyle = '#8a5a1c'; ctx.lineWidth = 2;
+  ctx.strokeRect(x - 1, y + (st.cleared ? lidH : 0), w + 2, h - (st.cleared ? lidH : 0));
+  ctx.fillStyle = '#a87818';
+  ctx.fillRect(x, y + h - 5, w, 5); // 底の影
+  // 赤い宝石の錠前
+  ctx.fillStyle = '#c0392b';
+  ctx.beginPath(); ctx.arc(gx, y + lidH + 2, 4.5, 0, 6.3); ctx.fill();
+  ctx.fillStyle = '#ff9d8a';
+  ctx.fillRect(gx - 2.5, y + lidH - 0.5, 2, 2);
+  // キラーン（十字の輝き2つ・交互に瞬く）
+  const tw1 = Math.max(0, Math.sin(t * 3.1));
+  const tw2 = Math.max(0, Math.sin(t * 3.1 + 2.2));
+  ctx.fillStyle = 'rgba(255,255,230,' + (0.4 + 0.6 * tw1).toFixed(3) + ')';
+  drawTwinkle(x + w * 0.16, y + 3, 4 + 3 * tw1);
+  ctx.fillStyle = 'rgba(255,255,230,' + (0.4 + 0.6 * tw2).toFixed(3) + ')';
+  drawTwinkle(x + w * 0.88, y + h * 0.5, 3.5 + 3 * tw2);
+  // 立ちのぼるきらめき
   ctx.fillStyle = 'rgba(255,236,150,' + (0.5 + 0.5 * Math.sin(t * 3)).toFixed(3) + ')';
-  ctx.fillRect(gx - 1.5, gy - T * 0.7 - ((t * 10) % 8), 3, 3);
-  ctx.fillRect(gx + 8, gy - T * 0.5 - ((t * 13) % 10), 2.5, 2.5);
-  ctx.fillRect(gx - 9, gy - T * 0.55 - ((t * 8) % 7), 2.5, 2.5);
+  ctx.fillRect(gx - 2, gy - T * 0.95 - ((t * 12) % 12), 3.5, 3.5);
+  ctx.fillRect(gx + 11, gy - T * 0.7 - ((t * 15) % 13), 3, 3);
+  ctx.fillRect(gx - 13, gy - T * 0.75 - ((t * 9) % 10), 3, 3);
+  // 「ゴール」ラベル（ふわふわ上下）
+  const ly = y - 22 + Math.sin(t * 2) * 2;
+  ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  const lw = ctx.measureText('ゴール').width + 14;
+  ctx.fillStyle = 'rgba(20,16,40,0.75)';
+  ctx.fillRect(gx - lw / 2, ly - 9, lw, 18);
+  ctx.strokeStyle = '#f5c542'; ctx.lineWidth = 1;
+  ctx.strokeRect(gx - lw / 2 + 0.5, ly - 8.5, lw - 1, 17);
+  ctx.fillStyle = '#f5c542';
+  ctx.fillText('ゴール', gx, ly + 0.5);
+}
+function drawTwinkle(cx, cy, r) {
+  ctx.fillRect(cx - r, cy - 1, r * 2, 2);
+  ctx.fillRect(cx - 1, cy - r, 2, r * 2);
 }
 function drawChest(st, ri, chd) {
   const m = st.m, rx = ri % m.w, ry = (ri / m.w) | 0;
@@ -1016,7 +1077,7 @@ window.DM = {
   auto: n => {
     const st = S.stage; if (!st) return 0;
     const from = committedPos();
-    const p = L.shortestPath(st.m, from.rx, from.ry, st.m.w - 1, st.m.h - 1, st.ladders);
+    const p = L.shortestPath(st.m, from.rx, from.ry, st.goal.rx, st.goal.ry, st.ladders);
     if (!p) return 0;
     const seg = p.slice(1, n ? 1 + n : undefined);
     for (const q of seg) st.plan.push({ rx: q[0], ry: q[1], t: st.gameTime - 2000 });
