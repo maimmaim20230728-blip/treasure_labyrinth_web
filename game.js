@@ -119,8 +119,39 @@ const PIX = {
 };
 const PAL_M = { H: '#4a3020', S: '#f2c9a0', K: '#20242c', B: '#3b6fd6', L: '#27407e' };
 const PAL_F = { H: '#6b3b1e', S: '#f2c9a0', K: '#20242c', B: '#e0526b', L: '#93304a' };
-/* 中性キャラ「ミント」：フード＋やわらかいベールで顔をやさしく隠す（文化・宗教・性に中立） */
-const PAL_N = { H: '#2f8f7a', S: '#ece7da', K: '#20242c', B: '#3aa88f', L: '#2a7a68' };
+/* 中性キャラ「ミント」：明るいミント色のフード＋クリームのベール。
+   にっこり閉じた目と金の星かざりで、中立の配慮はそのまま親しみやすく */
+const PAL_N = { H: '#3da98c', S: '#f4efe2', K: '#2a2e38', B: '#57bfa2', L: '#3a9078', G: '#f5c542' };
+/* ミント専用ドット絵（顔は出さず、ベールに にっこり閉じ目） */
+const PIX_N = {
+  down: [[
+    '..HHHHHH..', '.HHHGGHHH.', '.HSSSSSSH.', '.HKKSSKKH.', '.HSSSSSSH.',
+    '..SSSSSS..', '..BBBBBB..', '.BBBBBBBB.', '.SBBGGBBS.', '..BBBBBB..',
+    '..LLLLLL..', '..LL..LL..', '..KK..KK..', '..........',
+  ], [
+    '..HHHHHH..', '.HHHGGHHH.', '.HSSSSSSH.', '.HKKSSKKH.', '.HSSSSSSH.',
+    '..SSSSSS..', '..BBBBBB..', '.BBBBBBBB.', '.SBBGGBBS.', '..BBBBBB..',
+    '..LLLLLL..', '.LL....LL.', '.KK....KK.', '..........',
+  ]],
+  up: [[
+    '..HHHHHH..', '.HHHHHHHH.', '.HHHHHHHH.', '.HHHHHHHH.', '.SHHHHHHS.',
+    '..SSSSSS..', '..BBBBBB..', '.BBBBBBBB.', '.SBBBBBBS.', '..BBBBBB..',
+    '..LLLLLL..', '..LL..LL..', '..KK..KK..', '..........',
+  ], [
+    '..HHHHHH..', '.HHHHHHHH.', '.HHHHHHHH.', '.HHHHHHHH.', '.SHHHHHHS.',
+    '..SSSSSS..', '..BBBBBB..', '.BBBBBBBB.', '.SBBBBBBS.', '..BBBBBB..',
+    '..LLLLLL..', '.LL....LL.', '.KK....KK.', '..........',
+  ]],
+  side: [[
+    '..HHHHHH..', '.HHHGHHHH.', '.HHSSSSS..', '.HHSKKSS..', '.HHSSSSS..',
+    '..SSSSS...', '..BBBBB...', '..BBBBBB..', '..BBGBSB..', '..BBBBB...',
+    '...LLLL...', '...LL.L...', '...KK.K...', '..........',
+  ], [
+    '..HHHHHH..', '.HHHGHHHH.', '.HHSSSSS..', '.HHSKKSS..', '.HHSSSSS..',
+    '..SSSSS...', '..BBBBB...', '..BBBBBB..', '..BBGBSB..', '..BBBBB...',
+    '...LLLL...', '..LL..LL..', '..KK...K..', '..........',
+  ]],
+};
 const SPR = {};
 
 function pixCanvas(rows, pal) {
@@ -136,16 +167,17 @@ function pixCanvas(rows, pal) {
   return cnv;
 }
 const mirror = rows => rows.map(r => r.split('').reverse().join(''));
-/* ベール加工：顔の段（上6行）の目Kをベール色Sに置き換えて表情を隠す */
-const veil = rows => rows.map((r, i) => i < 6 ? r.replace(/K/g, 'S') : r);
 function buildSprites() {
-  const set = (pal, tr) => ({
-    down:  PIX.down.map(f => pixCanvas(tr ? tr(f) : f, pal)),
-    up:    PIX.up.map(f => pixCanvas(tr ? tr(f) : f, pal)),
-    right: PIX.side.map(f => pixCanvas(tr ? tr(f) : f, pal)),
-    left:  PIX.side.map(f => pixCanvas(mirror(tr ? tr(f) : f), pal)),
-  });
-  SPR.m = set(PAL_M); SPR.f = set(PAL_F); SPR.n = set(PAL_N, veil);
+  const set = (pal, px) => {
+    const src = px || PIX;
+    return {
+      down:  src.down.map(f => pixCanvas(f, pal)),
+      up:    src.up.map(f => pixCanvas(f, pal)),
+      right: src.side.map(f => pixCanvas(f, pal)),
+      left:  src.side.map(f => pixCanvas(mirror(f), pal)),
+    };
+  };
+  SPR.m = set(PAL_M); SPR.f = set(PAL_F); SPR.n = set(PAL_N, PIX_N);
 }
 
 /* ---- 状態 ---- */
@@ -153,7 +185,7 @@ const S = {
   screen: 'title', save: null, stage: null,
   zoom: 1, tracing: false, pointers: new Map(), pinchD: 0,
   targetMode: null, confetti: [], fireworks: [],
-  keysHeld: new Set(), lastKeyDir: -1,
+  keysHeld: new Map(), lastKeyDir: -1, // dir→押した時刻（長押し判定用）
   congratsUntil: 0, nextBurst: 0,
 };
 const SAVE_KEY = 'tlab.v1';
@@ -510,7 +542,7 @@ function attachInput() {
     if (S.screen !== 'play' || !S.stage) return;
     e.preventDefault();
     if (e.repeat) return; // 押しっぱなしはtick側で毎フレーム処理（OSのリピート待ちを排除）
-    S.keysHeld.add(d); S.lastKeyDir = d;
+    S.keysHeld.set(d, S.stage.gameTime); S.lastKeyDir = d;
     keyStep(d, false);
   });
   window.addEventListener('keyup', e => {
@@ -816,10 +848,11 @@ function tick(dt) {
       }
       moveChar(dt);
       updateClones(st, dt); // ⑩分身の術
-      // キー押しっぱなし：計画が尽きたら次の1歩を足す（連続移動）
+      // キー押しっぱなし（260ms以上の長押しのみ）：計画が尽きたら次の1歩を足す
+      // →「1回押し＝きっちり1マス」「押しっぱなし＝連続移動」の両立
       if (S.keysHeld.size && st.plan.length < 1) {
-        const d = S.keysHeld.has(S.lastKeyDir) ? S.lastKeyDir : [...S.keysHeld][0];
-        keyStep(d, true);
+        const d = S.keysHeld.has(S.lastKeyDir) ? S.lastKeyDir : [...S.keysHeld.keys()][0];
+        if (st.gameTime - S.keysHeld.get(d) > 260) keyStep(d, true); // 長押しのみ連続
       }
     }
   }
