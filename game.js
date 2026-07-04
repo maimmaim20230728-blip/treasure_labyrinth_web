@@ -49,6 +49,8 @@ const THEMES = [
   { name: 'さくらの迷宮', floor: '#dcecc0', floor2: '#d2e4b4', top: '#f6c6d8', top2: '#f0b8cd', front: '#96604a', front2: '#875540', line: '#6e4433' },
 ];
 const CONF_COLS = ['#f5c542', '#ff6b6b', '#4ecdc4', '#7bd44a', '#6f9dff', '#e08bff'];
+/* テーマ順（石/森/氷/遺跡/菓子/夜/溶岩/海/桜）に対応するBGM */
+const THEME_BGM = ['maze1', 'mazeForest', 'maze2', 'mazeRuins', 'mazeCandy', 'mazeNight', 'mazeLava', 'mazeSea', 'mazeSakura'];
 
 /* 説明文（言語切替に追従するようgetterで遅延参照） */
 const DESCS = {
@@ -117,6 +119,8 @@ const PIX = {
 };
 const PAL_M = { H: '#4a3020', S: '#f2c9a0', K: '#20242c', B: '#3b6fd6', L: '#27407e' };
 const PAL_F = { H: '#6b3b1e', S: '#f2c9a0', K: '#20242c', B: '#e0526b', L: '#93304a' };
+/* 中性キャラ「ミント」：フード＋やわらかいベールで顔をやさしく隠す（文化・宗教・性に中立） */
+const PAL_N = { H: '#2f8f7a', S: '#ece7da', K: '#20242c', B: '#3aa88f', L: '#2a7a68' };
 const SPR = {};
 
 function pixCanvas(rows, pal) {
@@ -132,14 +136,16 @@ function pixCanvas(rows, pal) {
   return cnv;
 }
 const mirror = rows => rows.map(r => r.split('').reverse().join(''));
+/* ベール加工：顔の段（上6行）の目Kをベール色Sに置き換えて表情を隠す */
+const veil = rows => rows.map((r, i) => i < 6 ? r.replace(/K/g, 'S') : r);
 function buildSprites() {
-  const set = pal => ({
-    down:  PIX.down.map(f => pixCanvas(f, pal)),
-    up:    PIX.up.map(f => pixCanvas(f, pal)),
-    right: PIX.side.map(f => pixCanvas(f, pal)),
-    left:  PIX.side.map(f => pixCanvas(mirror(f), pal)),
+  const set = (pal, tr) => ({
+    down:  PIX.down.map(f => pixCanvas(tr ? tr(f) : f, pal)),
+    up:    PIX.up.map(f => pixCanvas(tr ? tr(f) : f, pal)),
+    right: PIX.side.map(f => pixCanvas(tr ? tr(f) : f, pal)),
+    left:  PIX.side.map(f => pixCanvas(mirror(tr ? tr(f) : f), pal)),
   });
-  SPR.m = set(PAL_M); SPR.f = set(PAL_F);
+  SPR.m = set(PAL_M); SPR.f = set(PAL_F); SPR.n = set(PAL_N, veil);
 }
 
 /* ---- 状態 ---- */
@@ -154,18 +160,20 @@ function loadSave() {
   try { s = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); } catch (e) {}
   S.save = Object.assign({ gender: 'm', exp: 0, badges: [0, 0, 0, 0, 0, 0, 0], equipped: null, sound: true }, s || {});
   if (!Array.isArray(S.save.badges) || S.save.badges.length !== 7) S.save.badges = [0, 0, 0, 0, 0, 0, 0];
-  if (!Array.isArray(S.save.equipped)) S.save.equipped = [S.save.gender];
+  if (!Array.isArray(S.save.equipped)) S.save.equipped = [defaultSkill(S.save.gender)];
   if (!S.save.lang || !I18N.dict[S.save.lang]) S.save.lang = detectLang();
   sanitizeEquip();
   Snd.setEnabled(S.save.sound);
 }
 function persist() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(S.save)); } catch (e) {} }
-/* 装備スキルの整合性：習得済みだけ・スロット数まで・最低1つ */
+/* 装備スキルの整合性：習得済みだけ・スロット数まで・最低1つ
+   （中性キャラnの初期装備はスピードアップ） */
+function defaultSkill(g) { return g === 'n' ? 'speed' : g; }
 function sanitizeEquip() {
   const lv = L.levelFor(S.save.exp), g = S.save.gender;
   let eq = (S.save.equipped || []).filter((id, i, a) => a.indexOf(id) === i && L.skillAcquired(id, lv, g));
   eq = eq.slice(0, L.slotCount(lv));
-  if (!eq.length) eq = [g];
+  if (!eq.length) eq = [defaultSkill(g)];
   S.save.equipped = eq;
 }
 
@@ -269,7 +277,7 @@ function startStage(di) {
   $('diffName').textContent = t('diffs')[di];
   $('timeTarget').textContent = t('target') + ' ' + fmt(st.targetMs);
   toast('～ ' + t('themes')[st.themeIdx] + ' ～');
-  Snd.bgm('maze' + (1 + ((Math.random() * 3) | 0)));
+  Snd.bgm(THEME_BGM[st.themeIdx]); // 迷宮の雰囲気に合ったBGM
 }
 
 /* ---- 移動（なぞった軌跡を約1秒遅れで追いかける） ---- */
@@ -486,6 +494,33 @@ function attachInput() {
   };
   window.addEventListener('pointerup', endPointer);
   window.addEventListener('pointercancel', endPointer);
+  // ---- キーボード操作（PC向け）：矢印 / WASD / ZQSD。基本はタッチ、キーはあれば使える ----
+  window.addEventListener('keydown', e => {
+    if (S.screen !== 'play' || !S.stage) return;
+    const st = S.stage;
+    const map = {
+      arrowup: 0, w: 0, z: 0,
+      arrowright: 1, d: 1,
+      arrowdown: 2, s: 2,
+      arrowleft: 3, a: 3, q: 3,
+    };
+    const d = map[e.key.toLowerCase()];
+    if (d == null) return;
+    e.preventDefault();
+    if (st.cuts.active) { st.cuts.skip(); return; } // 演出はキーでもスキップ
+    if (st.cleared) return;
+    if (S.targetMode) { // ターゲット中は方向キーでその方向の壁を選択
+      const c = candidates().find(x => x.d === d);
+      if (c) tryTargetTap(bPos(c.bx) + bSize(c.bx) / 2, bPos(c.by) - WH + 2);
+      return;
+    }
+    const last = chainLast();
+    if (st.plan.length >= 3) return; // 先行入力は3マスまで
+    const nx = last.rx + L.DX[d], ny = last.ry + L.DY[d];
+    if (nx < 0 || ny < 0 || nx >= st.m.w || ny >= st.m.h) return;
+    if (!L.canPass(st.m, last.rx, last.ry, d, st.ladders)) return;
+    st.plan.push({ rx: nx, ry: ny, t: st.gameTime - L.TRACE_DELAY_MS }); // キーは即応
+  });
 }
 
 /* ---- クリア ---- */
@@ -534,9 +569,9 @@ function buildClearOverlay(raw, fin, ok, e, lv, coinF, diaF) {
 
 /* ---- スキル本体（⑧ワープ・⑨ヘンゼル・⑩分身の術） ---- */
 function hexRgb(hx) { const n = parseInt(hx.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
-function makeTrail(th) { // ⑨足あと色：迷宮ごとに壁色から作る（壁と見分けがつく薄さ）
+function makeTrail(th) { // ⑨足あと色：迷宮ごとに壁色から作る（壁と見分けがつく濃さ）
   const c = hexRgb(th.front);
-  return [0.16, 0.3, 0.45].map(a => 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + a + ')');
+  return [0.24, 0.42, 0.6].map(a => 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + a + ')');
 }
 function distMap(m, gx, gy) { // ゴールからの歩行距離（アイテム無しの通路のみ）
   const dist = new Int32Array(m.w * m.h).fill(-1);
@@ -1217,6 +1252,7 @@ function applyLang() {
   document.documentElement.dir = S.save.lang === 'ar' ? 'rtl' : 'ltr'; // アラビア語は右→左
   document.querySelector('#title .sub').textContent = t('sub');
   $('pickBlue').querySelector('span').textContent = t('blue');
+  $('pickNeutral').querySelector('span').textContent = I18N.mids[S.save.lang] || I18N.mids.ja;
   $('pickRed').querySelector('span').textContent = t('red');
   $('btnStart').textContent = t('start');
   $('btnBackTitle').textContent = t('back');
@@ -1262,6 +1298,7 @@ function refreshTitle() {
   $('passiveNow').textContent = t('equip') + ' (' + S.save.equipped.length + '/' + L.slotCount(lv) + '): '
     + S.save.equipped.map(id => SKILL_ICONS[id] + SKILL_INFO[id].name).join(' / ');
   $('pickBlue').classList.toggle('sel', S.save.gender === 'm');
+  $('pickNeutral').classList.toggle('sel', S.save.gender === 'n');
   $('pickRed').classList.toggle('sel', S.save.gender === 'f');
   $('btnSkill').textContent = '⚙ ' + t('skills');
   $('btnSound').textContent = S.save.sound ? t('soundOn') : t('soundOff');
@@ -1293,7 +1330,8 @@ function buildSkillCards() {
     const info = SKILL_INFO[id];
     const acquired = L.skillAcquired(id, lv, g);
     const equipped = S.save.equipped.includes(id);
-    const req = (id === 'm' || id === 'f') ? (g === id ? 1 : 5) : L.SKILLS.find(s => s.id === id).lv;
+    const req = (id === 'm' || id === 'f') ? (g === id ? 1 : 5)
+      : (id === 'speed' && g === 'n') ? 1 : L.SKILLS.find(s => s.id === id).lv;
     const row = document.createElement('button');
     row.className = 'skillRow' + (equipped ? ' sel' : '') + (acquired ? '' : ' locked');
     row.innerHTML = '<span class="srIco">' + SKILL_ICONS[id] + '</span>'
@@ -1327,6 +1365,7 @@ function attachUI() {
     refreshTitle();
   };
   $('pickBlue').onclick = () => { S.save.gender = 'm'; sanitizeEquip(); persist(); Snd.sfx('tap'); refreshTitle(); };
+  $('pickNeutral').onclick = () => { S.save.gender = 'n'; sanitizeEquip(); persist(); Snd.sfx('tap'); refreshTitle(); };
   $('pickRed').onclick = () => { S.save.gender = 'f'; sanitizeEquip(); persist(); Snd.sfx('tap'); refreshTitle(); };
   $('btnZoomIn').onclick = () => { setZoom(S.zoom * 1.25); Snd.sfx('tap'); };
   $('btnZoomOut').onclick = () => { setZoom(S.zoom / 1.25); Snd.sfx('tap'); };
@@ -1399,6 +1438,7 @@ function boot() {
   loadSave();
   buildSprites();
   drawPreview($('cvBlue'), SPR.m.down[0]);
+  drawPreview($('cvNeutral'), SPR.n.down[0]);
   drawPreview($('cvRed'), SPR.f.down[0]);
   attachUI();
   applyLang();

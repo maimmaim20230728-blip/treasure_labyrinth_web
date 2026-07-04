@@ -102,10 +102,10 @@ console.log('2) つるはし+ハシゴ乱用でも詰み無し: 済');
 
 // 5b) 追加パッシブスキル③〜⑩の計算式
 {
-  // ③スピードアップ：LV5で4、LV10から5レベルごとに+1
-  ok(L.speedCells(1) === 3 && L.speedCells(4) === 3, '速度: 未習得は3');
-  ok(L.speedCells(5) === 4 && L.speedCells(9) === 4, '速度: LV5-9は4');
+  // ③スピードアップ：装備中は4、LV10から5レベルごとに+1（未装備の3はゲーム側でゲート）
+  ok(L.speedCells(1) === 4 && L.speedCells(9) === 4, '速度: LV1-9は4');
   ok(L.speedCells(10) === 5 && L.speedCells(15) === 6, '速度: LV10=5/LV15=6');
+  ok(L.speedCells(99) === 22, '速度: LV99=22');
   // ④宝箱出現：LV7で+1%、以降+1%/LV
   ok(L.chestRateBonus(6) === 0 && Math.abs(L.chestRateBonus(7) - 0.01) < 1e-9, '宝箱率: LV7=+1%');
   ok(Math.abs(L.chestRateBonus(8) - 0.02) < 1e-9 && Math.abs(L.chestRateBonus(99) - 0.93) < 1e-9, '宝箱率: LV8=+2%/LV99=+93%');
@@ -135,9 +135,11 @@ console.log('2) つるはし+ハシゴ乱用でも詰み無し: 済');
   ok(L.slotCount(30) === 3 && L.slotCount(59) === 3, 'スロット: LV30-59=3');
   ok(L.slotCount(60) === 4 && L.slotCount(99) === 4, 'スロット: LV60+=4');
   // 習得判定：自分の性別は最初から・異性はLV5・③はLV5
-  ok(L.skillAcquired('m', 1, 'm') && !L.skillAcquired('f', 1, 'm'), '習得: 自性別のみLV1');
-  ok(L.skillAcquired('f', 5, 'm'), '習得: LV5で異性も');
+  ok(L.skillAcquired('m', 1, 'm') && !L.skillAcquired('f', 1, 'm'), '習得: 自キャラのみLV1');
+  ok(L.skillAcquired('f', 5, 'm'), '習得: LV5で他キャラの技も');
   ok(!L.skillAcquired('speed', 4, 'm') && L.skillAcquired('speed', 5, 'm'), '習得: ③はLV5');
+  ok(L.skillAcquired('speed', 1, 'n'), '習得: 中性キャラnはスピードをLV1から');
+  ok(!L.skillAcquired('m', 1, 'n') && !L.skillAcquired('f', 1, 'n') && L.skillAcquired('m', 5, 'n'), '習得: nのm/fはLV5');
   ok(!L.skillAcquired('clone', 34, 'f') && L.skillAcquired('clone', 35, 'f'), '習得: ⑩はLV35');
   console.log('5b) 追加スキル③〜⑩+装備スロット: 済');
 }

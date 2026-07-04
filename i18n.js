@@ -10,6 +10,13 @@ const I18N = {
     ['nl', 'Nederlands'], ['pl', 'Polski'], ['ru', 'Русский'], ['tr', 'Türkçe'], ['hi', 'हिन्दी'],
     ['id', 'Bahasa Indonesia'], ['ar', 'العربية'], ['bn', 'বাংলা'], ['sw', 'Kiswahili'],
   ],
+  /* 中性キャラの呼び名（色や性でなく「ミント」） */
+  mids: {
+    ja: 'ミント', en: 'Mint', zh: '薄荷', 'zh-TW': '薄荷', ko: '민트',
+    es: 'Menta', pt: 'Menta', fr: 'Menthe', de: 'Minze', it: 'Menta',
+    nl: 'Munt', pl: 'Mięta', ru: 'Мята', tr: 'Nane', hi: 'पुदीना',
+    id: 'Mint', ar: 'نعناع', bn: 'পুদিনা', sw: 'Minti',
+  },
   dict: {
 
   ja: {

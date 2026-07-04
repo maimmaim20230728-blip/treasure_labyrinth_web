@@ -195,9 +195,9 @@ const SKILLS = [
   { id: 'hansel', lv: 30, icon: '🍞' }, // ⑨ヘンゼル
   { id: 'clone',  lv: 35, icon: '👥' }, // ⑩分身の術
 ];
-/* ③LV5で4マス/秒。LV10から5レベルごとに+1 */
+/* ③装備中は4マス/秒。LV10から5レベルごとに+1
+   （習得可否はskillAcquired側で判定。中性キャラはLV1から使える） */
 function speedCells(level) {
-  if (level < 5) return CHAR_SPEED;
   return 4 + Math.floor(Math.max(0, Math.min(level, MAX_LV) - 5) / 5);
 }
 /* ④LV7で+1%。LV8から1レベルごとに+1%（宝箱の数に掛ける倍率で表現） */
@@ -258,9 +258,11 @@ function slotCount(level) {
   if (level >= 10) return 2;
   return 1;
 }
-/* 習得済みか（①②のm/fは自分の性別なら最初から・LV5で両方解禁） */
+/* 習得済みか（①②のm/fは自分のキャラなら最初から・LV5で両方解禁。
+   中性キャラnの初期パッシブは③スピードアップ） */
 function skillAcquired(id, level, gender) {
   if (id === 'm' || id === 'f') return level >= 5 || gender === id;
+  if (id === 'speed' && gender === 'n') return true;
   const sk = SKILLS.find(s => s.id === id);
   return !!sk && level >= sk.lv;
 }

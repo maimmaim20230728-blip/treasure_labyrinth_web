@@ -36,6 +36,11 @@ function bassNotes(roots, stepsPerChord) {
   });
   return out;
 }
+function qTrack(wave, vol, quarters) { // 4分音符メロディ用
+  const notes = [];
+  quarters.forEach((m, i) => { if (m) notes.push([i * 2, m, 2]); });
+  return track(wave, vol, notes);
+}
 
 const SONGS = {};
 /* タイトル：少し明るい 約16秒ループ */
@@ -82,6 +87,55 @@ SONGS.clearSoft = { bpm: 80, loopSteps: 32, tracks: [
   track('sine', 0.10, arpNotes([[72, 76, 79], [69, 72, 77]], 16, [0, 1, 2, 1], 4)),
   track('triangle', 0.09, bassNotes([48, 41], 16)),
 ]};
+
+/* ---- 迷宮テーマ別BGM ---- */
+/* 遺跡：低くミステリアス */
+SONGS.mazeRuins = { bpm: 66, loopSteps: 64, tracks: [
+  track('triangle', 0.10, arpNotes([[57, 60, 64], [56, 59, 63], [57, 60, 64], [53, 57, 62]], 16, [0, 1, 2, 1], 4)),
+  track('sine', 0.12, bassNotes([45, 44, 45, 41], 16)),
+]};
+/* お菓子：はずむ長調 */
+(() => {
+  const mel = [72, 0, 76, 0, 79, 0, 76, 0, 74, 0, 77, 0, 81, 0, 77, 0,
+               72, 0, 76, 0, 79, 0, 84, 0, 83, 0, 79, 0, 76, 0, 74, 0,
+               72, 0, 76, 0, 79, 0, 76, 0, 74, 0, 77, 0, 81, 0, 84, 0,
+               83, 0, 81, 0, 79, 0, 77, 0, 76, 0, 74, 0, 72, 0, 0, 0];
+  SONGS.mazeCandy = { bpm: 112, loopSteps: 64, tracks: [
+    melTrack('square', 0.09, mel),
+    track('triangle', 0.12, bassNotes([48, 53, 48, 43, 48, 53, 43, 48], 8)),
+  ]};
+})();
+/* 夜：ゆっくり深い短調 */
+SONGS.mazeNight = { bpm: 58, loopSteps: 64, tracks: [
+  track('sine', 0.10, arpNotes([[45, 48, 52], [44, 47, 52], [45, 48, 52], [41, 45, 48]], 16, [0, 1, 2, 1], 4)),
+  track('sine', 0.06, [[8, 76, 3], [24, 74, 3], [40, 79, 3], [56, 72, 3]]),
+]};
+/* 溶岩：低く刻む緊張感 */
+SONGS.mazeLava = { bpm: 100, loopSteps: 64, tracks: [
+  track('triangle', 0.13, (() => {
+    const n = [];
+    const seq = [45, 45, 48, 45, 44, 44, 47, 44, 45, 45, 48, 45, 51, 50, 47, 44];
+    seq.forEach((m, i) => n.push([i * 4, m, 3]));
+    return n;
+  })()),
+  track('square', 0.05, [[12, 69, 2], [28, 68, 2], [44, 69, 2], [60, 63, 2]]),
+]};
+/* 海：ゆったり寄せては返す */
+SONGS.mazeSea = { bpm: 76, loopSteps: 64, tracks: [
+  track('sine', 0.10, arpNotes([[57, 60, 64], [55, 59, 62], [57, 60, 64], [59, 62, 65]], 16, [0, 1, 2, 1, 2, 1, 0, 1], 2)),
+  track('triangle', 0.10, bassNotes([45, 43, 45, 47], 16)),
+]};
+/* 桜：日本古謡「さくらさくら」（メロディはパブリックドメイン・Web Audioで自作合成） */
+(() => {
+  const q = [69, 69, 71, 0, 69, 69, 71, 0, 69, 71, 72, 71, 69, 71, 69, 65,
+             64, 60, 64, 65, 64, 64, 60, 59, 69, 71, 72, 71, 69, 71, 69, 65];
+  SONGS.mazeSakura = { bpm: 72, loopSteps: 64, tracks: [
+    qTrack('sine', 0.12, q),
+    track('triangle', 0.08, [[0, 45, 4], [16, 40, 4], [32, 45, 4], [48, 40, 4]]),
+  ]};
+})();
+/* 森：オルゴール調（maze3）を流用 */
+SONGS.mazeForest = SONGS.maze3;
 
 /* ---- エンジン ---- */
 function ensure() {
@@ -209,5 +263,5 @@ function setEnabled(on) {
   else { if (master) master.gain.value = 0.9; if (cur) bgm(cur); }
 }
 
-return { bgm, sfx, setEnabled, unlock, get current() { return cur; }, get enabled() { return enabled; } };
+return { bgm, sfx, setEnabled, unlock, get current() { return cur; }, get enabled() { return enabled; }, get songs() { return Object.keys(SONGS); } };
 })();
