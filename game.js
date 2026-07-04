@@ -186,7 +186,14 @@ function buildSprites() {
       left:  src.side.map(f => pixCanvas(mirror(f), pal)),
     };
   };
-  SPR.m = set(PAL_M); SPR.f = set(PAL_F); SPR.n = set(PAL_N, PIX_N);
+  SPR.m = set(PAL_M); SPR.f = set(PAL_F);
+  SPR.n = set(PAL_N, PIX_N);                              // 明るい目
+  SPR.n2 = set(Object.assign({}, PAL_N, { E: '#1f8fb5' }), PIX_N); // 少し暗い目
+}
+/* キャラのスプライト取得。ロボ(n)は目が1秒ごとに明↔暗で点滅 */
+function charSet(g) {
+  if (g === 'n') return (Math.floor(performance.now() / 1000) % 2) ? SPR.n2 : SPR.n;
+  return SPR[g];
 }
 
 /* ---- 状態 ---- */
@@ -206,18 +213,16 @@ function loadSave() {
   if (!Array.isArray(S.save.equipped)) S.save.equipped = [defaultSkill(S.save.gender)];
   if (!S.save.lang || !I18N.dict[S.save.lang]) S.save.lang = detectLang();
   sanitizeEquip();
-  Snd.setEnabled(S.save.sound);
+  Snd.setEnabled(true); // 音のON/OFFは廃止。ミュートは設定の音量スライダー(0%)で行う
 }
 function persist() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(S.save)); } catch (e) {} }
-/* 装備スキルの整合性：習得済みだけ・スロット数まで・最低1つ
+/* 装備スキルの整合性：習得済みだけ・スロット数まで（0個も可）
    （中性キャラnの初期装備はスピードアップ） */
 function defaultSkill(g) { return g === 'n' ? 'speed' : g; }
 function sanitizeEquip() {
   const lv = L.levelFor(S.save.exp), g = S.save.gender;
   let eq = (S.save.equipped || []).filter((id, i, a) => a.indexOf(id) === i && L.skillAcquired(id, lv, g));
-  eq = eq.slice(0, L.slotCount(lv));
-  if (!eq.length) eq = [defaultSkill(g)];
-  S.save.equipped = eq;
+  S.save.equipped = eq.slice(0, L.slotCount(lv));
 }
 
 /* ---- キャンバス ---- */
@@ -1200,7 +1205,7 @@ function drawChest(st, ri, chd) {
 }
 function drawChar(st) {
   const c = st.char;
-  const set = SPR[S.save.gender];
+  const set = charSet(S.save.gender);
   const cutA = st.cuts.active;
   if (cutA && cutA.kind === 'climb') {
     // ハシゴのぼり：2秒かけて壁を乗り越える（山なりに持ち上がる）
@@ -1235,7 +1240,7 @@ function drawChar(st) {
   ctx.globalAlpha = 1;
 }
 function drawClone(cl) {
-  const set = SPR[S.save.gender];
+  const set = charSet(S.save.gender);
   const key = cl.dir === 0 ? 'up' : cl.dir === 1 ? 'right' : cl.dir === 3 ? 'left' : 'down';
   ctx.globalAlpha = 0.45 * cl.fade; // 半透明の分身
   ctx.drawImage(set[key][cl.frame], Math.round(cl.x - 10), Math.round(cl.y + T * 0.4 - 28), 20, 28);
@@ -1460,7 +1465,6 @@ function refreshTitle() {
   $('pickNeutral').classList.toggle('sel', S.save.gender === 'n');
   $('pickRed').classList.toggle('sel', S.save.gender === 'f');
   $('btnSkill').textContent = '⚙ ' + t('skills');
-  $('btnSound').textContent = S.save.sound ? t('soundOn') : t('soundOff');
   $('btnLang').textContent = '🌐 ' + (I18N.langs.find(p => p[0] === S.save.lang) || ['', '?'])[1];
   $('btnSet').textContent = '🔧 ' + t('settings');
 }
@@ -1500,7 +1504,6 @@ function buildSkillCards() {
     row.onclick = () => {
       if (!acquired) { toast(tf('learnAt', { n: req })); Snd.sfx('nope'); return; }
       if (equipped) {
-        if (S.save.equipped.length <= 1) { toast(t('lastOne')); Snd.sfx('nope'); return; }
         S.save.equipped = S.save.equipped.filter(x => x !== id);
       } else {
         if (S.save.equipped.length >= max) { toast(t('slotsFull')); Snd.sfx('nope'); return; }
@@ -1532,11 +1535,6 @@ function attachUI() {
     Snd.setVolumes(S.save.volBgm, S.save.volSfx);
     $('volSfxV').textContent = Math.round(S.save.volSfx * 100) + '%';
     Snd.sfx('coin'); // 試し聞き
-  };
-  $('btnSound').onclick = () => {
-    S.save.sound = !S.save.sound; persist();
-    Snd.setEnabled(S.save.sound);
-    refreshTitle();
   };
   $('pickBlue').onclick = () => { S.save.gender = 'm'; sanitizeEquip(); persist(); Snd.sfx('tap'); refreshTitle(); };
   $('pickNeutral').onclick = () => { S.save.gender = 'n'; sanitizeEquip(); persist(); Snd.sfx('tap'); refreshTitle(); };
@@ -1594,11 +1592,17 @@ function attachUI() {
 
 /* ---- メインループ ---- */
 let lastTs = 0;
+let roboBlinkState = -1;
 function frame(ts) {
   const dt = Math.min(60, lastTs ? ts - lastTs : 16);
   lastTs = ts;
   tick(dt);
   render();
+  // タイトルのロボ選択プレビューも目を点滅させる（状態が変わった時だけ再描画）
+  if (S.screen === 'title') {
+    const b = Math.floor(performance.now() / 1000) % 2;
+    if (b !== roboBlinkState) { roboBlinkState = b; drawPreview($('cvNeutral'), charSet('n').down[0]); }
+  }
   requestAnimationFrame(frame);
 }
 
