@@ -622,22 +622,30 @@ function ladderShape(baseX, baseY, len, angle) {
   for (let i = 0; i < n; i++) ctx.fillRect(-7, -len + 3 + i * ((len - 6) / Math.max(1, n - 1)), 14, 2.5);
   ctx.restore();
 }
+function ladderSide(bX, bY, tX, tY) {
+  // 真横から見た立てかけハシゴ＝支柱だけが見え、踏み板は見えない
+  ctx.lineCap = 'round';
+  ctx.strokeStyle = '#8a5a2e'; ctx.lineWidth = 4;
+  ctx.beginPath(); ctx.moveTo(bX, bY); ctx.lineTo(tX, tY); ctx.stroke();
+  ctx.strokeStyle = '#b8834a'; ctx.lineWidth = 1.5; // 奥側の支柱がわずかにのぞく
+  ctx.beginPath(); ctx.moveTo(bX, bY - 2.5); ctx.lineTo(tX, tY - 2.5); ctx.stroke();
+}
 function drawLadder(bx, by, d) {
   // 設置した側から壁に「立てかけた」ハシゴ。d=とおれる方向
-  const x = bPos(bx), yTop = bPos(by) - WH, w = bSize(bx), h = bSize(by);
+  const x = bPos(bx), y = bPos(by), yTop = y - WH, w = bSize(bx), h = bSize(by);
   const cx = x + w / 2, cy = yTop + h / 2;
   if (d === 0) {
     // 南側から北へ：手前の面に立てかける＝全身が見える
-    ladderShape(cx, bPos(by) + h + 3, h + WH + 10, 0);
+    ladderShape(cx, y + h + 3, h + WH + 10, 0);
   } else if (d === 2) {
     // 北側から南へ：壁のむこう側なので、先端だけ壁の上からのぞく
     ladderShape(cx, yTop + 7, 15, 0);
   } else if (d === 1) {
-    // 西側から東へ：左の床から斜めに立てかける
-    ladderShape(x - 6, bPos(by) + h * 0.85, h * 0.85 + WH + 6, 0.42);
+    // 西側から東へ：西の床から斜めに立てかけ＝真横から見えるのは支柱だけ
+    ladderSide(x - 9, y + h * 0.78, x + 5, yTop + 2);
   } else {
-    // 東側から西へ：右の床から斜めに立てかける
-    ladderShape(x + w + 6, bPos(by) + h * 0.85, h * 0.85 + WH + 6, -0.42);
+    // 東側から西へ：東の床から斜めに立てかけ
+    ladderSide(x + w + 9, y + h * 0.78, x + w - 5, yTop + 2);
   }
   // とおれる方向の矢印（壁の上面）
   ctx.fillStyle = 'rgba(255,255,255,0.9)';
