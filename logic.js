@@ -186,14 +186,14 @@ function diaFactor(level, isF)  { return isF ? 0.85 - 0.005 * Math.min(level, MA
 
 /* ---- 追加パッシブスキル（③〜⑩・レベルで自動取得） ---- */
 const SKILLS = [
-  { id: 'speed',  lv: 5,  icon: '🥾' }, // ③スピードアップ
+  { id: 'speed',  lv: 5,  icon: '🥾' }, // ③スピードアップ（ミントはLV1）
   { id: 'chest',  lv: 7,  icon: '🎁' }, // ④宝箱出現アップ
   { id: 'lucky',  lv: 10, icon: '🍀' }, // ⑤からっぽ率低下
-  { id: 'hawk',   lv: 15, icon: '🦅' }, // ⑥鷹の目
-  { id: 'craft',  lv: 20, icon: '🛠️' }, // ⑦精密作業
-  { id: 'warp',   lv: 25, icon: '🌀' }, // ⑧ワープ
-  { id: 'hansel', lv: 30, icon: '🍞' }, // ⑨ヘンゼル
-  { id: 'clone',  lv: 35, icon: '👥' }, // ⑩分身の術
+  { id: 'hawk',   lv: 12, icon: '🦅' }, // ⑥鷹の目（LV15でゴール矢印）
+  { id: 'craft',  lv: 15, icon: '🛠️' }, // ⑦精密作業
+  { id: 'warp',   lv: 17, icon: '🌀' }, // ⑧ワープ（クールタイム制）
+  { id: 'hansel', lv: 20, icon: '🍞' }, // ⑨ヘンゼル
+  { id: 'clone',  lv: 20, icon: '👥' }, // ⑩分身の術
 ];
 /* ③装備中は4マス/秒。LV10から5レベルごとに+1
    （習得可否はskillAcquired側で判定。中性キャラはLV1から使える） */
@@ -215,46 +215,52 @@ function rollChestWeighted(emptyPct, rnd) {
   if (r < emptyPct) return 'empty';
   return CHEST_ITEMS[(((rnd || Math.random)()) * 4) | 0]; // empty以外の4種
 }
-/* ⑥LV15で視界+1。LV16から1レベルごとに+1（全部見えたら頭打ち） */
+/* ⑥LV12で視界7→8。LV13から1レベルごとに+1（全部見えたら頭打ち）
+   LV15からはゴールの方向を矢印で示す（ゲーム側で描画） */
 function viewRangeFor(level, base) {
   const b = base == null ? 7 : base;
-  if (level < 15) return b;
-  return Math.min(40, b + (Math.min(level, MAX_LV) - 14));
+  if (level < 12) return b;
+  return Math.min(40, (b + 1) + (Math.min(level, MAX_LV) - 12));
 }
-/* ⑦LV20:2回 LV40:3回 LV70:4回 LV99:5回（つるはしの使用回数／ハシゴの再設置回数） */
+/* ⑦LV15:2回 LV30:3回 LV50:4回 LV70:5回（つるはしの使用回数／ハシゴの再設置回数） */
 function toolUses(level) {
-  if (level >= 99) return 5;
-  if (level >= 70) return 4;
-  if (level >= 40) return 3;
-  if (level >= 20) return 2;
+  if (level >= 70) return 5;
+  if (level >= 50) return 4;
+  if (level >= 30) return 3;
+  if (level >= 15) return 2;
   return 1;
 }
-/* ⑧「ゴールから11マス」の最寄りリングへワープできる確率(%)。LV25=0.1%、以降+0.1%/LV */
+/* ⑧ワープのクールタイム：LV17=60秒→LV18から-0.5秒/LV */
+function warpCT(level) {
+  return Math.max(5, 60 - 0.5 * (Math.max(Math.min(level, MAX_LV), 17) - 17));
+}
+/* ⑧「ゴールから11マス」の最寄りリングへワープできる確率(%)。LV17=0.1%、以降+0.1%/LV */
 function warpClosestPct(level) {
-  if (level < 25) return 0;
-  return Math.min(100, 0.1 + 0.1 * (Math.min(level, MAX_LV) - 25));
+  if (level < 17) return 0;
+  return Math.min(100, 0.1 + 0.1 * (Math.min(level, MAX_LV) - 17));
 }
-/* ⑨LV30:1段 LV35:2段 LV40:3段（足あとの濃さの段階数） */
+/* ⑨LV20:1段 LV25:2段 LV30:3段（足あとの濃さの段階数） */
 function hanselShades(level) {
-  if (level >= 40) return 3;
-  if (level >= 35) return 2;
-  if (level >= 30) return 1;
+  if (level >= 30) return 3;
+  if (level >= 25) return 2;
+  if (level >= 20) return 1;
   return 0;
 }
-/* ⑩LV35:1人 LV40:2人 LV50:3人（分身は1マス/秒固定） */
+/* ⑩LV20:1人→10レベルごとに+1（LV90:8人）→LV99で9人（分身は1マス/秒固定） */
 function cloneCount(level) {
-  if (level >= 50) return 3;
-  if (level >= 40) return 2;
-  if (level >= 35) return 1;
-  return 0;
+  if (level >= 99) return 9;
+  if (level < 20) return 0;
+  return Math.min(8, 1 + Math.floor((level - 20) / 10));
 }
 const CLONE_SPEED = 1;
 
 /* ---- スキル装備スロット（選んだスキルだけが効く） ----
-   LV10〜29=2こ / LV30〜59=3こ / LV60以降=4こ（それ以前は1こ） */
+   LV10〜19=2 / LV20〜29=3 / LV30〜39=4 / LV40〜49=5 / LV50以降=6（それ以前は1） */
 function slotCount(level) {
-  if (level >= 60) return 4;
-  if (level >= 30) return 3;
+  if (level >= 50) return 6;
+  if (level >= 40) return 5;
+  if (level >= 30) return 4;
+  if (level >= 20) return 3;
   if (level >= 10) return 2;
   return 1;
 }
@@ -274,7 +280,7 @@ const api = {
   StageTimer, CutsceneCtrl,
   MAX_LV, lvCum, levelFor, PASSIVE, tackleCT, coinFactor, diaFactor,
   SKILLS, speedCells, chestRateBonus, emptyRatePct, rollChestWeighted,
-  viewRangeFor, toolUses, warpClosestPct, hanselShades, cloneCount, CLONE_SPEED,
+  viewRangeFor, toolUses, warpCT, warpClosestPct, hanselShades, cloneCount, CLONE_SPEED,
   slotCount, skillAcquired,
 };
 if (typeof module !== 'undefined' && module.exports) module.exports = api;

@@ -58,7 +58,7 @@
     <div id="passiveNow"></div>
   </div>
   <button id="btnStart" class="big">▶ はじめる</button>
-  <div class="row"><button id="btnSkill">⚙ スキル</button><button id="btnSound">🔊</button><button id="btnLang">🌐</button></div>
+  <div class="row"><button id="btnSkill">⚙ スキル</button><button id="btnSound">🔊</button><button id="btnLang">🌐</button><button id="btnSet">🔧</button></div>
   <p class="credit">介護と支援の相談どころ「そよぎ」</p>
 </div>
 
@@ -66,6 +66,19 @@
   <h2>ことばを えらぶ</h2>
   <div id="langList"></div>
   <button id="btnBackTitle3">← タイトルへ</button>
+</div>
+
+<div id="setSel" class="overlay hidden">
+  <h2>🔧 せってい</h2>
+  <div class="setRow"><div class="setLbl" id="fsLabel"></div><div id="fontBtns" class="row"></div></div>
+  <div class="setRow"><div class="setLbl" id="bgmLabel"></div><div class="volRow"><input type="range" id="volBgmR" min="0" max="3" step="0.25"><span class="volV" id="volBgmV"></span></div></div>
+  <div class="setRow"><div class="setLbl" id="sfxLabel"></div><div class="volRow"><input type="range" id="volSfxR" min="0" max="3" step="0.25"><span class="volV" id="volSfxV"></span></div></div>
+  <button id="btnBackTitle4">← タイトルへ</button>
+</div>
+
+<div id="congrats" class="hidden">
+  <div id="congratsMain">🎉 CONGRATULATIONS!! 🎉</div>
+  <div id="congratsSub"></div>
 </div>
 
 <div id="diffSel" class="overlay hidden">

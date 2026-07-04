@@ -3,8 +3,9 @@
    起動中は常に何かが鳴る方針。初回タップで自動アンロック。 */
 const Snd = (() => {
 'use strict';
-let ctx = null, master = null, musG = null, schedT = null, stepIdx = 0, nextT = 0;
-let cur = null, pending = 'title', enabled = true;
+/* out=最終出力 / musG=BGMバス / master=SFXバス（音量を別々に0〜3倍で調整できる） */
+let ctx = null, out = null, master = null, musG = null, schedT = null, stepIdx = 0, nextT = 0;
+let cur = null, pending = 'title', enabled = true, volBgm = 1, volSfx = 1;
 
 function midi2f(m) { return 440 * Math.pow(2, (m - 69) / 12); }
 
@@ -73,13 +74,28 @@ SONGS.skill = { bpm: 66, loopSteps: 64, tracks: [
   track('triangle', 0.10, arpNotes([[57, 61, 64], [59, 63, 66], [57, 61, 64], [55, 59, 62]], 16, [0, 1, 2, 3], 4)),
   track('sine', 0.07, [[8, 81, 2], [24, 79, 2], [40, 83, 2], [56, 78, 2]]),
 ]};
-/* クリア（目標達成＝高揚感） */
+/* クリア（目標達成＝盛大に！リード+高速アルペジオ+ドライブするベースの3層） */
 (() => {
-  const mel = [72, 0, 76, 0, 79, 0, 84, 0, 83, 81, 79, 81, 83, 0, 84, 0,
-               84, 0, 79, 0, 81, 0, 76, 0, 79, 76, 74, 76, 72, 0, 0, 0];
-  SONGS.clearBig = { bpm: 148, loopSteps: 32, tracks: [
-    melTrack('square', 0.13, mel),
-    track('triangle', 0.16, bassNotes([48, 55, 53, 48], 8)),
+  const mel = [84, 0, 84, 0, 88, 0, 91, 0, 96, 0, 93, 91, 93, 0, 96, 0,
+               91, 0, 88, 0, 91, 93, 96, 0, 93, 91, 88, 86, 88, 0, 84, 0,
+               86, 0, 86, 0, 88, 0, 91, 0, 93, 0, 91, 88, 91, 0, 93, 0,
+               96, 0, 93, 0, 91, 0, 93, 96, 98, 0, 96, 93, 96, 0, 0, 0];
+  SONGS.clearBig = { bpm: 160, loopSteps: 64, tracks: [
+    melTrack('square', 0.12, mel),
+    track('square', 0.05, arpNotes([[72, 76, 79], [72, 76, 79], [74, 77, 81], [76, 79, 84]], 16, [0, 1, 2, 3, 4, 3, 2, 1], 2)),
+    track('triangle', 0.17, bassNotes([48, 48, 50, 52, 53, 53, 55, 55], 8)),
+  ]};
+})();
+/* コングラチュレーション（最高難易度クリア・LV99）：さらに壮大な祝祭ループ */
+(() => {
+  const mel = [84, 84, 0, 84, 88, 0, 91, 0, 91, 91, 0, 91, 96, 0, 91, 0,
+               93, 93, 0, 93, 96, 0, 98, 0, 96, 0, 93, 0, 91, 0, 88, 0,
+               84, 84, 0, 84, 88, 0, 91, 0, 96, 96, 0, 96, 98, 0, 96, 0,
+               100, 0, 98, 0, 96, 0, 98, 100, 103, 0, 0, 0, 96, 98, 100, 0];
+  SONGS.congrats = { bpm: 172, loopSteps: 64, tracks: [
+    melTrack('square', 0.11, mel),
+    track('square', 0.05, arpNotes([[76, 79, 84], [77, 81, 84], [79, 84, 88], [81, 84, 89]], 16, [0, 1, 2, 3, 4, 3, 2, 1], 2)),
+    track('triangle', 0.17, bassNotes([48, 55, 57, 55, 53, 55, 48, 55], 8)),
   ]};
 })();
 /* クリア（目標超過＝ひかえめ） */
@@ -125,13 +141,22 @@ SONGS.mazeSea = { bpm: 76, loopSteps: 64, tracks: [
   track('sine', 0.10, arpNotes([[57, 60, 64], [55, 59, 62], [57, 60, 64], [59, 62, 65]], 16, [0, 1, 2, 1, 2, 1, 0, 1], 2)),
   track('triangle', 0.10, bassNotes([45, 43, 45, 47], 16)),
 ]};
-/* 桜：日本古謡「さくらさくら」（メロディはパブリックドメイン・Web Audioで自作合成） */
+/* 桜：日本古謡「さくらさくら」全曲版（メロディはパブリックドメイン・Web Audioで自作合成）
+   ララシ─ ララシ─ / ラシドシ ラシラファ / ミドミファ ミミドシ /
+   ラシドシ ラシラファ / ミドミファ ミミドシ / ララシ─ ララシ─ / ラシドシ ラ─── */
 (() => {
-  const q = [69, 69, 71, 0, 69, 69, 71, 0, 69, 71, 72, 71, 69, 71, 69, 65,
-             64, 60, 64, 65, 64, 64, 60, 59, 69, 71, 72, 71, 69, 71, 69, 65];
-  SONGS.mazeSakura = { bpm: 72, loopSteps: 64, tracks: [
-    qTrack('sine', 0.12, q),
-    track('triangle', 0.08, [[0, 45, 4], [16, 40, 4], [32, 45, 4], [48, 40, 4]]),
+  const N = [ // [拍, MIDI, 拍数]
+    [0, 69, 1], [1, 69, 1], [2, 71, 2],   [4, 69, 1], [5, 69, 1], [6, 71, 2],
+    [8, 69, 1], [9, 71, 1], [10, 72, 1], [11, 71, 1],  [12, 69, 1], [13, 71, 1], [14, 69, 1], [15, 65, 1],
+    [16, 64, 1], [17, 60, 1], [18, 64, 1], [19, 65, 1],  [20, 64, 1], [21, 64, 1], [22, 60, 1], [23, 59, 1],
+    [24, 69, 1], [25, 71, 1], [26, 72, 1], [27, 71, 1],  [28, 69, 1], [29, 71, 1], [30, 69, 1], [31, 65, 1],
+    [32, 64, 1], [33, 60, 1], [34, 64, 1], [35, 65, 1],  [36, 64, 1], [37, 64, 1], [38, 60, 1], [39, 59, 1],
+    [40, 69, 1], [41, 69, 1], [42, 71, 2],  [44, 69, 1], [45, 69, 1], [46, 71, 2],
+    [48, 69, 1], [49, 71, 1], [50, 72, 1], [51, 71, 1],  [52, 69, 4],
+  ];
+  SONGS.mazeSakura = { bpm: 76, loopSteps: 112, tracks: [
+    track('sine', 0.13, N.map(x => [x[0] * 2, x[1], x[2] * 2])),
+    track('triangle', 0.07, [[0, 45, 8], [16, 40, 8], [32, 45, 8], [48, 41, 8], [64, 45, 8], [80, 40, 8], [96, 45, 8]]),
   ]};
 })();
 /* 森：オルゴール調（maze3）を流用 */
@@ -143,8 +168,9 @@ function ensure() {
   const AC = window.AudioContext || window.webkitAudioContext;
   if (!AC) return false;
   ctx = new AC();
-  master = ctx.createGain(); master.gain.value = enabled ? 0.9 : 0; master.connect(ctx.destination);
-  musG = ctx.createGain(); musG.gain.value = 1; musG.connect(master);
+  out = ctx.createGain(); out.gain.value = enabled ? 0.9 : 0; out.connect(ctx.destination);
+  musG = ctx.createGain(); musG.gain.value = volBgm; musG.connect(out);
+  master = ctx.createGain(); master.gain.value = volSfx; master.connect(out); // SFXバス
   ctx.addEventListener('statechange', () => {
     if (ctx.state === 'running' && pending) { const p = pending; pending = null; bgm(p); }
   });
@@ -243,11 +269,26 @@ const FX = {
     [1175, 1568, 2093].forEach((f, i) => _note(t + 0.55 + i * 0.08, f, 0.12, 'sine', 0.09, master));
   },
   levelup()  { [523, 659, 784, 1047].forEach((f, i) => _note(now() + i * 0.09, f, 0.18, 'square', 0.11, master)); },
-  fanfare()  {
+  fanfare()  { // 盛大版：5連コード+シンバル+駆け上がるグリッサンド
     const t = now();
-    [[0, [523, 659, 784]], [0.16, [587, 740, 880]], [0.32, [659, 831, 988]], [0.5, [784, 988, 1175]]]
-      .forEach(pair => pair[1].forEach(f => _note(t + pair[0], f, 0.22, 'square', 0.07, master)));
-    _noise(t, 0.5, 0.12, 3000);
+    [[0, [523, 659, 784]], [0.14, [587, 740, 880]], [0.28, [659, 831, 988]], [0.42, [784, 988, 1175]], [0.6, [1047, 1319, 1568]]]
+      .forEach(pair => pair[1].forEach(f => _note(t + pair[0], f, 0.3, 'square', 0.09, master)));
+    _noise(t, 0.7, 0.2, 4000);
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = 'sawtooth';
+    o.frequency.setValueAtTime(200, t); o.frequency.exponentialRampToValueAtTime(1600, t + 0.5);
+    g.gain.setValueAtTime(0.05, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.55);
+    o.connect(g); g.connect(master); o.start(t); o.stop(t + 0.6);
+  },
+  bang() { // 花火の破裂音
+    const t = now();
+    _noise(t, 0.5, 0.35, 2500);
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(650 + Math.random() * 500, t);
+    o.frequency.exponentialRampToValueAtTime(110, t + 0.5);
+    g.gain.setValueAtTime(0.2, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.5);
+    o.connect(g); g.connect(master); o.start(t); o.stop(t + 0.52);
   },
   clearSoft(){ [523, 659, 784].forEach((f, i) => _note(now() + i * 0.12, f, 0.25, 'sine', 0.1, master)); },
   goal()     { [784, 988, 1175, 1568].forEach((f, i) => _note(now() + i * 0.06, f, 0.14, 'sine', 0.1, master)); },
@@ -259,9 +300,14 @@ function sfx(name) {
 }
 function setEnabled(on) {
   enabled = on;
-  if (!on) { _stopSched(); if (master) master.gain.value = 0; }
-  else { if (master) master.gain.value = 0.9; if (cur) bgm(cur); }
+  if (!on) { _stopSched(); if (out) out.gain.value = 0; }
+  else { if (out) out.gain.value = 0.9; if (cur) bgm(cur); }
+}
+function setVolumes(b, s) { // BGM/SFXの音量（0=ミュート〜3=3倍）
+  volBgm = b; volSfx = s;
+  if (musG) musG.gain.value = b;
+  if (master) master.gain.value = s;
 }
 
-return { bgm, sfx, setEnabled, unlock, get current() { return cur; }, get enabled() { return enabled; }, get songs() { return Object.keys(SONGS); } };
+return { bgm, sfx, setEnabled, setVolumes, unlock, get current() { return cur; }, get enabled() { return enabled; }, get songs() { return Object.keys(SONGS); } };
 })();

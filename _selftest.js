@@ -117,30 +117,31 @@ console.log('2) つるはし+ハシゴ乱用でも詰み無し: 済');
   for (let i = 0; i < 50000; i++) { const it = L.rollChestWeighted(10, r); cnt[it] = (cnt[it] || 0) + 1; }
   const ePct = cnt.empty / 500;
   ok(ePct > 9 && ePct < 11, `重み抽選: からっぽ${ePct}%（期待10%）`);
-  // ⑥鷹の目：LV15で+1、以降+1/LV
-  ok(L.viewRangeFor(14) === 7 && L.viewRangeFor(15) === 8 && L.viewRangeFor(16) === 9, '視界: LV15=8/LV16=9');
+  // ⑥鷹の目：LV12で8、以降+1/LV（上限40）
+  ok(L.viewRangeFor(11) === 7 && L.viewRangeFor(12) === 8 && L.viewRangeFor(13) === 9, '視界: LV12=8/LV13=9');
   ok(L.viewRangeFor(99) === 40, '視界: 上限40で頭打ち');
-  // ⑦精密作業
-  ok(L.toolUses(19) === 1 && L.toolUses(20) === 2 && L.toolUses(40) === 3 && L.toolUses(70) === 4 && L.toolUses(99) === 5, '道具回数 2/3/4/5');
-  // ⑧ワープ：LV25=0.1%、+0.1%/LV
-  ok(L.warpClosestPct(24) === 0 && Math.abs(L.warpClosestPct(25) - 0.1) < 1e-9, 'ワープ: LV25=0.1%');
-  ok(Math.abs(L.warpClosestPct(26) - 0.2) < 1e-9 && Math.abs(L.warpClosestPct(99) - 7.5) < 1e-9, 'ワープ: LV26=0.2%/LV99=7.5%');
-  // ⑨ヘンゼル・⑩分身
-  ok(L.hanselShades(29) === 0 && L.hanselShades(30) === 1 && L.hanselShades(35) === 2 && L.hanselShades(40) === 3, 'ヘンゼル段階');
-  ok(L.cloneCount(34) === 0 && L.cloneCount(35) === 1 && L.cloneCount(40) === 2 && L.cloneCount(50) === 3, '分身人数');
+  // ⑦精密作業：LV15/30/50/70で2/3/4/5回
+  ok(L.toolUses(14) === 1 && L.toolUses(15) === 2 && L.toolUses(30) === 3 && L.toolUses(50) === 4 && L.toolUses(70) === 5, '道具回数 2/3/4/5');
+  // ⑧ワープ：CT LV17=60秒→LV18から-0.5秒/LV（LV99=19秒）・近リング確率0.1%+0.1%/LV
+  ok(L.warpCT(17) === 60 && L.warpCT(18) === 59.5 && L.warpCT(99) === 19, 'ワープCT 60→19');
+  ok(L.warpClosestPct(16) === 0 && Math.abs(L.warpClosestPct(17) - 0.1) < 1e-9 && Math.abs(L.warpClosestPct(99) - 8.3) < 1e-9, 'ワープ近リング率');
+  // ⑨ヘンゼル：LV20/25/30で1/2/3段
+  ok(L.hanselShades(19) === 0 && L.hanselShades(20) === 1 && L.hanselShades(25) === 2 && L.hanselShades(30) === 3, 'ヘンゼル段階');
+  // ⑩分身：LV20から10LVごとに+1・LV99で9人
+  ok(L.cloneCount(19) === 0 && L.cloneCount(20) === 1 && L.cloneCount(30) === 2 && L.cloneCount(50) === 4, '分身人数 前半');
+  ok(L.cloneCount(90) === 8 && L.cloneCount(98) === 8 && L.cloneCount(99) === 9, '分身人数 LV90=8/LV99=9');
   ok(L.CLONE_SPEED === 1, '分身は1マス/秒固定');
-  // 装備スロット数：LV10-29=2 / LV30-59=3 / LV60+=4
-  ok(L.slotCount(1) === 1 && L.slotCount(9) === 1, 'スロット: LV9まで1');
-  ok(L.slotCount(10) === 2 && L.slotCount(29) === 2, 'スロット: LV10-29=2');
-  ok(L.slotCount(30) === 3 && L.slotCount(59) === 3, 'スロット: LV30-59=3');
-  ok(L.slotCount(60) === 4 && L.slotCount(99) === 4, 'スロット: LV60+=4');
+  // 装備スロット数：LV10-19=2 / 20-29=3 / 30-39=4 / 40-49=5 / 50+=6
+  ok(L.slotCount(9) === 1 && L.slotCount(10) === 2 && L.slotCount(19) === 2, 'スロット: LV10-19=2');
+  ok(L.slotCount(20) === 3 && L.slotCount(29) === 3 && L.slotCount(30) === 4 && L.slotCount(39) === 4, 'スロット: 20-29=3/30-39=4');
+  ok(L.slotCount(40) === 5 && L.slotCount(49) === 5 && L.slotCount(50) === 6 && L.slotCount(99) === 6, 'スロット: 40-49=5/50+=6');
   // 習得判定：自分の性別は最初から・異性はLV5・③はLV5
   ok(L.skillAcquired('m', 1, 'm') && !L.skillAcquired('f', 1, 'm'), '習得: 自キャラのみLV1');
   ok(L.skillAcquired('f', 5, 'm'), '習得: LV5で他キャラの技も');
   ok(!L.skillAcquired('speed', 4, 'm') && L.skillAcquired('speed', 5, 'm'), '習得: ③はLV5');
   ok(L.skillAcquired('speed', 1, 'n'), '習得: 中性キャラnはスピードをLV1から');
   ok(!L.skillAcquired('m', 1, 'n') && !L.skillAcquired('f', 1, 'n') && L.skillAcquired('m', 5, 'n'), '習得: nのm/fはLV5');
-  ok(!L.skillAcquired('clone', 34, 'f') && L.skillAcquired('clone', 35, 'f'), '習得: ⑩はLV35');
+  ok(!L.skillAcquired('clone', 19, 'f') && L.skillAcquired('clone', 20, 'f'), '習得: ⑩はLV20');
   console.log('5b) 追加スキル③〜⑩+装備スロット: 済');
 }
 

@@ -77,7 +77,7 @@ const SKILL_INFO = {
   lucky: mkSkill('lucky', lv => tf('vLucky', { n: L.emptyRatePct(lv) })),
   hawk: mkSkill('hawk', lv => tf('vHawk', { n: L.viewRangeFor(lv) })),
   craft: mkSkill('craft', lv => tf('vCraft', { n: L.toolUses(lv) })),
-  warp: mkSkill('warp', lv => tf('vWarp', { n: L.warpClosestPct(lv).toFixed(1) })),
+  warp: mkSkill('warp', lv => tf('vCT', { n: L.warpCT(lv) })),
   hansel: mkSkill('hansel', lv => tf('vHansel', { n: L.hanselShades(lv) })),
   clone: mkSkill('clone', lv => tf('vClone', { n: L.cloneCount(lv) })),
 };
@@ -152,13 +152,15 @@ function buildSprites() {
 const S = {
   screen: 'title', save: null, stage: null,
   zoom: 1, tracing: false, pointers: new Map(), pinchD: 0,
-  targetMode: null, confetti: [],
+  targetMode: null, confetti: [], fireworks: [],
+  keysHeld: new Set(), lastKeyDir: -1,
+  congratsUntil: 0, nextBurst: 0,
 };
 const SAVE_KEY = 'tlab.v1';
 function loadSave() {
   let s = null;
   try { s = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); } catch (e) {}
-  S.save = Object.assign({ gender: 'm', exp: 0, badges: [0, 0, 0, 0, 0, 0, 0], equipped: null, sound: true }, s || {});
+  S.save = Object.assign({ gender: 'm', exp: 0, badges: [0, 0, 0, 0, 0, 0, 0], equipped: null, sound: true, fontScale: 0, volBgm: 1, volSfx: 1 }, s || {});
   if (!Array.isArray(S.save.badges) || S.save.badges.length !== 7) S.save.badges = [0, 0, 0, 0, 0, 0, 0];
   if (!Array.isArray(S.save.equipped)) S.save.equipped = [defaultSkill(S.save.gender)];
   if (!S.save.lang || !I18N.dict[S.save.lang]) S.save.lang = detectLang();
@@ -252,7 +254,7 @@ function startStage(di) {
     viewRange: eq.has('hawk') ? L.viewRangeFor(lv) : 7,                // ⑥鷹の目
     pickCharges: 0,                                                    // ⑦精密作業：つるはしの残り追加使用
     ladderRetrievals: eq.has('craft') ? Math.max(0, L.toolUses(lv) - 1) : 0, // ⑦ハシゴ回収の残り回数
-    warpUsed: false, warpOk: false,                                    // ⑧ワープ
+    warpReadyAt: 0, warpOk: false,                                     // ⑧ワープ（クールタイム制）
     hanselShades: eq.has('hansel') ? L.hanselShades(lv) : 0,           // ⑨ヘンゼル
     visits: new Uint8Array(diff.w * diff.h),
     clones: [],                                                        // ⑩分身の術
@@ -270,6 +272,7 @@ function startStage(di) {
   st.trailCol = makeTrail(st.theme);
   st.goalDist = distMap(m, goal.rx, goal.ry);
   st.warpOk = eq.has('warp') && st.goalDist.some(dv => dv >= 11);
+  st.goalArrow = eq.has('hawk') && lv >= 15; // 🦅LV15から：ゴール方向の矢印
   spawnClones(st);
   S.stage = st; S.zoom = 1; S.targetMode = null; S.tracing = false;
   showScreen('play');
@@ -494,33 +497,45 @@ function attachInput() {
   };
   window.addEventListener('pointerup', endPointer);
   window.addEventListener('pointercancel', endPointer);
-  // ---- キーボード操作（PC向け）：矢印 / WASD / ZQSD。基本はタッチ、キーはあれば使える ----
+  // ---- キーボード操作（PC向け）：矢印 / WASD / ZQSD。押しっぱなしで連続移動・ラグなし ----
+  const KEYMAP = {
+    arrowup: 0, w: 0, z: 0,
+    arrowright: 1, d: 1,
+    arrowdown: 2, s: 2,
+    arrowleft: 3, a: 3, q: 3,
+  };
   window.addEventListener('keydown', e => {
-    if (S.screen !== 'play' || !S.stage) return;
-    const st = S.stage;
-    const map = {
-      arrowup: 0, w: 0, z: 0,
-      arrowright: 1, d: 1,
-      arrowdown: 2, s: 2,
-      arrowleft: 3, a: 3, q: 3,
-    };
-    const d = map[e.key.toLowerCase()];
+    const d = KEYMAP[e.key.toLowerCase()];
     if (d == null) return;
+    if (S.screen !== 'play' || !S.stage) return;
     e.preventDefault();
-    if (st.cuts.active) { st.cuts.skip(); return; } // 演出はキーでもスキップ
-    if (st.cleared) return;
-    if (S.targetMode) { // ターゲット中は方向キーでその方向の壁を選択
-      const c = candidates().find(x => x.d === d);
-      if (c) tryTargetTap(bPos(c.bx) + bSize(c.bx) / 2, bPos(c.by) - WH + 2);
-      return;
-    }
-    const last = chainLast();
-    if (st.plan.length >= 3) return; // 先行入力は3マスまで
-    const nx = last.rx + L.DX[d], ny = last.ry + L.DY[d];
-    if (nx < 0 || ny < 0 || nx >= st.m.w || ny >= st.m.h) return;
-    if (!L.canPass(st.m, last.rx, last.ry, d, st.ladders)) return;
-    st.plan.push({ rx: nx, ry: ny, t: st.gameTime - L.TRACE_DELAY_MS }); // キーは即応
+    if (e.repeat) return; // 押しっぱなしはtick側で毎フレーム処理（OSのリピート待ちを排除）
+    S.keysHeld.add(d); S.lastKeyDir = d;
+    keyStep(d, false);
   });
+  window.addEventListener('keyup', e => {
+    const d = KEYMAP[e.key.toLowerCase()];
+    if (d != null) S.keysHeld.delete(d);
+  });
+  window.addEventListener('blur', () => S.keysHeld.clear());
+}
+/* キー1歩ぶんの入力。cont=押しっぱなしからの自動連続 */
+function keyStep(d, cont) {
+  const st = S.stage; if (!st) return;
+  if (st.cuts.active) { if (!cont) st.cuts.skip(); return; } // 演出はキーでもスキップ
+  if (st.cleared) return;
+  if (S.targetMode) { // ターゲット中は方向キーでその方向の壁を選択
+    if (cont) return;
+    const c = candidates().find(x => x.d === d);
+    if (c) tryTargetTap(bPos(c.bx) + bSize(c.bx) / 2, bPos(c.by) - WH + 2);
+    return;
+  }
+  const last = chainLast();
+  if (st.plan.length >= 3) return; // 先行入力は3マスまで
+  const nx = last.rx + L.DX[d], ny = last.ry + L.DY[d];
+  if (nx < 0 || ny < 0 || nx >= st.m.w || ny >= st.m.h) return;
+  if (!L.canPass(st.m, last.rx, last.ry, d, st.ladders)) return;
+  st.plan.push({ rx: nx, ry: ny, t: st.gameTime - L.TRACE_DELAY_MS }); // キーはラグなし即応
 }
 
 /* ---- クリア ---- */
@@ -549,10 +564,14 @@ function doClear() {
       // 新スキル習得・スロット増加の告知
       const learned = L.SKILLS.filter(sk => prevLv < sk.lv && newLv >= sk.lv);
       learned.forEach((sk, i) => setTimeout(() => toast(tf('newSkill', { s: sk.icon + SKILL_INFO[sk.id].name })), 2600 + i * 1900));
-      if ([10, 30, 60].some(b => prevLv < b && newLv >= b)) {
+      if ([10, 20, 30, 40, 50].some(b => prevLv < b && newLv >= b)) {
         setTimeout(() => toast(tf('slotsUp', { n: L.slotCount(newLv) })), 2600 + learned.length * 1900);
       }
     }
+    // 🎉最高難易度クリア or LV99到達 → コングラチュレーション大演出
+    const gotMax = st.diffIdx === 6;
+    const gotLv99 = newLv >= 99 && prevLv < 99;
+    if (gotMax || gotLv99) setTimeout(() => showCongrats(gotMax, gotLv99), 1100);
   }, 650);
 }
 function buildClearOverlay(raw, fin, ok, e, lv, coinF, diaF) {
@@ -596,7 +615,7 @@ function doWarp() { // ⑧1回だけランダムワープ。ゴールから10マ
     if (dist[i] >= 11 && i !== cRoom) { cands.push(i); if (dist[i] < minD) minD = dist[i]; }
   }
   if (!cands.length) { toast(t('warpNo')); Snd.sfx('nope'); return; }
-  st.warpUsed = true;
+  st.warpReadyAt = st.gameTime + L.warpCT(st.lv) * 1000; // 使うたびクールタイム
   // レベルが高いほど「いちばんゴール寄り(11マス)のリング」へ飛べる確率が上がる
   const ring = cands.filter(i => dist[i] === minD);
   const pool = (Math.random() < L.warpClosestPct(st.lv) / 100) ? ring : cands;
@@ -714,6 +733,50 @@ function updateConfetti(dt) {
   }
 }
 
+/* ---- コングラチュレーション（最高難易度クリア・LV99）＋花火 ---- */
+function showCongrats(gotMax, gotLv99) {
+  const cg = I18N.congrats[S.save.lang] || I18N.congrats.ja;
+  const subs = [];
+  if (gotMax) subs.push(cg[0]);
+  if (gotLv99) subs.push(cg[1]);
+  $('congratsSub').textContent = subs.join('　');
+  $('congrats').classList.remove('hidden');
+  S.congratsUntil = performance.now() + 9500; // 花火の打ち上げ時間
+  S.nextBurst = 0;
+  Snd.bgm('congrats');
+  Snd.sfx('fanfare');
+  spawnConfetti(260);
+}
+function hideCongrats() {
+  $('congrats').classList.add('hidden');
+  S.congratsUntil = 0;
+  S.fireworks.length = 0;
+  Snd.bgm('clearBig');
+}
+function updateFireworks(dt) {
+  const s = dt / 1000;
+  if (S.congratsUntil && performance.now() < S.congratsUntil) {
+    if (performance.now() >= S.nextBurst) { // 次の打ち上げ
+      S.nextBurst = performance.now() + 420 + Math.random() * 380;
+      const cw = cv.clientWidth, chh = cv.clientHeight;
+      const x = cw * (0.15 + Math.random() * 0.7), y = chh * (0.1 + Math.random() * 0.45);
+      const col = CONF_COLS[(Math.random() * CONF_COLS.length) | 0];
+      for (let i = 0; i < 44; i++) {
+        const a = Math.random() * 6.283, v = 60 + Math.random() * 170;
+        S.fireworks.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, life: 0.9 + Math.random() * 0.5, col, size: 2.5 + Math.random() * 2.2 });
+      }
+      Snd.sfx('bang');
+      spawnConfetti(26);
+    }
+  }
+  for (let i = S.fireworks.length - 1; i >= 0; i--) {
+    const p = S.fireworks[i];
+    p.life -= s;
+    if (p.life <= 0) { S.fireworks.splice(i, 1); continue; }
+    p.vy += 100 * s; p.x += p.vx * s; p.y += p.vy * s;
+  }
+}
+
 /* ---- 毎フレーム更新 ---- */
 function tick(dt) {
   const st = S.stage;
@@ -753,6 +816,11 @@ function tick(dt) {
       }
       moveChar(dt);
       updateClones(st, dt); // ⑩分身の術
+      // キー押しっぱなし：計画が尽きたら次の1歩を足す（連続移動）
+      if (S.keysHeld.size && st.plan.length < 1) {
+        const d = S.keysHeld.has(S.lastKeyDir) ? S.lastKeyDir : [...S.keysHeld][0];
+        keyStep(d, true);
+      }
     }
   }
   if (st) {
@@ -761,6 +829,7 @@ function tick(dt) {
     if (st.shake > 0) st.shake = Math.max(0, st.shake - dt * 0.02);
   }
   updateConfetti(dt);
+  updateFireworks(dt);
   updateHud();
 }
 function updateHud() {
@@ -771,6 +840,11 @@ function updateHud() {
     const remain = Math.max(0, st.tackleReadyAt - st.gameTime);
     $('cntFist').textContent = remain > 0 ? Math.ceil(remain / 1000) + 's' : 'OK';
     $('slotFist').classList.toggle('dim', remain > 0);
+  }
+  if (st.eq.has('warp') && st.warpOk) {
+    const remainW = Math.max(0, st.warpReadyAt - st.gameTime);
+    $('cntWarp').textContent = remainW > 0 ? Math.ceil(remainW / 1000) + 's' : 'OK';
+    $('slotWarp').classList.toggle('dim', remainW > 0);
   }
 }
 
@@ -850,14 +924,36 @@ function render() {
       ctx.fillStyle = fg;
       ctx.fillRect(st.cam.x - cw / 2 / sc - 12, st.cam.y - ch / 2 / sc - 12, cw / sc + 24, ch / sc + 24);
     }
+    // 🦅たかのめLV15：ゴールの方向を金の矢印で示す（霧の上に描く）
+    if (st.goalArrow && !st.cleared) {
+      const dxg = roomX(st.goal.rx) - st.char.x, dyg = roomY(st.goal.ry) - st.char.y;
+      if (Math.hypot(dxg, dyg) > T * 1.5) {
+        const angG = Math.atan2(dyg, dxg);
+        const rrG = T * 1.3 + Math.sin(performance.now() / 280) * 3;
+        ctx.save();
+        ctx.translate(st.char.x + Math.cos(angG) * rrG, st.char.y + Math.sin(angG) * rrG - T * 0.2);
+        ctx.rotate(angG);
+        ctx.fillStyle = 'rgba(245,197,66,0.95)';
+        ctx.strokeStyle = 'rgba(60,40,0,0.6)'; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(9, 0); ctx.lineTo(-5, -6); ctx.lineTo(-2, 0); ctx.lineTo(-5, 6); ctx.closePath();
+        ctx.fill(); ctx.stroke();
+        ctx.restore();
+      }
+    }
   }
-  // 紙吹雪（スクリーン座標）
+  // 紙吹雪・花火（スクリーン座標）
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   for (const p of S.confetti) {
     ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot);
     ctx.fillStyle = p.col; ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
     ctx.restore();
   }
+  for (const p of S.fireworks) {
+    ctx.globalAlpha = Math.min(1, p.life * 1.6);
+    ctx.fillStyle = p.col;
+    ctx.fillRect(p.x - p.size / 2, p.y - p.size / 2, p.size, p.size);
+  }
+  ctx.globalAlpha = 1;
 }
 function drawWallBlock(st, bx, by, v) {
   const m = st.m, th = st.theme;
@@ -1227,24 +1323,45 @@ function updateSlots() {
   $('slotLadder').classList.toggle('sel', S.targetMode === 'ladder');
   $('slotFist').classList.toggle('sel', S.targetMode === 'tackle');
   $('slotFist').classList.toggle('hidden', !st.eq.has('m'));
-  // ⑧ワープ（装備中のみ・1回だけ）
+  // ⑧ワープ（装備中のみ・クールタイム制）
   const warpVis = st.eq.has('warp');
   $('slotWarp').classList.toggle('hidden', !warpVis);
-  if (warpVis) {
-    $('cntWarp').textContent = st.warpUsed ? '✕' : (st.warpOk ? 'OK' : 'ー');
-    $('slotWarp').classList.toggle('dim', st.warpUsed || !st.warpOk);
-  }
+  if (warpVis && !st.warpOk) { $('cntWarp').textContent = 'ー'; $('slotWarp').classList.add('dim'); }
 }
 function showScreen(name) {
   S.screen = name;
-  ['title', 'diffSel', 'skillSel', 'clearOv', 'langSel'].forEach(id => $(id).classList.add('hidden'));
+  ['title', 'diffSel', 'skillSel', 'clearOv', 'langSel', 'setSel'].forEach(id => $(id).classList.add('hidden'));
   ['hudTop', 'hudBottom'].forEach(id => $(id).classList.add('hidden'));
   if (name === 'title') { $('title').classList.remove('hidden'); refreshTitle(); Snd.bgm('title'); }
   else if (name === 'diff') { $('diffSel').classList.remove('hidden'); buildDiffList(); Snd.bgm('title'); }
   else if (name === 'skill') { $('skillSel').classList.remove('hidden'); buildSkillCards(); Snd.bgm('skill'); } // 専用BGM
   else if (name === 'lang') { $('langSel').classList.remove('hidden'); buildLangList(); Snd.bgm('title'); }
+  else if (name === 'set') { $('setSel').classList.remove('hidden'); buildSettings(); Snd.bgm('title'); }
   else if (name === 'play') { $('hudTop').classList.remove('hidden'); $('hudBottom').classList.remove('hidden'); }
   else if (name === 'clear') { $('clearOv').classList.remove('hidden'); }
+}
+/* ---- 設定（文字サイズ・音量） ---- */
+function applyFont() {
+  document.documentElement.style.fontSize = [16, 18.5, 21][S.save.fontScale || 0] + 'px';
+}
+function buildSettings() {
+  document.querySelector('#setSel h2').textContent = '🔧 ' + t('settings');
+  $('fsLabel').textContent = t('fontSize');
+  $('bgmLabel').textContent = t('volBgm');
+  $('sfxLabel').textContent = t('volSfx');
+  const names = [t('fontN'), t('fontL'), t('fontXL')];
+  const el = $('fontBtns'); el.innerHTML = '';
+  names.forEach((nm, i) => {
+    const b = document.createElement('button');
+    b.className = 'langBtn' + (S.save.fontScale === i ? ' sel' : '');
+    b.textContent = nm;
+    b.onclick = () => { S.save.fontScale = i; persist(); applyFont(); Snd.sfx('tap'); buildSettings(); };
+    el.appendChild(b);
+  });
+  $('volBgmR').value = S.save.volBgm;
+  $('volSfxR').value = S.save.volSfx;
+  $('volBgmV').textContent = Math.round(S.save.volBgm * 100) + '%';
+  $('volSfxV').textContent = Math.round(S.save.volSfx * 100) + '%';
 }
 /* ---- 言語の適用と切替 ---- */
 function applyLang() {
@@ -1303,6 +1420,7 @@ function refreshTitle() {
   $('btnSkill').textContent = '⚙ ' + t('skills');
   $('btnSound').textContent = S.save.sound ? t('soundOn') : t('soundOff');
   $('btnLang').textContent = '🌐 ' + (I18N.langs.find(p => p[0] === S.save.lang) || ['', '?'])[1];
+  $('btnSet').textContent = '🔧 ' + t('settings');
 }
 function buildDiffList() {
   const el = $('diffList'); el.innerHTML = '';
@@ -1359,6 +1477,20 @@ function attachUI() {
   $('btnBackTitle2').onclick = () => { Snd.sfx('tap'); showScreen('title'); };
   $('btnSkill').onclick = () => { Snd.sfx('tap'); showScreen('skill'); };
   $('btnLang').onclick = () => { Snd.sfx('tap'); showScreen('lang'); };
+  $('btnSet').onclick = () => { Snd.sfx('tap'); showScreen('set'); };
+  $('btnBackTitle4').onclick = () => { Snd.sfx('tap'); showScreen('title'); };
+  $('congrats').onclick = hideCongrats;
+  $('volBgmR').oninput = () => {
+    S.save.volBgm = parseFloat($('volBgmR').value); persist();
+    Snd.setVolumes(S.save.volBgm, S.save.volSfx);
+    $('volBgmV').textContent = Math.round(S.save.volBgm * 100) + '%';
+  };
+  $('volSfxR').oninput = () => {
+    S.save.volSfx = parseFloat($('volSfxR').value); persist();
+    Snd.setVolumes(S.save.volBgm, S.save.volSfx);
+    $('volSfxV').textContent = Math.round(S.save.volSfx * 100) + '%';
+    Snd.sfx('coin'); // 試し聞き
+  };
   $('btnSound').onclick = () => {
     S.save.sound = !S.save.sound; persist();
     Snd.setEnabled(S.save.sound);
@@ -1389,8 +1521,9 @@ function attachUI() {
     if (!playActive()) return;
     desc(DESCS.warp);
     const st = S.stage;
-    if (st.warpUsed) { toast(t('warpOnce')); Snd.sfx('nope'); return; }
     if (!st.warpOk) { toast(t('warpNo')); Snd.sfx('nope'); return; }
+    const remain = st.warpReadyAt - st.gameTime;
+    if (remain > 0) { toast(tf('ctWait', { n: Math.ceil(remain / 1000) })); Snd.sfx('nope'); return; }
     doWarp();
   };
   $('slotLadder').onclick = () => {
@@ -1442,6 +1575,8 @@ function boot() {
   drawPreview($('cvRed'), SPR.f.down[0]);
   attachUI();
   applyLang();
+  applyFont();
+  Snd.setVolumes(S.save.volBgm, S.save.volSfx);
   resize();
   showScreen('title');
   requestAnimationFrame(frame);

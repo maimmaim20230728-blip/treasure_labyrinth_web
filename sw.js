@@ -1,5 +1,5 @@
 /* 宝の迷宮 SW - 完全オフラインキャッシュ */
-const CACHE = 'tlab-v3';
+const CACHE = 'tlab-v4';
 const ASSETS = [
   './', './index.html', './style.css', './i18n.js', './logic.js', './audio.js', './game.js',
   './manifest.json', './icons/icon-192.png', './icons/icon-512.png',
