@@ -589,8 +589,8 @@ function render() {
       ctx.fillRect(p.x - p.size / 2, p.y - p.size / 2, p.size, p.size);
     }
     ctx.globalAlpha = 1;
-    // 視界：7マスまでハッキリ→8マス以降は遠いほど暗く、遥か遠くはほぼ見えない（クリア後は全体が見える）
-    if (!st.cleared) {
+    // 視界：7マスまでハッキリ→8マス以降は遠いほど暗く、遥か遠くはほぼ見えない（クリア後も維持）
+    {
       const vr = st.viewRange;
       const rIn = vr * P, rOut = (vr + 9) * P; // 7マス〜16マスにかけて漆黒へ
       const span = rOut - rIn;
