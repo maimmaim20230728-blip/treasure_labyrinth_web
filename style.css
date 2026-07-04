@@ -1,0 +1,141 @@
+/* 宝の迷宮 - シニア・キッズ両対応の大きめUI */
+:root {
+  --bg: #141628;
+  --panel: #1e2140;
+  --border: #3a3f6e;
+  --gold: #f5c542;
+  --txt: #f2ecd9;
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
+html, body {
+  margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
+  background: var(--bg); color: var(--txt);
+  font-family: 'Segoe UI', 'Hiragino Sans', 'Yu Gothic UI', sans-serif;
+}
+#cv { position: fixed; inset: 0; width: 100%; height: 100%; touch-action: none; display: block; }
+.hidden { display: none !important; }
+button { cursor: pointer; font-family: inherit; }
+
+/* 上部HUD */
+#hudTop {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 5;
+  display: flex; align-items: center; gap: 6px;
+  padding: 6px 8px; padding-top: calc(6px + env(safe-area-inset-top));
+  background: rgba(14, 16, 34, 0.72);
+}
+#timeBox { font-weight: bold; font-size: 16px; white-space: nowrap; flex-shrink: 0; }
+#timeTarget { font-size: 11px; opacity: 0.8; margin-left: 3px; font-weight: normal; }
+#diffName {
+  font-size: 12px; opacity: 0.9; flex: 1; text-align: center;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0;
+}
+.camBtns { display: flex; gap: 4px; flex-shrink: 0; }
+.camBtns button {
+  font-size: 16px; background: var(--panel); color: var(--txt);
+  border: 2px solid var(--border); border-radius: 8px; padding: 5px 8px;
+}
+
+/* 下部HUD（アイテム個数と説明文を常時表示） */
+#hudBottom {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 5;
+  background: rgba(14, 16, 34, 0.78);
+  padding: 6px 8px calc(8px + env(safe-area-inset-bottom));
+}
+#slots { display: flex; gap: 6px; justify-content: center; }
+.slot {
+  font-size: 20px; background: var(--panel); color: var(--txt);
+  border: 2px solid var(--border); border-radius: 12px; padding: 6px 10px; min-width: 62px;
+}
+.slot span { font-size: 13px; margin-left: 2px; }
+.slot.dim { opacity: 0.45; }
+.slot.sel { border-color: var(--gold); box-shadow: 0 0 8px var(--gold); }
+#desc { margin-top: 6px; text-align: center; font-size: 14px; min-height: 20px; opacity: 0.95; }
+
+/* オーバーレイ画面 */
+.overlay {
+  position: fixed; inset: 0; z-index: 10;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
+  background: rgba(10, 12, 28, 0.85); padding: 20px; text-align: center; overflow-y: auto;
+}
+#title h1 {
+  font-size: 44px; margin: 0; color: var(--gold);
+  text-shadow: 3px 3px 0 #7a5a10; letter-spacing: 3px;
+}
+.sub { margin: 0; opacity: 0.85; font-size: 15px; }
+.subEn { margin: 0; font-size: 12px; letter-spacing: 4px; opacity: 0.55; }
+h2 { margin: 0; color: var(--gold); }
+button.big {
+  font-size: 24px; padding: 14px 34px; background: var(--gold); color: #3a2a05;
+  border: none; border-radius: 14px; font-weight: bold; box-shadow: 0 4px 0 #a07f20;
+}
+.row { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+.row button, #btnBackTitle, #btnBackTitle2 {
+  background: var(--panel); color: var(--txt);
+  border: 2px solid var(--border); border-radius: 12px; padding: 10px 16px; font-size: 16px;
+}
+#charPick { display: flex; gap: 18px; }
+.charBtn {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  background: var(--panel); color: var(--txt); font-size: 15px;
+  border: 2px solid var(--border); border-radius: 12px; padding: 10px 18px;
+}
+.charBtn.sel { border-color: var(--gold); box-shadow: 0 0 10px var(--gold); }
+.charBtn canvas { image-rendering: pixelated; }
+#lvBox { width: min(320px, 80vw); font-size: 18px; font-weight: bold; }
+#expBar { height: 10px; background: rgba(0,0,0,0.5); border-radius: 6px; overflow: hidden; margin: 4px 0; }
+#expFill { height: 100%; background: linear-gradient(90deg, #7bd44a, #f5c542); width: 0; }
+#expTxt, #passiveNow { font-size: 13px; opacity: 0.85; font-weight: normal; }
+.credit { font-size: 12px; opacity: 0.55; margin-top: 8px; }
+
+/* 難易度選択 */
+#diffList { display: flex; flex-direction: column; gap: 8px; width: min(340px, 86vw); }
+.diffBtn {
+  font-size: 18px; display: flex; justify-content: space-between; align-items: center; gap: 8px;
+  background: var(--panel); color: var(--txt);
+  border: 2px solid var(--border); border-radius: 12px; padding: 12px 14px;
+}
+.diffBtn small { opacity: 0.6; }
+.diffBtn.locked { opacity: 0.5; }
+.badge { color: var(--gold); font-size: 14px; min-width: 52px; text-align: right; }
+
+/* スキル選択 */
+#skillNote { font-size: 13px; opacity: 0.8; margin: 0; }
+#skillCards { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+.skillCard {
+  display: flex; flex-direction: column; gap: 6px; width: min(250px, 80vw);
+  background: var(--panel); border: 2px solid var(--border); border-radius: 14px;
+  padding: 14px; color: var(--txt); font-size: 14px; text-align: left;
+}
+.skillCard b { font-size: 18px; }
+.skillCard .val { color: var(--gold); }
+.skillCard.sel { border-color: var(--gold); box-shadow: 0 0 10px var(--gold); }
+.skillCard.locked { opacity: 0.55; }
+.tag { font-size: 12px; opacity: 0.9; }
+
+/* クリア画面（紙吹雪が見えるよう半透明） */
+#clearOv { background: rgba(10, 12, 28, 0.75); }
+#clearTitle { font-size: 30px; margin: 0; color: var(--gold); }
+.crow { font-size: 16px; }
+.crow.cbig { font-size: 24px; color: var(--gold); }
+
+/* トースト・レベルアップ */
+#toast {
+  position: fixed; left: 50%; bottom: 112px; transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.82); color: #fff; padding: 10px 18px; border-radius: 12px;
+  font-size: 15px; z-index: 20; transition: opacity 0.3s; opacity: 0;
+  pointer-events: none; white-space: nowrap; max-width: 92vw;
+}
+#toast.show { opacity: 1; }
+#lvup {
+  position: fixed; left: 50%; top: 38%; transform: translate(-50%, -50%) scale(0.6);
+  color: var(--gold); font-size: 34px; font-weight: bold;
+  text-shadow: 2px 2px 0 #000; z-index: 25; pointer-events: none; opacity: 0;
+}
+#lvup.pop { animation: lvpop 1.9s ease forwards; }
+@keyframes lvpop {
+  0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+  15%  { opacity: 1; transform: translate(-50%, -50%) scale(1.15); }
+  30%  { transform: translate(-50%, -50%) scale(1); }
+  80%  { opacity: 1; }
+  100% { opacity: 0; transform: translate(-50%, -60%) scale(1); }
+}

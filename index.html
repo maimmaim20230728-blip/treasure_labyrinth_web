@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>宝の迷宮 - Treasure Labyrinth</title>
+<meta name="description" content="なぞって すすむ ドットめいろ。子どもの知育から大人の脳トレまで、完全オフラインで遊べる迷路ゲーム。">
+<meta name="theme-color" content="#141628">
+<meta property="og:title" content="宝の迷宮 - Treasure Labyrinth">
+<meta property="og:description" content="なぞって すすむ ドットめいろ。介護と支援の相談どころ「そよぎ」提供。">
+<meta property="og:image" content="https://treasure-labyrinth-web.vercel.app/og.png">
+<meta name="fc:miniapp" content='{"version":"1","imageUrl":"https://treasure-labyrinth-web.vercel.app/og.png","button":{"title":"あそぶ","action":{"type":"launchMiniApp","name":"宝の迷宮","url":"https://treasure-labyrinth-web.vercel.app/","splashImageUrl":"https://treasure-labyrinth-web.vercel.app/icons/icon-192.png","splashBackgroundColor":"#141628"}}}'>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<canvas id="cv"></canvas>
+
+<div id="hudTop" class="hidden">
+  <div id="timeBox">⏱ <span id="timeNow">0:00.0</span><span id="timeTarget"></span></div>
+  <div id="diffName"></div>
+  <div class="camBtns">
+    <button id="btnZoomOut" title="ズームアウト">➖</button>
+    <button id="btnZoomIn" title="ズームイン">➕</button>
+    <button id="btnReset" title="してんリセット">🧭</button>
+    <button id="btnQuit" title="やめる">✕</button>
+  </div>
+</div>
+
+<div id="hudBottom" class="hidden">
+  <div id="slots">
+    <button class="slot" id="slotPick">⛏️<span id="cntPick">×0</span></button>
+    <button class="slot" id="slotLadder">🪜<span id="cntLadder">×0</span></button>
+    <button class="slot" id="slotCoin">🪙<span id="cntCoin">×0</span></button>
+    <button class="slot" id="slotDia">💎<span id="cntDia">×0</span></button>
+    <button class="slot hidden" id="slotFist">👊<span id="cntFist">OK</span></button>
+  </div>
+  <div id="desc"></div>
+</div>
+
+<div id="title" class="overlay">
+  <h1>宝の迷宮</h1>
+  <p class="subEn">TREASURE LABYRINTH</p>
+  <p class="sub">なぞって すすむ ドットめいろ</p>
+  <div id="charPick">
+    <button id="pickBlue" class="charBtn"><canvas id="cvBlue" width="60" height="84"></canvas><span>あお</span></button>
+    <button id="pickRed" class="charBtn"><canvas id="cvRed" width="60" height="84"></canvas><span>あか</span></button>
+  </div>
+  <div id="lvBox">LV <span id="lvNum">1</span>
+    <div id="expBar"><div id="expFill"></div></div>
+    <div id="expTxt"></div>
+    <div id="passiveNow"></div>
+  </div>
+  <button id="btnStart" class="big">▶ はじめる</button>
+  <div class="row"><button id="btnSkill">⚙ スキル</button><button id="btnSound">🔊</button></div>
+  <p class="credit">介護と支援の相談どころ「そよぎ」</p>
+</div>
+
+<div id="diffSel" class="overlay hidden">
+  <h2>めいろを えらぶ</h2>
+  <div id="diffList"></div>
+  <button id="btnBackTitle">← タイトルへ</button>
+</div>
+
+<div id="skillSel" class="overlay hidden">
+  <h2>パッシブスキル</h2>
+  <p id="skillNote"></p>
+  <div id="skillCards"></div>
+  <button id="btnBackTitle2">← タイトルへ</button>
+</div>
+
+<div id="clearOv" class="overlay hidden">
+  <h2 id="clearTitle"></h2>
+  <div id="clearBody"></div>
+  <div class="row"><button id="btnRetry">もういちど</button><button id="btnNext" class="big">つぎへ ▶</button></div>
+</div>
+
+<div id="toast"></div>
+<div id="lvup"></div>
+
+<script src="logic.js"></script>
+<script src="audio.js"></script>
+<script src="game.js"></script>
+<script>
+if ('serviceWorker' in navigator && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+  addEventListener('load', () => navigator.serviceWorker.register('sw.js'));
+}
+</script>
+<script type="module">
+/* Farcaster Mini App: フレーム内で開かれた時に ready() を送る */
+try {
+  const { sdk } = await import('https://esm.sh/@farcaster/miniapp-sdk');
+  await sdk.actions.ready();
+} catch (e) { /* 通常ブラウザでは何もしない */ }
+</script>
+</body>
+</html>

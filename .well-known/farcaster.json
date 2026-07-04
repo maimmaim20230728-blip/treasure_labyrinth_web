@@ -1,0 +1,19 @@
+{
+  "accountAssociation": {
+    "header": "",
+    "payload": "",
+    "signature": ""
+  },
+  "miniapp": {
+    "version": "1",
+    "name": "宝の迷宮",
+    "iconUrl": "https://treasure-labyrinth-web.vercel.app/icons/icon-512.png",
+    "homeUrl": "https://treasure-labyrinth-web.vercel.app/",
+    "imageUrl": "https://treasure-labyrinth-web.vercel.app/og.png",
+    "buttonTitle": "あそぶ",
+    "splashImageUrl": "https://treasure-labyrinth-web.vercel.app/icons/icon-192.png",
+    "splashBackgroundColor": "#141628",
+    "primaryCategory": "games",
+    "tags": ["game", "maze", "retro", "puzzle", "japanese"]
+  }
+}

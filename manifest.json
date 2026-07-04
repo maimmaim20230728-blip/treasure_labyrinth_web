@@ -1,0 +1,14 @@
+{
+  "name": "宝の迷宮 - Treasure Labyrinth",
+  "short_name": "宝の迷宮",
+  "description": "なぞって すすむ ドットめいろ。子どもの知育から大人の脳トレまで、完全オフラインで遊べる迷路ゲーム。",
+  "start_url": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#141628",
+  "theme_color": "#141628",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
