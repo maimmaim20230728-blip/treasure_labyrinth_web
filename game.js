@@ -267,7 +267,10 @@ function onEnterRoom() {
     chest.result = L.rollChest(); // 5種 均等20%
     st.plan.length = 0;
     Snd.sfx('chest');
-    st.cuts.start('chest', 3000, { ri, revealAt: 900, res: chest.result }, () => applyChest(chest.result));
+    st.cuts.start('chest', 3000, { ri, revealAt: 900, res: chest.result }, () => {
+      applyChest(chest.result);
+      chest.fading = true; chest.fadeT = 0; // タイム再開と同時にフェードアウト開始
+    });
     return;
   }
   if (c.rx === st.m.w - 1 && c.ry === st.m.h - 1) doClear();
@@ -493,6 +496,11 @@ function tick(dt) {
     } else {
       st.timer.update(dt); // 演出中はタイマーが止まっている
       st.gameTime += dt;
+      // 開封済みの宝箱は箱ごとフェードアウト→消滅
+      for (const pair of st.chests) {
+        const chd = pair[1];
+        if (chd.fading) { chd.fadeT += dt; if (chd.fadeT >= 700) st.chests.delete(pair[0]); }
+      }
       moveChar(dt);
     }
   }
@@ -686,12 +694,44 @@ function drawChest(st, ri, chd) {
   const cx = roomX(rx), cyB = roomY(ry) + T * 0.36;
   const w = T * 0.62, h = T * 0.5, x = cx - w / 2, y = cyB - h;
   const cutA = st.cuts.active;
-  let lid = chd.opened ? 1 : 0;
-  if (cutA && cutA.kind === 'chest' && cutA.data.ri === ri) lid = Math.min(1, cutA.t / 800);
-  ctx.fillStyle = '#7a4a20'; ctx.fillRect(x, y + h * 0.35, w, h * 0.65);
-  if (lid > 0) { ctx.fillStyle = '#241608'; ctx.fillRect(x + 2, y + h * 0.35, w - 4, h * 0.25); }
-  ctx.fillStyle = '#9a6a34'; ctx.fillRect(x - 1, y - lid * h * 0.5, w + 2, h * 0.42);
-  ctx.fillStyle = '#f5c542'; ctx.fillRect(x + w * 0.44, y + h * 0.3, w * 0.12, h * 0.45);
+  let k = chd.opened ? 1 : 0; // ふたの開き具合 0=閉 1=全開
+  if (cutA && cutA.kind === 'chest' && cutA.data.ri === ri) k = Math.min(1, cutA.t / 800);
+  // 開封後はタイム再開とともにフェードアウト
+  const alpha = chd.fading ? Math.max(0, 1 - chd.fadeT / 700) : 1;
+  if (alpha <= 0) return;
+  ctx.globalAlpha = alpha;
+  const RED = '#a83434', RED_L = '#bf4646', RED_D = '#7c2626', GOLD = '#f5c542', INNER = '#3a1414';
+  const lidH = h * 0.42;
+  // 開いたふた（蝶番＝箱の奥の辺。半分をこえたら奥へパタンと倒れて内側が見える）
+  if (k > 0.5) {
+    const bh = lidH * 0.85 * (k - 0.5) * 2;
+    ctx.fillStyle = RED_D;
+    ctx.fillRect(x - 1, y - bh, w + 2, bh);
+    ctx.strokeStyle = GOLD; ctx.lineWidth = 1.5;
+    ctx.strokeRect(x - 0.5, y - bh + 0.5, w + 1, Math.max(1, bh - 1));
+  }
+  // 本体（赤＋金の縁取り）
+  ctx.fillStyle = RED;
+  ctx.fillRect(x, y + lidH, w, h - lidH);
+  ctx.fillStyle = RED_D;
+  ctx.fillRect(x, y + h - 4, w, 4); // 底の影
+  // 中身の暗がり（開きはじめたら見える）
+  if (k > 0.15) { ctx.fillStyle = INNER; ctx.fillRect(x + 2, y + lidH - 2, w - 4, 6); }
+  // 閉じている間のふた（奥の蝶番を軸に起き上がる＝手前の高さが縮む）
+  if (k < 0.5) {
+    const fh = lidH * (1 - k * 2);
+    ctx.fillStyle = RED_L;
+    ctx.fillRect(x - 1, y + (lidH - fh), w + 2, fh);
+    ctx.strokeStyle = GOLD; ctx.lineWidth = 1.5;
+    ctx.strokeRect(x - 0.5, y + (lidH - fh) + 0.5, w + 1, Math.max(1, fh - 1));
+  }
+  // 金の縁取り・帯・錠前
+  ctx.strokeStyle = GOLD; ctx.lineWidth = 1.5;
+  ctx.strokeRect(x + 0.5, y + lidH + 0.5, w - 1, h - lidH - 1);
+  ctx.fillStyle = GOLD;
+  ctx.fillRect(x + w * 0.44, y + lidH, w * 0.12, h - lidH);
+  if (k < 0.3) ctx.fillRect(x + w * 0.4, y + lidH - 2, w * 0.2, 5); // 錠前
+  ctx.globalAlpha = 1;
 }
 function drawChar(st) {
   const c = st.char;
