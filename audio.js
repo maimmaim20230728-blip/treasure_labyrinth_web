@@ -158,6 +158,15 @@ const FX = {
   item()     { [659, 784, 988].forEach((f, i) => _note(now() + i * 0.06, f, 0.1, 'square', 0.1, master)); },
   empty()    { _note(now(), 220, 0.25, 'triangle', 0.12, master); },
   pickHit()  { _noise(now(), 0.08, 0.2, 900); _note(now(), 120, 0.09, 'triangle', 0.2, master); },
+  thud()     { // 体当たりの鈍いドスン
+    _noise(now(), 0.14, 0.32, 380);
+    const t = now();
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(120, t); o.frequency.exponentialRampToValueAtTime(45, t + 0.16);
+    g.gain.setValueAtTime(0.35, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.2);
+    o.connect(g); g.connect(master); o.start(t); o.stop(t + 0.22);
+  },
   crumble()  { _noise(now(), 0.45, 0.25, 500); },
   chest()    {
     const t = now();

@@ -8,8 +8,14 @@ const $ = id => document.getElementById(id);
 const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
 
 /* ---- 定数 ---- */
-const T = 32;   // 1ブロックのワールドpx
-const WH = 14;  // 壁の見た目の高さ（2.5D風に側面が見える）
+const T = 32;      // 部屋1マスのワールドpx
+const H = T / 2;   // 壁の厚み＝部屋の半分（ハシゴが見やすく・なぞりも楽）
+const P = T + H;   // 部屋間の周期（壁1枚+部屋1マス）
+const WH = 14;     // 壁の見た目の高さ（2.5D風に側面が見える）
+/* ブロック格子は 偶数=壁(厚みH)・奇数=部屋(幅T) の交互配置 */
+const bPos = b => (((b + 1) >> 1) * H) + ((b >> 1) * T);
+const bSize = b => (b & 1) ? T : H;
+const rowAt = wy => { const k = Math.floor(wy / P); const rem = wy - k * P; return 2 * k + (rem < H ? 0 : 1); };
 
 const THEMES = [
   { name: 'いしの迷宮',   floor: '#d9d0aa', floor2: '#cfc59c', top: '#9aa0aa', top2: '#8a8f98', front: '#666c78', front2: '#565b66', line: '#474b55' },
@@ -22,12 +28,12 @@ const THEMES = [
 const CONF_COLS = ['#f5c542', '#ff6b6b', '#4ecdc4', '#7bd44a', '#6f9dff', '#e08bff'];
 
 const DESCS = {
-  default: 'ゆびで なぞると 1びょうおくれて キャラが はしるよ',
+  default: 'ゆびで なぞると 0.5びょうおくれて キャラが はしるよ',
   pick:    '⛏️つるはし：かべを 1まい こわせる（つかいきり・さいだい2こ）',
   ladder:  '🪜ハシゴ：かべに かける。かけた ほうこうにだけ とおれる（さいだい3こ）',
-  coin:    '🪙コイン：さいごの タイムを 10%カット（ふくり・さいだい5まい）',
-  diamond: '💎ダイヤ：さいごの タイムを 15%カット（ふくり・さいだい5こ）',
-  fist:    '👊かべパンチ：つるはしなしで かべを こわせる（クールタイムあり）',
+  coin:    '🪙コイン：さいごの タイムを カット（ふくり・さいだい5まい）',
+  diamond: '💎ダイヤ：さいごの タイムを おおきくカット（ふくり・さいだい5こ）',
+  tackle:  '💥たいあたり：つるはしなしで かべを こわせる（クールタイムあり）',
   pickTarget:   'こわしたい かべを タップ！（ほかを タップで キャンセル）',
   ladderTarget: 'ハシゴを かけたい かべを タップ！',
 };
@@ -118,10 +124,13 @@ function resize() {
   cv.width = Math.round(cv.clientWidth * dpr);
   cv.height = Math.round(cv.clientHeight * dpr);
 }
-const roomX = rx => (2 * rx + 1.5) * T;
-const roomY = ry => (2 * ry + 1.5) * T;
+const roomX = rx => bPos(2 * rx + 1) + T / 2;
+const roomY = ry => bPos(2 * ry + 1) + T / 2;
+const worldW = m => bPos(m.bw - 1) + H;
+const worldH = m => bPos(m.bh - 1) + H;
 function viewScale() {
-  const base = clamp(Math.min(cv.clientWidth, cv.clientHeight) / (T * 11), 0.9, 2.4);
+  // 基本倍率＝スマホ縦で部屋5マスぶんが見える程度
+  const base = clamp(Math.min(cv.clientWidth, cv.clientHeight) / (5 * P + H), 0.9, 2.4);
   return base * S.zoom;
 }
 function setZoom(z) { S.zoom = clamp(z, 1 / 3, 1.4); } // ズームアウトは最大3倍まで
@@ -135,7 +144,7 @@ function resetView() { // 視点リセット：ワンタップでキャラ中心
 function clampCam(st) {
   const sc = viewScale();
   const vw = cv.clientWidth / sc, vh = cv.clientHeight / sc;
-  const ww = st.m.bw * T, wh2 = st.m.bh * T;
+  const ww = worldW(st.m), wh2 = worldH(st.m);
   st.cam.x = (vw >= ww + 2 * T) ? ww / 2 : clamp(st.cam.x, vw / 2 - T, ww - vw / 2 + T);
   st.cam.y = (vh >= wh2 + 2 * T) ? wh2 / 2 : clamp(st.cam.y, vh / 2 - T, wh2 - vh / 2 + T);
 }
@@ -163,7 +172,7 @@ function startStage(di) {
     char: { rx: 0, ry: 0, x: roomX(0), y: roomY(0), dir: 2, frame: 0, animT: 0, moving: null },
     cam: { x: roomX(0), y: roomY(0) },
     theme: THEMES[(Math.random() * THEMES.length) | 0],
-    particles: [], shake: 0, cleared: false, fistReadyAt: 0,
+    particles: [], shake: 0, cleared: false, tackleReadyAt: 0,
   };
   st.cuts = new L.CutsceneCtrl(st.timer);
   // 宝箱配置（スタート・ゴール以外からランダム）
@@ -194,8 +203,8 @@ function dirBetween(ax, ay, bx, by) {
 function handleTracePoint(e) {
   const st = S.stage; if (!st || st.cleared || st.cuts.active) return;
   const w = ptWorld(e);
-  const rx = clamp(Math.round((w.x / T - 1.5) / 2), 0, st.m.w - 1);
-  const ry = clamp(Math.round((w.y / T - 1.5) / 2), 0, st.m.h - 1);
+  const rx = clamp(Math.round((w.x - H - T / 2) / P), 0, st.m.w - 1);
+  const ry = clamp(Math.round((w.y - H - T / 2) / P), 0, st.m.h - 1);
   const last = chainLast();
   if (rx === last.rx && ry === last.ry) return;
   // ひとつ前のマスへ戻ったら取り消し
@@ -209,16 +218,16 @@ function handleTracePoint(e) {
 }
 function moveChar(dt) {
   const st = S.stage, c = st.char;
-  let budget = dt / 1000 * L.CHAR_SPEED * 2 * T; // 一定速度（キビキビ）
+  let budget = dt / 1000 * L.CHAR_SPEED * P; // 一定速度（4マス/秒）
   while (budget > 0) {
     if (!c.moving) {
       const nxt = st.plan[0];
       if (!nxt) { c.animT = 0; c.frame = 0; break; }
-      if (st.gameTime < nxt.t + 1000) break; // 約1秒遅れて追いかける
+      if (st.gameTime < nxt.t + L.TRACE_DELAY_MS) break; // 約0.5秒遅れて追いかける
       const d = dirBetween(c.rx, c.ry, nxt.rx, nxt.ry);
       if (d < 0 || !L.canPass(st.m, c.rx, c.ry, d, st.ladders)) { st.plan.shift(); continue; }
       st.plan.shift();
-      c.moving = { fx: c.x, fy: c.y, tx: nxt.rx, ty: nxt.ry, prog: 0, dist: 2 * T };
+      c.moving = { fx: c.x, fy: c.y, tx: nxt.rx, ty: nxt.ry, prog: 0, dist: P };
       c.dir = d;
     }
     const mv = c.moving;
@@ -271,7 +280,7 @@ function playActive() { return S.screen === 'play' && S.stage && !S.stage.cleare
 function setTarget(mode) {
   S.targetMode = mode;
   updateSlots();
-  if (mode === 'pick' || mode === 'fist') desc(DESCS.pickTarget);
+  if (mode === 'pick' || mode === 'tackle') desc(DESCS.pickTarget);
   else if (mode === 'ladder') desc(DESCS.ladderTarget);
   else descDefault();
 }
@@ -289,8 +298,9 @@ function candidates() {
 function tryTargetTap(wx, wy) {
   const st = S.stage;
   for (const cand of candidates()) {
-    const x = cand.bx * T, y = cand.by * T - WH;
-    if (wx >= x && wx <= x + T && wy >= y && wy <= y + T + WH) {
+    const x = bPos(cand.bx), y = bPos(cand.by) - WH;
+    const w = bSize(cand.bx), h = bSize(cand.by) + WH;
+    if (wx >= x && wx <= x + w && wy >= y && wy <= y + h) {
       const mode = S.targetMode; setTarget(null);
       if (mode === 'ladder') {
         st.counts.ladder--; // 置いたら再配置不可・通行は何度でも（再利用可）
@@ -298,10 +308,13 @@ function tryTargetTap(wx, wy) {
         Snd.sfx('ladder');
         st.cuts.start('ladder', 900, { wi: cand.wi }, () => {});
       } else {
-        if (mode === 'pick') st.counts.pick--; // 1回使い捨て
-        else st.fistReadyAt = st.gameTime + L.PASSIVE.m.ct[L.passiveRank(L.levelFor(S.save.exp))] * 1000;
+        const via = (mode === 'pick') ? 'pick' : 'tackle';
+        if (via === 'pick') st.counts.pick--; // 1回使い捨て
+        else st.tackleReadyAt = st.gameTime + L.tackleCT(L.levelFor(S.save.exp)) * 1000;
         st.plan.length = 0;
-        st.cuts.start('break', 2000, { wi: cand.wi, hitsDone: 0 }, () => {
+        st.char.dir = cand.d; // 体当たりは壁の方を向く
+        // つるはし=3回叩く2秒 / 体当たり=2回突進1.5秒
+        st.cuts.start('break', via === 'pick' ? 2000 : 1500, { wi: cand.wi, via, d: cand.d, hitsDone: 0 }, () => {
           st.m.g[cand.wi] = 0; // 壁1枚破壊
           spawnCrumble(cand.wi);
           Snd.sfx('crumble');
@@ -370,18 +383,19 @@ function doClear() {
   st.cleared = true; st.timer.pause();
   Snd.sfx('goal');
   const raw = st.timer.ms;
-  const fin = L.finalTimeMs(raw, st.counts.coin, st.counts.diamond); // 複利計算
-  const ok = fin <= st.targetMs;
   const prevLv = L.levelFor(S.save.exp);
-  let e = st.diff.exp * (ok ? 1.5 : 1);
-  if (effPassive() === 'f') e *= L.PASSIVE.f.mult[L.passiveRank(prevLv)];
-  e = Math.round(e);
+  // 複利計算（✨おたからマスターなら係数がレベルぶん強化）
+  const isF = effPassive() === 'f';
+  const coinF = L.coinFactor(prevLv, isF), diaF = L.diaFactor(prevLv, isF);
+  const fin = L.finalTimeMs(raw, st.counts.coin, st.counts.diamond, coinF, diaF);
+  const ok = fin <= st.targetMs;
+  const e = Math.round(st.diff.exp * (ok ? 1.5 : 1));
   S.save.exp += e; S.save.badges[st.diffIdx]++; persist();
   const newLv = L.levelFor(S.save.exp);
   setTimeout(() => {
     if (ok) { Snd.sfx('fanfare'); Snd.bgm('clearBig'); spawnConfetti(150); } // 盛大に祝う
     else    { Snd.sfx('clearSoft'); Snd.bgm('clearSoft'); spawnConfetti(25); } // ひかえめ
-    buildClearOverlay(raw, fin, ok, e, newLv);
+    buildClearOverlay(raw, fin, ok, e, newLv, coinF, diaF);
     showScreen('clear');
     if (newLv > prevLv) {
       showLvup(newLv); Snd.sfx('levelup');
@@ -389,12 +403,12 @@ function doClear() {
     }
   }, 650);
 }
-function buildClearOverlay(raw, fin, ok, e, lv) {
+function buildClearOverlay(raw, fin, ok, e, lv, coinF, diaF) {
   const st = S.stage, c = st.counts;
   $('clearTitle').textContent = ok ? '🎉 おたから ゲット！ 🎉' : '✨ ゴール！';
   let html = '<div class="crow">めいろの タイム <b>' + fmt(raw) + '</b></div>';
-  if (c.coin) html += '<div class="crow">🪙×' + c.coin + '　タイム ×' + Math.pow(0.9, c.coin).toFixed(3) + '（ふくり）</div>';
-  if (c.diamond) html += '<div class="crow">💎×' + c.diamond + '　タイム ×' + Math.pow(0.85, c.diamond).toFixed(3) + '（ふくり）</div>';
+  if (c.coin) html += '<div class="crow">🪙×' + c.coin + '　タイム ×' + Math.pow(coinF, c.coin).toFixed(3) + '（ふくり）</div>';
+  if (c.diamond) html += '<div class="crow">💎×' + c.diamond + '　タイム ×' + Math.pow(diaF, c.diamond).toFixed(3) + '（ふくり）</div>';
   html += '<div class="crow cbig">さいしゅうタイム <b>' + fmt(fin) + '</b></div>';
   html += '<div class="crow">もくひょう ' + fmt(st.targetMs) + (ok ? '　🏆 たっせい！' : '　つぎは もくひょうに チャレンジ！') + '</div>';
   html += '<div class="crow">EXP <b>+' + e + '</b>　（LV ' + lv + '）</div>';
@@ -406,7 +420,7 @@ function spawnCrumble(wi) {
   const st = S.stage, bx = wi % st.m.bw, by = (wi / st.m.bw) | 0;
   for (let i = 0; i < 12; i++) {
     st.particles.push({
-      x: bx * T + T / 2, y: by * T + T / 2 - WH / 2,
+      x: bPos(bx) + bSize(bx) / 2, y: bPos(by) + bSize(by) / 2 - WH / 2,
       vx: (Math.random() - 0.5) * 180, vy: -Math.random() * 160 - 40,
       g: 420, life: 0.7 + Math.random() * 0.3, col: st.theme.front, size: 3 + Math.random() * 3,
     });
@@ -450,9 +464,15 @@ function tick(dt) {
     st.cuts.update(dt);
     const cutA = st.cuts.active;
     if (cutA) {
-      if (cutA.kind === 'break') { // 3回叩くアニメ＋打撃音
-        const hits = Math.min(3, 1 + ((cutA.t / 650) | 0));
-        if (hits > cutA.data.hitsDone) { cutA.data.hitsDone = hits; Snd.sfx('pickHit'); st.shake = 5; }
+      if (cutA.kind === 'break') { // つるはし=3回叩く / 体当たり=2回突進
+        const pick = cutA.data.via === 'pick';
+        const hits = pick ? Math.min(3, 1 + ((cutA.t / 650) | 0))
+                          : Math.min(2, 1 + ((cutA.t / 700) | 0));
+        if (hits > cutA.data.hitsDone) {
+          cutA.data.hitsDone = hits;
+          Snd.sfx(pick ? 'pickHit' : 'thud');
+          st.shake = pick ? 5 : 7;
+        }
       }
     } else {
       st.timer.update(dt); // 演出中はタイマーが止まっている
@@ -473,7 +493,7 @@ function updateHud() {
   if (!st || (S.screen !== 'play' && S.screen !== 'clear')) return;
   $('timeNow').textContent = fmt(st.timer.ms);
   if (effPassive() === 'm') {
-    const remain = Math.max(0, st.fistReadyAt - st.gameTime);
+    const remain = Math.max(0, st.tackleReadyAt - st.gameTime);
     $('cntFist').textContent = remain > 0 ? Math.ceil(remain / 1000) + 's' : 'OK';
     $('slotFist').classList.toggle('dim', remain > 0);
   }
@@ -493,17 +513,19 @@ function render() {
     ctx.setTransform(dpr * sc, 0, 0, dpr * sc, dpr * (cw / 2 - (st.cam.x + shx) * sc), dpr * (ch / 2 - (st.cam.y + shy) * sc));
     ctx.imageSmoothingEnabled = false;
     const m = st.m, th = st.theme;
-    const x0 = Math.max(0, ((st.cam.x - cw / 2 / sc) / T | 0) - 1), x1 = Math.min(m.bw - 1, ((st.cam.x + cw / 2 / sc) / T | 0) + 1);
-    const y0 = Math.max(0, ((st.cam.y - ch / 2 / sc) / T | 0) - 2), y1 = Math.min(m.bh - 1, ((st.cam.y + ch / 2 / sc) / T | 0) + 2);
+    const x0 = clamp(2 * Math.floor((st.cam.x - cw / 2 / sc) / P) - 1, 0, m.bw - 1);
+    const x1 = clamp(2 * Math.ceil((st.cam.x + cw / 2 / sc) / P) + 1, 0, m.bw - 1);
+    const y0 = clamp(2 * Math.floor((st.cam.y - ch / 2 / sc) / P) - 2, 0, m.bh - 1);
+    const y1 = clamp(2 * Math.ceil((st.cam.y + ch / 2 / sc) / P) + 2, 0, m.bh - 1);
     // 床
     for (let by = y0; by <= y1; by++) for (let bx = x0; bx <= x1; bx++) {
       if (m.g[by * m.bw + bx] !== 0) continue;
       ctx.fillStyle = ((bx + by) & 1) ? th.floor : th.floor2;
-      ctx.fillRect(bx * T, by * T, T, T);
+      ctx.fillRect(bPos(bx), bPos(by), bSize(bx), bSize(by));
     }
     drawPlan(st);
     // 行ごとに 壁→エンティティ（2.5D風の前後関係）
-    const charRow = clamp((st.char.y / T) | 0, 0, m.bh - 1);
+    const charRow = clamp(rowAt(st.char.y), 0, m.bh - 1);
     const goalRow = 2 * (m.h - 1) + 1;
     for (let by = y0; by <= y1; by++) {
       for (let bx = x0; bx <= x1; bx++) {
@@ -535,54 +557,57 @@ function render() {
   }
 }
 function drawWallBlock(st, bx, by, v) {
-  const m = st.m, th = st.theme, x = bx * T, y = by * T;
+  const m = st.m, th = st.theme;
+  const x = bPos(bx), y = bPos(by), w = bSize(bx), h = bSize(by);
   const below = (by + 1 < m.bh) ? m.g[(by + 1) * m.bw + bx] : 0;
   if (below === 0) { // 壁の側面（前面）が見える
     ctx.fillStyle = (v === 2) ? th.front2 : th.front;
-    ctx.fillRect(x, y + T - WH, T, WH);
+    ctx.fillRect(x, y + h - WH, w, WH);
     ctx.fillStyle = th.line;
-    ctx.fillRect(x, y + T - WH + ((WH / 2) | 0), T, 1);
-    ctx.fillRect(x + ((bx & 1) ? (T >> 2) : (3 * T >> 2)), y + T - WH, 1, (WH / 2) | 0);
+    ctx.fillRect(x, y + h - WH + ((WH / 2) | 0), w, 1);
+    ctx.fillRect(x + ((bx & 1) ? (w >> 2) : (3 * w >> 2)), y + h - WH, 1, (WH / 2) | 0);
   }
   ctx.fillStyle = (v === 2) ? th.top2 : th.top;
-  ctx.fillRect(x, y - WH, T, T);
+  ctx.fillRect(x, y - WH, w, h);
   ctx.strokeStyle = th.line; ctx.lineWidth = 1;
-  ctx.strokeRect(x + 0.5, y - WH + 0.5, T - 1, T - 1);
+  ctx.strokeRect(x + 0.5, y - WH + 0.5, w - 1, h - 1);
   const cutA = st.cuts.active;
   if (cutA && cutA.kind === 'break' && cutA.data.wi === by * m.bw + bx) {
-    drawCracks(x, y - WH, Math.min(3, 1 + ((cutA.t / 650) | 0)));
+    drawCracks(x, y - WH, w, h + WH, cutA.data.hitsDone || 1);
   }
   const lv = st.ladders[by * m.bw + bx];
-  if (lv) drawLadder(x, y - WH, lv - 1);
+  if (lv) drawLadder(bx, by, lv - 1);
 }
-function drawCracks(x, y, lvl) {
+function drawCracks(x, y, w, h, lvl) {
   ctx.strokeStyle = 'rgba(0,0,0,0.55)'; ctx.lineWidth = 1.5;
   ctx.beginPath();
-  ctx.moveTo(x + T * 0.5, y + T * 0.15); ctx.lineTo(x + T * 0.35, y + T * 0.45); ctx.lineTo(x + T * 0.55, y + T * 0.6);
+  ctx.moveTo(x + w * 0.5, y + h * 0.15); ctx.lineTo(x + w * 0.35, y + h * 0.45); ctx.lineTo(x + w * 0.55, y + h * 0.6);
   if (lvl >= 2) {
-    ctx.moveTo(x + T * 0.35, y + T * 0.45); ctx.lineTo(x + T * 0.15, y + T * 0.7);
-    ctx.moveTo(x + T * 0.55, y + T * 0.6); ctx.lineTo(x + T * 0.75, y + T * 0.85);
+    ctx.moveTo(x + w * 0.35, y + h * 0.45); ctx.lineTo(x + w * 0.15, y + h * 0.7);
+    ctx.moveTo(x + w * 0.55, y + h * 0.6); ctx.lineTo(x + w * 0.75, y + h * 0.85);
   }
   if (lvl >= 3) {
-    ctx.moveTo(x + T * 0.5, y + T * 0.15); ctx.lineTo(x + T * 0.72, y + T * 0.35);
-    ctx.moveTo(x + T * 0.15, y + T * 0.7); ctx.lineTo(x + T * 0.3, y + T * 0.9);
+    ctx.moveTo(x + w * 0.5, y + h * 0.15); ctx.lineTo(x + w * 0.72, y + h * 0.35);
+    ctx.moveTo(x + w * 0.15, y + h * 0.7); ctx.lineTo(x + w * 0.3, y + h * 0.9);
   }
   ctx.stroke();
 }
-function drawLadder(x, y, d) {
+function drawLadder(bx, by, d) {
+  // 壁の上面に、渡す方向へ少しはみ出して描く（薄い壁でも見やすい）
+  const x = bPos(bx), y = bPos(by) - WH, w = bSize(bx), h = bSize(by);
+  const cx = x + w / 2, cy = y + h / 2;
   ctx.fillStyle = '#a9743f';
-  const horiz = (d === 1 || d === 3);
-  if (horiz) {
-    ctx.fillRect(x + 3, y + T * 0.3, T - 6, 3); ctx.fillRect(x + 3, y + T * 0.62, T - 6, 3);
-    for (let i = 0; i < 3; i++) ctx.fillRect(x + 6 + i * ((T - 12) / 2), y + T * 0.3, 3, T * 0.32 + 3);
-  } else {
-    ctx.fillRect(x + T * 0.3, y + 3, 3, T - 6); ctx.fillRect(x + T * 0.62, y + 3, 3, T - 6);
-    for (let i = 0; i < 3; i++) ctx.fillRect(x + T * 0.3, y + 6 + i * ((T - 12) / 2), T * 0.32 + 3, 3);
+  if (d === 1 || d === 3) { // よこ向きに渡す
+    ctx.fillRect(x - 4, cy - 6, w + 8, 3); ctx.fillRect(x - 4, cy + 3, w + 8, 3);
+    for (let i = 0; i < 3; i++) ctx.fillRect(x - 3 + i * ((w + 3) / 2), cy - 6, 3, 12);
+  } else { // たて向きに渡す
+    ctx.fillRect(cx - 6, y - 4, 3, h + 8); ctx.fillRect(cx + 3, y - 4, 3, h + 8);
+    for (let i = 0; i < 3; i++) ctx.fillRect(cx - 6, y - 3 + i * ((h + 3) / 2), 12, 3);
   }
   // 通れる方向の矢印
   ctx.fillStyle = 'rgba(255,255,255,0.9)';
   ctx.beginPath();
-  const cx = x + T / 2, cy = y + T / 2, a = 6;
+  const a = 5;
   if (d === 0) { ctx.moveTo(cx, cy - a); ctx.lineTo(cx - a, cy + a); ctx.lineTo(cx + a, cy + a); }
   if (d === 2) { ctx.moveTo(cx, cy + a); ctx.lineTo(cx - a, cy - a); ctx.lineTo(cx + a, cy - a); }
   if (d === 1) { ctx.moveTo(cx + a, cy); ctx.lineTo(cx - a, cy - a); ctx.lineTo(cx - a, cy + a); }
@@ -629,18 +654,31 @@ function drawChar(st) {
   const c = st.char;
   const set = SPR[S.save.gender];
   const key = c.dir === 0 ? 'up' : c.dir === 1 ? 'right' : c.dir === 3 ? 'left' : 'down';
-  const img = set[key][c.moving ? c.frame : 0];
-  ctx.drawImage(img, Math.round(c.x - 10), Math.round(c.y + T * 0.4 - 28), 20, 28);
+  let frame = c.moving ? c.frame : 0;
+  let ox = 0, oy = 0;
+  const cutA = st.cuts.active;
+  if (cutA && cutA.kind === 'break' && cutA.data.via === 'tackle') {
+    // 体当たり：壁に向かって突進→跳ね返るを繰り返す
+    const cyc = (cutA.t % 700) / 700;
+    const lunge = cyc < 0.4 ? (cyc / 0.4) : Math.max(0, 1 - (cyc - 0.4) / 0.35);
+    const amp = lunge * (H + T * 0.2);
+    ox = L.DX[cutA.data.d] * amp;
+    oy = L.DY[cutA.data.d] * amp;
+    frame = 1; // 走りポーズ
+  }
+  ctx.drawImage(set[key][frame], Math.round(c.x - 10 + ox), Math.round(c.y + T * 0.4 - 28 + oy), 20, 28);
 }
 function drawTargets(st) {
   if (!S.targetMode) return;
   const pulse = 0.5 + 0.5 * Math.sin(performance.now() / 180);
   for (const c of candidates()) {
+    const x = bPos(c.bx), y = bPos(c.by) - WH;
+    const w = bSize(c.bx), h = bSize(c.by) + WH;
     ctx.strokeStyle = 'rgba(255,220,80,' + (0.45 + 0.5 * pulse).toFixed(3) + ')';
     ctx.lineWidth = 2.5;
-    ctx.strokeRect(c.bx * T + 1.5, c.by * T - WH + 1.5, T - 3, T + WH - 3);
+    ctx.strokeRect(x + 1, y + 1, w - 2, h - 2);
     ctx.fillStyle = 'rgba(255,220,80,' + (0.12 + 0.15 * pulse).toFixed(3) + ')';
-    ctx.fillRect(c.bx * T + 1.5, c.by * T - WH + 1.5, T - 3, T + WH - 3);
+    ctx.fillRect(x + 1, y + 1, w - 2, h - 2);
   }
 }
 function drawCutFx(st) {
@@ -648,13 +686,28 @@ function drawCutFx(st) {
   const m = st.m;
   if (c.kind === 'break') {
     const bx = c.data.wi % m.bw, by = (c.data.wi / m.bw) | 0;
-    const swing = Math.sin(c.t / 650 * Math.PI * 2) * 0.9;
-    ctx.save();
-    ctx.translate(bx * T + T * 0.85, by * T - WH - 4);
-    ctx.rotate(-0.6 + swing);
-    ctx.font = ((T * 0.9) | 0) + 'px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.fillText('⛏️', 0, 0);
-    ctx.restore();
+    const wx = bPos(bx) + bSize(bx) / 2, wy = bPos(by) + bSize(by) / 2;
+    if (c.data.via === 'pick') {
+      // つるはし：振り下ろしアニメ
+      const swing = Math.sin(c.t / 650 * Math.PI * 2) * 0.9;
+      ctx.save();
+      ctx.translate(wx + T * 0.35, wy - WH - T * 0.3);
+      ctx.rotate(-0.6 + swing);
+      ctx.font = ((T * 0.9) | 0) + 'px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText('⛏️', 0, 0);
+      ctx.restore();
+    } else {
+      // 体当たり：衝突の瞬間に火花マーク
+      const cyc = (c.t % 700) / 700;
+      if (cyc >= 0.35 && cyc < 0.62) {
+        const k = (cyc - 0.35) / 0.27;
+        ctx.font = ((T * (0.5 + 0.4 * k)) | 0) + 'px serif';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.globalAlpha = 1 - k;
+        ctx.fillText('💥', wx, wy - WH);
+        ctx.globalAlpha = 1;
+      }
+    }
   } else if (c.kind === 'chest' && c.t >= c.data.revealAt) {
     const ri = c.data.ri, rx = ri % m.w, ry = (ri / m.w) | 0;
     const k = (c.t - c.data.revealAt) / (c.dur - c.data.revealAt);
@@ -673,7 +726,7 @@ function drawCutFx(st) {
     const bx = c.data.wi % m.bw, by = (c.data.wi / m.bw) | 0;
     const t = c.t / 900;
     ctx.strokeStyle = 'rgba(255,220,120,' + (1 - t).toFixed(3) + ')'; ctx.lineWidth = 2;
-    ctx.strokeRect(bx * T - 2, by * T - WH - 2, T + 4, T + 4);
+    ctx.strokeRect(bPos(bx) - 4, bPos(by) - WH - 4, bSize(bx) + 8, bSize(by) + WH + 8);
   }
 }
 
@@ -711,7 +764,7 @@ function updateSlots() {
   $('slotDia').classList.toggle('dim', st.counts.diamond <= 0);
   $('slotPick').classList.toggle('sel', S.targetMode === 'pick');
   $('slotLadder').classList.toggle('sel', S.targetMode === 'ladder');
-  $('slotFist').classList.toggle('sel', S.targetMode === 'fist');
+  $('slotFist').classList.toggle('sel', S.targetMode === 'tackle');
   $('slotFist').classList.toggle('hidden', effPassive() !== 'm');
 }
 function showScreen(name) {
@@ -727,12 +780,14 @@ function showScreen(name) {
 function refreshTitle() {
   const lv = L.levelFor(S.save.exp);
   $('lvNum').textContent = lv;
-  const curBase = L.LV_EXP[lv - 1];
-  const next = (lv < L.LV_EXP.length) ? L.LV_EXP[lv] : null;
+  const curBase = L.lvCum(lv);
+  const next = (lv < L.MAX_LV) ? L.lvCum(lv + 1) : null;
   $('expFill').style.width = next ? Math.min(100, 100 * (S.save.exp - curBase) / (next - curBase)) + '%' : '100%';
-  $('expTxt').textContent = next ? ('EXP ' + S.save.exp + ' / ' + next) : ('EXP ' + S.save.exp + '（LV10たいは こうかいよてい）');
-  const pk = effPassive(), P = L.PASSIVE[pk], r = L.passiveRank(lv);
-  $('passiveNow').textContent = 'パッシブ: ' + P.icon + P.name + (pk === 'm' ? '（CT ' + P.ct[r] + 'びょう）' : '（EXP ×' + P.mult[r] + '）');
+  $('expTxt').textContent = next ? ('EXP ' + S.save.exp + ' / ' + next) : ('EXP ' + S.save.exp + '（LV99 カンスト！）');
+  const pk = effPassive(), PS = L.PASSIVE[pk];
+  $('passiveNow').textContent = 'パッシブ: ' + PS.icon + PS.name + (pk === 'm'
+    ? '（CT ' + L.tackleCT(lv) + 'びょう）'
+    : '（🪙×' + L.coinFactor(lv, true).toFixed(3) + '・💎×' + L.diaFactor(lv, true).toFixed(3) + '）');
   $('pickBlue').classList.toggle('sel', S.save.gender === 'm');
   $('pickRed').classList.toggle('sel', S.save.gender === 'f');
   $('btnSkill').textContent = lv >= 5 ? '⚙ スキル' : '⚙ スキル（LV5でせんたく）';
@@ -754,16 +809,18 @@ function buildDiffList() {
   });
 }
 function buildSkillCards() {
-  const lv = L.levelFor(S.save.exp), r = L.passiveRank(lv);
+  const lv = L.levelFor(S.save.exp);
   const el = $('skillCards'); el.innerHTML = '';
   ['m', 'f'].forEach(k => {
-    const P = L.PASSIVE[k];
+    const PS = L.PASSIVE[k];
     const unlocked = (k === S.save.gender) || lv >= 5; // LV5で異性のパッシブも習得（平等化）
     const seld = effPassive() === k;
     const card = document.createElement('button');
     card.className = 'skillCard' + (seld ? ' sel' : '') + (unlocked ? '' : ' locked');
-    const val = k === 'm' ? ('クールタイム ' + P.ct[r] + 'びょう') : ('EXP ×' + P.mult[r]);
-    card.innerHTML = '<b>' + P.icon + ' ' + P.name + '</b><span>' + P.desc + '</span><span class="val">' + val + '</span>'
+    const val = k === 'm'
+      ? ('クールタイム ' + L.tackleCT(lv) + 'びょう（LV99で10.5びょう）')
+      : ('🪙×' + L.coinFactor(lv, true).toFixed(3) + '・💎×' + L.diaFactor(lv, true).toFixed(3) + '（LVで強化）');
+    card.innerHTML = '<b>' + PS.icon + ' ' + PS.name + '</b><span>' + PS.desc + '</span><span class="val">' + val + '</span>'
       + (unlocked ? (seld ? '<span class="tag">✅ セットちゅう</span>' : '<span class="tag"> </span>') : '<span class="tag">🔒 LV5で かいほう</span>');
     card.onclick = () => {
       if (!unlocked) { toast('LV5に なると えらべるよ'); Snd.sfx('nope'); return; }
@@ -814,12 +871,12 @@ function attachUI() {
   };
   $('slotFist').onclick = () => {
     if (!playActive()) return;
-    if (S.targetMode === 'fist') { setTarget(null); return; }
-    desc(DESCS.fist);
+    if (S.targetMode === 'tackle') { setTarget(null); return; }
+    desc(DESCS.tackle);
     const st = S.stage;
-    const remain = st.fistReadyAt - st.gameTime;
+    const remain = st.tackleReadyAt - st.gameTime;
     if (remain > 0) { toast('クールタイム あと' + Math.ceil(remain / 1000) + 'びょう'); Snd.sfx('nope'); return; }
-    Snd.sfx('tap'); setTarget('fist');
+    Snd.sfx('tap'); setTarget('tackle');
   };
   $('slotCoin').onclick = () => { desc(DESCS.coin); Snd.sfx('tap'); };
   $('slotDia').onclick = () => { desc(DESCS.diamond); Snd.sfx('tap'); };
@@ -870,5 +927,6 @@ window.DM = {
     return seg.length;
   },
   skip: () => S.stage && S.stage.cuts.skip(),
+  setTarget, tryTargetTap, candidates, bPos, bSize,
 };
 })();

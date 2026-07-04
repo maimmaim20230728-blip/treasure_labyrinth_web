@@ -120,7 +120,8 @@ const DIFFS = [
   { name: '難し過ぎる',   w: 24, h: 19, chestLo: 6, chestHi: 6, margin: 1.8,  flat: 2, exp: 410 },
   { name: '最高難易度',   w: 30, h: 24, chestLo: 8, chestHi: 8, margin: 1.7,  flat: 0, exp: 520 },
 ];
-const CHAR_SPEED = 6; // マス/秒（キビキビ走る速度）
+const CHAR_SPEED = 4;      // マス/秒（キビキビ・でも見て追える速度）
+const TRACE_DELAY_MS = 500; // なぞりから追従までの遅れ
 
 function targetSeconds(diff, pathLen) {
   return Math.ceil(pathLen / CHAR_SPEED * diff.margin + diff.flat);
@@ -135,9 +136,12 @@ function rollChest(rnd) { return CHEST_ITEMS[(((rnd || Math.random)()) * 5) | 0]
 const ITEM_CAPS = { pick: 2, ladder: 3, coin: 5, diamond: 5 };
 
 /* ---- 複利タイム短縮 ----
-   コイン1枚=最終TIME×0.90、ダイヤ1個=×0.85 を所持数ぶん複利で適用 */
-function finalTimeMs(rawMs, coins, diamonds) {
-  return rawMs * Math.pow(0.90, coins) * Math.pow(0.85, diamonds);
+   コイン1枚=最終TIME×0.90、ダイヤ1個=×0.85 を所持数ぶん複利で適用。
+   女性パッシブ「おたからマスター」有効時は係数がレベル×0.005ぶん強くなる */
+function finalTimeMs(rawMs, coins, diamonds, coinF, diaF) {
+  if (coinF == null) coinF = 0.90;
+  if (diaF == null) diaF = 0.85;
+  return rawMs * Math.pow(coinF, coins) * Math.pow(diaF, diamonds);
 }
 
 /* ---- ステージタイマー（演出中は停止） ---- */
@@ -163,21 +167,30 @@ class CutsceneCtrl {
   _finish() { const c = this.cur; this.cur = null; this.timer.resume(); if (c.onEnd) c.onEnd(c); }
 }
 
-/* ---- レベルとパッシブ（LV5まで暫定・LV10帯は将来拡張） ---- */
-const LV_EXP = [0, 120, 300, 560, 900]; // 累計EXP: LV1..LV5
-function levelFor(exp) { let lv = 1; for (let i = 1; i < LV_EXP.length; i++) if (exp >= LV_EXP[i]) lv = i + 1; return lv; }
+/* ---- レベルとパッシブ（LV99カンスト） ---- */
+const MAX_LV = 99;
+/* LVnに到達するのに必要な累計EXP（LV2=120、以降なだらかに増加） */
+function lvCum(n) { return 120 * (n - 1) + 10 * (n - 1) * (n - 2); }
+function levelFor(exp) { let lv = 1; while (lv < MAX_LV && exp >= lvCum(lv + 1)) lv++; return lv; }
 const PASSIVE = {
-  m: { icon: '👊', name: 'かべパンチ',   desc: 'つるはし無しで かべを こわせる（クールタイムあり）', ct: [90, 70, 50, 35] },
-  f: { icon: '✨', name: 'しゅうちゅう', desc: 'クリアで もらえるEXPが ふえる',                     mult: [1.5, 1.6, 1.8, 2.0] },
+  m: { icon: '💥', name: 'たいあたり',       desc: 'つるはし無しで 体当たりで かべを こわせる（クールタイムあり）' },
+  f: { icon: '✨', name: 'おたからマスター', desc: 'コインとダイヤの タイムカットが つよくなる' },
 };
-function passiveRank(level) { return Math.min(level, 4) - 1; } // 0..3
+/* 体当たりCT：LV1=60秒→1LVごとに-0.5秒→LV99カンストで10.5秒 */
+function tackleCT(level) {
+  if (level >= MAX_LV) return 10.5;
+  return Math.max(10.5, 60 - 0.5 * (level - 1));
+}
+/* おたからマスター：LV×0.005ずつ係数が下がる（＝カットが強くなる） */
+function coinFactor(level, isF) { return isF ? 0.90 - 0.005 * Math.min(level, MAX_LV) : 0.90; }
+function diaFactor(level, isF)  { return isF ? 0.85 - 0.005 * Math.min(level, MAX_LV) : 0.85; }
 
 const api = {
   DX, DY, mulberry32, generate, wallIndex, canPass, shortestPath, bfsLimited,
-  DIFFS, CHAR_SPEED, targetSeconds, chestCount,
+  DIFFS, CHAR_SPEED, TRACE_DELAY_MS, targetSeconds, chestCount,
   CHEST_ITEMS, rollChest, ITEM_CAPS, finalTimeMs,
   StageTimer, CutsceneCtrl,
-  LV_EXP, levelFor, PASSIVE, passiveRank,
+  MAX_LV, lvCum, levelFor, PASSIVE, tackleCT, coinFactor, diaFactor,
 };
 if (typeof module !== 'undefined' && module.exports) module.exports = api;
 else root.Logic = api;
