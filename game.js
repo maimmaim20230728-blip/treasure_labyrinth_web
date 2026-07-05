@@ -330,7 +330,7 @@ function startStage(di) {
   updateSlots(); descDefault();
   $('diffName').textContent = t('diffs')[di];
   $('timeTarget').textContent = t('target') + ' ' + fmt(st.targetMs);
-  toast('～ ' + t('themes')[st.themeIdx] + ' ～');
+  showStageName(t('themes')[st.themeIdx]); // 画面中央に大きく→ゆっくりフェード
   Snd.bgm(THEME_BGM[st.themeIdx]); // 迷宮の雰囲気に合ったBGM
 }
 
@@ -357,7 +357,7 @@ function handleTracePoint(e) {
     if (prev && rx === prev.rx && ry === prev.ry) { st.plan.pop(); return; }
   }
   // 壁は越えられない（少しの指飛びだけ最短4歩まで補間）
-  const seg = L.bfsLimited(st.m, last.rx, last.ry, rx, ry, 4, st.ladders);
+  const seg = L.bfsLimited(st.m, last.rx, last.ry, rx, ry, 10, st.ladders); // 10マス先タップでも追尾
   if (seg && seg.length) for (const p of seg) st.plan.push({ rx: p[0], ry: p[1], t: st.gameTime });
 }
 function moveChar(dt) {
@@ -601,43 +601,50 @@ function doClear() {
   const coinF = L.coinFactor(st.lv, isF), diaF = L.diaFactor(st.lv, isF);
   const fin = L.finalTimeMs(raw, st.counts.coin, st.counts.diamond, coinF, diaF);
   const ok = fin <= st.targetMs;
-  const mult = L.expMultiplier(fin, st.targetMs); // 目標の何割以内かでEXP倍率が上がる
-  const e = Math.round(st.diff.exp * mult);
+  const isUlt = st.diffIdx === L.DIFFS.length - 1;
+  const rew = L.expReward(st.diff.exp, fin, st.targetMs, isUlt); // {exp, mult, fixed}
+  const e = rew.exp;
   S.save.exp += e; S.save.badges[st.diffIdx]++; persist();
   const newLv = L.levelFor(S.save.exp);
+  // レベルアップ演出はクリア結果を閉じてから（同時だと見にくいので分離）
+  S.pendingLevelUp = (newLv > prevLv) ? { prevLv, newLv } : null;
   setTimeout(() => {
     if (ok) { Snd.sfx('fanfare'); Snd.bgm('clearBig'); spawnConfetti(150); } // 盛大に祝う
     else    { Snd.sfx('clearSoft'); Snd.bgm('clearSoft'); spawnConfetti(25); } // ひかえめ
-    buildClearOverlay(raw, fin, ok, e, newLv, coinF, diaF, mult);
+    buildClearOverlay(raw, fin, ok, e, newLv, coinF, diaF, rew);
     showScreen('clear');
-    if (newLv > prevLv) {
-      showLvup(newLv); Snd.sfx('levelup');
-      if (newLv >= 5 && prevLv < 5) setTimeout(() => toast(t('skillFree')), 1900);
-      // 新スキル習得・スロット増加の告知
-      const learned = L.SKILLS.filter(sk => prevLv < sk.lv && newLv >= sk.lv);
-      learned.forEach((sk, i) => setTimeout(() => toast(tf('newSkill', { s: sk.icon + SKILL_INFO[sk.id].name })), 2600 + i * 1900));
-      if ([10, 20, 30, 40, 50].some(b => prevLv < b && newLv >= b)) {
-        setTimeout(() => toast(tf('slotsUp', { n: L.slotCount(newLv) })), 2600 + learned.length * 1900);
-      }
-    }
     // 🎉最高難易度クリア or LV99到達 → コングラチュレーション大演出
-    const gotMax = st.diffIdx === L.DIFFS.length - 1;
     const gotLv99 = newLv >= 99 && prevLv < 99;
-    if (gotMax || gotLv99) setTimeout(() => showCongrats(gotMax, gotLv99), 1100);
+    if (isUlt || gotLv99) setTimeout(() => showCongrats(isUlt, gotLv99), 1100);
   }, 650);
 }
-function buildClearOverlay(raw, fin, ok, e, lv, coinF, diaF, mult) {
+/* クリア結果を閉じたあとにレベルアップ演出を再生（分離表示） */
+function playPendingLevelUp() {
+  const p = S.pendingLevelUp; if (!p) return;
+  S.pendingLevelUp = null;
+  showLvup(p.newLv); Snd.sfx('levelup');
+  if (p.newLv >= 5 && p.prevLv < 5) setTimeout(() => toast(t('skillFree')), 1300);
+  const learned = L.SKILLS.filter(sk => p.prevLv < sk.lv && p.newLv >= sk.lv);
+  learned.forEach((sk, i) => setTimeout(() => toast(tf('newSkill', { s: sk.icon + SKILL_INFO[sk.id].name })), 2000 + i * 1900));
+  if ([10, 20, 30, 40, 50].some(b => p.prevLv < b && p.newLv >= b)) {
+    setTimeout(() => toast(tf('slotsUp', { n: L.slotCount(p.newLv) })), 2000 + learned.length * 1900);
+  }
+}
+function buildClearOverlay(raw, fin, ok, e, lv, coinF, diaF, rew) {
   const st = S.stage, c = st.counts;
   $('clearTitle').textContent = ok ? t('clearBig') : t('clearSoft');
-  let html = '<div class="crow">' + t('mazeTime') + ' <b>' + fmt(raw) + '</b></div>';
+  // クリアした迷宮のなまえ（○○の迷宮）
+  let html = '<div class="crow cmaze">～ ' + t('themes')[st.themeIdx] + ' ～</div>';
+  html += '<div class="crow">' + t('mazeTime') + ' <b>' + fmt(raw) + '</b></div>';
   if (c.coin) html += '<div class="crow">🪙×' + c.coin + '　×' + Math.pow(coinF, c.coin).toFixed(3) + ' ' + t('compound') + '</div>';
   if (c.diamond) html += '<div class="crow">💎×' + c.diamond + '　×' + Math.pow(diaF, c.diamond).toFixed(3) + ' ' + t('compound') + '</div>';
   html += '<div class="crow cbig">' + t('finalTime') + ' <b>' + fmt(fin) + '</b></div>';
   html += '<div class="crow">' + t('goalTime') + ' ' + fmt(st.targetMs) + '　' + (ok ? t('achieved') : t('challenge')) + '</div>';
-  // 目標達成時は「目標タイムの◯%＝EXP×N」を大きく強調
+  // 目標達成時は「目標タイムの◯%＝EXP×N（固定EXPなら🏆）」を大きく強調
   if (ok) {
     const pct = Math.max(1, Math.round(fin / st.targetMs * 100));
-    html += '<div class="crow cbig">' + pct + '% → EXP ×' + mult + '</div>';
+    const tag = rew.fixed ? '🏆 スペシャル' : 'EXP ×' + rew.mult;
+    html += '<div class="crow cbig">' + pct + '% → ' + tag + '</div>';
   }
   html += '<div class="crow">EXP <b>+' + e + '</b>　(LV ' + lv + ')</div>';
   $('clearBody').innerHTML = html;
@@ -1367,6 +1374,12 @@ function showLvup(lv) {
   el.classList.remove('pop'); void el.offsetWidth;
   el.classList.add('pop');
 }
+function showStageName(name) { // 画面中央に大きく出してゆっくりフェードアウト
+  const el = $('stagename');
+  el.textContent = name;
+  el.classList.remove('show'); void el.offsetWidth;
+  el.classList.add('show');
+}
 function updateSlots() {
   const st = S.stage; if (!st) return;
   $('cntPick').textContent = '×' + st.counts.pick + (st.pickCharges > 0 ? '+' + st.pickCharges : '');
@@ -1558,8 +1571,8 @@ function attachUI() {
     if (Date.now() - quitArm < 2000) { S.stage = null; quitArm = 0; showScreen('diff'); }
     else { quitArm = Date.now(); toast(t('quit')); }
   };
-  $('btnRetry').onclick = () => { Snd.sfx('tap'); startStage(S.stage.diffIdx); };
-  $('btnNext').onclick = () => { Snd.sfx('tap'); S.stage = null; showScreen('diff'); };
+  $('btnRetry').onclick = () => { Snd.sfx('tap'); const p = S.pendingLevelUp; startStage(S.stage.diffIdx); S.pendingLevelUp = p; playPendingLevelUp(); };
+  $('btnNext').onclick = () => { Snd.sfx('tap'); S.stage = null; showScreen('diff'); playPendingLevelUp(); };
   // アイテムスロット
   $('slotPick').onclick = () => {
     if (!playActive()) return;

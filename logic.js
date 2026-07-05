@@ -136,16 +136,33 @@ function chestCount(diff, rnd) {
 /* ---- 取得EXP倍率 ----
    最終タイムが目標タイムの何割以内かで倍率を上げる。
    未達成(>10割)=×1 / 10割以内=×1.5 / 8割=×2 / 6割=×3 / 4割=×5 / 2割=×7 / 1割以内=×10 */
-function expMultiplier(finMs, targetMs) {
-  if (targetMs <= 0) return 1;
+/* 取得EXP。返り値 { exp, mult, fixed }
+   通常難易度：目標比で ×1.5/×2/×3/×5/×7/×11/×20/×30 と段階化。
+   最高難易度(isUlt)：9割/2割/0.5割は固定EXP(1350/10050/30010)、他は同じ倍率。 */
+function expReward(baseExp, finMs, targetMs, isUlt) {
+  const M = m => ({ exp: Math.round(baseExp * m), mult: m, fixed: false });
+  const F = v => ({ exp: v, mult: null, fixed: true });
+  if (targetMs <= 0 || finMs > targetMs) return M(1); // 目標未達成 ×1
   const r = finMs / targetMs;
-  if (r > 1)   return 1;   // 目標未達成
-  if (r <= 0.1) return 10;
-  if (r <= 0.2) return 7;
-  if (r <= 0.4) return 5;
-  if (r <= 0.6) return 3;
-  if (r <= 0.8) return 2;
-  return 1.5;              // 10割以内（達成）
+  if (isUlt) {
+    if (r <= 0.05) return F(30010); // 0.5割以内
+    if (r <= 0.1)  return M(20);    // 1割
+    if (r <= 0.2)  return F(10050); // 2割
+    if (r <= 0.3)  return M(7);     // 3割
+    if (r <= 0.4)  return M(5);     // 4割
+    if (r <= 0.6)  return M(3);     // 6割
+    if (r <= 0.8)  return M(2);     // 8割
+    if (r <= 0.9)  return F(1350);  // 9割（最高難易度のみ）
+    return M(1.5);                  // 10割
+  }
+  if (r <= 0.05) return M(30); // 0.5割以内
+  if (r <= 0.1)  return M(20); // 1割
+  if (r <= 0.2)  return M(11); // 2割
+  if (r <= 0.3)  return M(7);  // 3割
+  if (r <= 0.4)  return M(5);  // 4割
+  if (r <= 0.6)  return M(3);  // 6割
+  if (r <= 0.8)  return M(2);  // 8割
+  return M(1.5);               // 10割以内（達成）
 }
 
 /* ---- 宝箱抽選（5種 均等20%） ---- */
@@ -293,7 +310,7 @@ function skillAcquired(id, level, gender) {
 
 const api = {
   DX, DY, mulberry32, generate, wallIndex, canPass, shortestPath, bfsLimited,
-  DIFFS, CHAR_SPEED, TRACE_DELAY_MS, targetSeconds, chestCount, expMultiplier,
+  DIFFS, CHAR_SPEED, TRACE_DELAY_MS, targetSeconds, chestCount, expReward,
   CHEST_ITEMS, rollChest, ITEM_CAPS, finalTimeMs,
   StageTimer, CutsceneCtrl,
   MAX_LV, lvCum, levelFor, PASSIVE, tackleCT, coinFactor, diaFactor,

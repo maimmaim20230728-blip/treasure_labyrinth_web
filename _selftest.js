@@ -145,20 +145,42 @@ console.log('2) つるはし+ハシゴ乱用でも詰み無し: 済');
   console.log('5b) 追加スキル③〜⑩+装備スロット: 済');
 }
 
-// 5c) 取得EXP倍率（目標タイムの何割以内か）
+// 5c) 取得EXP（目標タイム比・通常難易度）
 {
-  const T = 100000; // 目標10万ms
-  ok(L.expMultiplier(120000, T) === 1, 'EXP倍率: 未達成(>10割)は×1');
-  ok(L.expMultiplier(100000, T) === 1.5, 'EXP倍率: ちょうど10割は×1.5');
-  ok(L.expMultiplier(95000, T) === 1.5, 'EXP倍率: 9.5割は×1.5');
-  ok(L.expMultiplier(80000, T) === 2, 'EXP倍率: 8割は×2');
-  ok(L.expMultiplier(70000, T) === 2, 'EXP倍率: 7割(6割超8割以下)は×2');
-  ok(L.expMultiplier(60000, T) === 3, 'EXP倍率: 6割は×3');
-  ok(L.expMultiplier(40000, T) === 5, 'EXP倍率: 4割は×5');
-  ok(L.expMultiplier(20000, T) === 7, 'EXP倍率: 2割は×7');
-  ok(L.expMultiplier(10000, T) === 10, 'EXP倍率: 1割は×10');
-  ok(L.expMultiplier(5000, T) === 10, 'EXP倍率: 1割未満も×10');
-  console.log('5c) 取得EXP倍率: 済');
+  const T = 100000, B = 100; // 目標10万ms・基礎EXP100
+  const m = (fin) => L.expReward(B, fin, T, false);
+  ok(m(120000).exp === 100 && m(120000).mult === 1, 'EXP: 未達成は×1');
+  ok(m(100000).mult === 1.5, 'EXP: 10割は×1.5');
+  ok(m(80000).mult === 2, 'EXP: 8割は×2');
+  ok(m(70000).mult === 2, 'EXP: 7割は×2');
+  ok(m(60000).mult === 3, 'EXP: 6割は×3');
+  ok(m(40000).mult === 5, 'EXP: 4割は×5');
+  ok(m(30000).mult === 7, 'EXP: 3割は×7');
+  ok(m(20000).mult === 11, 'EXP: 2割は×11');
+  ok(m(10000).mult === 20, 'EXP: 1割は×20');
+  ok(m(5000).mult === 30, 'EXP: 0.5割は×30');
+  console.log('5c) 取得EXP(通常): 済');
+}
+
+// 5d) 最高難易度の特別EXP（9割/2割/0.5割は固定・他は倍率）
+{
+  const T = 100000, B = 700; // 最高難易度の基礎700
+  const u = (fin) => L.expReward(B, fin, T, true);
+  ok(u(120000).exp === 700, 'ULT: 未達成は700');
+  ok(u(95000).mult === 1.5 && u(95000).exp === 1050, 'ULT: 10割は×1.5=1050');
+  ok(u(85000).fixed && u(85000).exp === 1350, 'ULT: 9割は固定1350');
+  ok(u(70000).mult === 2 && u(70000).exp === 1400, 'ULT: 8割は×2=1400');
+  ok(u(50000).mult === 3, 'ULT: 6割は×3');
+  ok(u(35000).mult === 5, 'ULT: 4割は×5');
+  ok(u(25000).mult === 7, 'ULT: 3割は×7');
+  ok(u(15000).fixed && u(15000).exp === 10050, 'ULT: 2割は固定10050');
+  ok(u(8000).mult === 20 && u(8000).exp === 14000, 'ULT: 1割は×20=14000');
+  ok(u(4000).fixed && u(4000).exp === 30010, 'ULT: 0.5割は固定30010');
+  // 速いほど多い（単調増加）
+  const seq = [u(120000), u(95000), u(85000), u(70000), u(50000), u(35000), u(25000), u(15000), u(8000), u(4000)].map(x => x.exp);
+  let mono = true; for (let i = 1; i < seq.length; i++) if (seq[i] <= seq[i - 1]) mono = false;
+  ok(mono, 'ULT: 速いほどEXP増加(単調) ' + seq.join('<'));
+  console.log('5d) 最高難易度の特別EXP: 済');
 }
 
 // 6) 難易度が上がるほど目標タイムの余裕係数が減る（単調性）
