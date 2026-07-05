@@ -133,6 +133,21 @@ function chestCount(diff, rnd) {
   return diff.chestLo + (((rnd || Math.random)() * (diff.chestHi - diff.chestLo + 1)) | 0);
 }
 
+/* ---- 取得EXP倍率 ----
+   最終タイムが目標タイムの何割以内かで倍率を上げる。
+   未達成(>10割)=×1 / 10割以内=×1.5 / 8割=×2 / 6割=×3 / 4割=×5 / 2割=×7 / 1割以内=×10 */
+function expMultiplier(finMs, targetMs) {
+  if (targetMs <= 0) return 1;
+  const r = finMs / targetMs;
+  if (r > 1)   return 1;   // 目標未達成
+  if (r <= 0.1) return 10;
+  if (r <= 0.2) return 7;
+  if (r <= 0.4) return 5;
+  if (r <= 0.6) return 3;
+  if (r <= 0.8) return 2;
+  return 1.5;              // 10割以内（達成）
+}
+
 /* ---- 宝箱抽選（5種 均等20%） ---- */
 const CHEST_ITEMS = ['pick', 'ladder', 'coin', 'diamond', 'empty'];
 function rollChest(rnd) { return CHEST_ITEMS[(((rnd || Math.random)()) * 5) | 0]; }
@@ -278,7 +293,7 @@ function skillAcquired(id, level, gender) {
 
 const api = {
   DX, DY, mulberry32, generate, wallIndex, canPass, shortestPath, bfsLimited,
-  DIFFS, CHAR_SPEED, TRACE_DELAY_MS, targetSeconds, chestCount,
+  DIFFS, CHAR_SPEED, TRACE_DELAY_MS, targetSeconds, chestCount, expMultiplier,
   CHEST_ITEMS, rollChest, ITEM_CAPS, finalTimeMs,
   StageTimer, CutsceneCtrl,
   MAX_LV, lvCum, levelFor, PASSIVE, tackleCT, coinFactor, diaFactor,

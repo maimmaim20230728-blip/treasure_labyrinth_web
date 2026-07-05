@@ -145,6 +145,22 @@ console.log('2) つるはし+ハシゴ乱用でも詰み無し: 済');
   console.log('5b) 追加スキル③〜⑩+装備スロット: 済');
 }
 
+// 5c) 取得EXP倍率（目標タイムの何割以内か）
+{
+  const T = 100000; // 目標10万ms
+  ok(L.expMultiplier(120000, T) === 1, 'EXP倍率: 未達成(>10割)は×1');
+  ok(L.expMultiplier(100000, T) === 1.5, 'EXP倍率: ちょうど10割は×1.5');
+  ok(L.expMultiplier(95000, T) === 1.5, 'EXP倍率: 9.5割は×1.5');
+  ok(L.expMultiplier(80000, T) === 2, 'EXP倍率: 8割は×2');
+  ok(L.expMultiplier(70000, T) === 2, 'EXP倍率: 7割(6割超8割以下)は×2');
+  ok(L.expMultiplier(60000, T) === 3, 'EXP倍率: 6割は×3');
+  ok(L.expMultiplier(40000, T) === 5, 'EXP倍率: 4割は×5');
+  ok(L.expMultiplier(20000, T) === 7, 'EXP倍率: 2割は×7');
+  ok(L.expMultiplier(10000, T) === 10, 'EXP倍率: 1割は×10');
+  ok(L.expMultiplier(5000, T) === 10, 'EXP倍率: 1割未満も×10');
+  console.log('5c) 取得EXP倍率: 済');
+}
+
 // 6) 難易度が上がるほど目標タイムの余裕係数が減る（単調性）
 for (let i = 1; i < L.DIFFS.length; i++) {
   ok(L.DIFFS[i].margin <= L.DIFFS[i - 1].margin, 'margin単調減少');

@@ -601,13 +601,14 @@ function doClear() {
   const coinF = L.coinFactor(st.lv, isF), diaF = L.diaFactor(st.lv, isF);
   const fin = L.finalTimeMs(raw, st.counts.coin, st.counts.diamond, coinF, diaF);
   const ok = fin <= st.targetMs;
-  const e = Math.round(st.diff.exp * (ok ? 1.5 : 1));
+  const mult = L.expMultiplier(fin, st.targetMs); // 目標の何割以内かでEXP倍率が上がる
+  const e = Math.round(st.diff.exp * mult);
   S.save.exp += e; S.save.badges[st.diffIdx]++; persist();
   const newLv = L.levelFor(S.save.exp);
   setTimeout(() => {
     if (ok) { Snd.sfx('fanfare'); Snd.bgm('clearBig'); spawnConfetti(150); } // 盛大に祝う
     else    { Snd.sfx('clearSoft'); Snd.bgm('clearSoft'); spawnConfetti(25); } // ひかえめ
-    buildClearOverlay(raw, fin, ok, e, newLv, coinF, diaF);
+    buildClearOverlay(raw, fin, ok, e, newLv, coinF, diaF, mult);
     showScreen('clear');
     if (newLv > prevLv) {
       showLvup(newLv); Snd.sfx('levelup');
@@ -625,7 +626,7 @@ function doClear() {
     if (gotMax || gotLv99) setTimeout(() => showCongrats(gotMax, gotLv99), 1100);
   }, 650);
 }
-function buildClearOverlay(raw, fin, ok, e, lv, coinF, diaF) {
+function buildClearOverlay(raw, fin, ok, e, lv, coinF, diaF, mult) {
   const st = S.stage, c = st.counts;
   $('clearTitle').textContent = ok ? t('clearBig') : t('clearSoft');
   let html = '<div class="crow">' + t('mazeTime') + ' <b>' + fmt(raw) + '</b></div>';
@@ -633,6 +634,11 @@ function buildClearOverlay(raw, fin, ok, e, lv, coinF, diaF) {
   if (c.diamond) html += '<div class="crow">💎×' + c.diamond + '　×' + Math.pow(diaF, c.diamond).toFixed(3) + ' ' + t('compound') + '</div>';
   html += '<div class="crow cbig">' + t('finalTime') + ' <b>' + fmt(fin) + '</b></div>';
   html += '<div class="crow">' + t('goalTime') + ' ' + fmt(st.targetMs) + '　' + (ok ? t('achieved') : t('challenge')) + '</div>';
+  // 目標達成時は「目標タイムの◯%＝EXP×N」を大きく強調
+  if (ok) {
+    const pct = Math.max(1, Math.round(fin / st.targetMs * 100));
+    html += '<div class="crow cbig">' + pct + '% → EXP ×' + mult + '</div>';
+  }
   html += '<div class="crow">EXP <b>+' + e + '</b>　(LV ' + lv + ')</div>';
   $('clearBody').innerHTML = html;
 }
