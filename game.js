@@ -1506,7 +1506,8 @@ function refreshTitle() {
   const curBase = L.lvCum(lv);
   const next = (lv < L.MAX_LV) ? L.lvCum(lv + 1) : null;
   $('expFill').style.width = next ? Math.min(100, 100 * (S.save.exp - curBase) / (next - curBase)) + '%' : '100%';
-  $('expTxt').textContent = next ? ('EXP ' + S.save.exp + ' / ' + next) : ('EXP ' + S.save.exp + ' ' + t('expMax'));
+  // LV99以降はEXPを530000で打ち止め表示（超過分は やりこみスコア に変換されている設定）
+  $('expTxt').textContent = next ? ('EXP ' + S.save.exp + ' / ' + next) : ('EXP ' + L.EXP_CAP + ' ' + t('expMax'));
   // やりこみスコア（LV99カンスト後・別枠）とトレジャーマスターの金きらきらバッジ
   const score = L.masteryScore(S.save.exp), mBox = $('masteryBox'), mBadge = $('masterBadge');
   if (score > 0) { mBox.classList.remove('hidden'); mBox.textContent = t('masteryScore') + ' ' + score + ' / ' + L.SCORE_MAX; }
