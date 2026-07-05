@@ -151,7 +151,7 @@ function expMultiplier(finMs, targetMs) {
 /* ---- 宝箱抽選（5種 均等20%） ---- */
 const CHEST_ITEMS = ['pick', 'ladder', 'coin', 'diamond', 'empty'];
 function rollChest(rnd) { return CHEST_ITEMS[(((rnd || Math.random)()) * 5) | 0]; }
-const ITEM_CAPS = { pick: 2, ladder: 3, coin: 5, diamond: 5 };
+const ITEM_CAPS = { pick: 3, ladder: 3, coin: 5, diamond: 5 };
 
 /* ---- 複利タイム短縮 ----
    コイン1枚=最終TIME×0.90、ダイヤ1個=×0.85 を所持数ぶん複利で適用。
