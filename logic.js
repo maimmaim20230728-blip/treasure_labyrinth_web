@@ -204,8 +204,28 @@ class CutsceneCtrl {
 
 /* ---- レベルとパッシブ（LV99カンスト） ---- */
 const MAX_LV = 99;
-/* LVnに到達するのに必要な累計EXP（LV2=120、以降なだらかに増加） */
-function lvCum(n) { return 120 * (n - 1) + 10 * (n - 1) * (n - 2); }
+/* LVnに到達するのに必要な累計EXP（3段階）。
+   ①LV1-50 : 従来どおり（LV2=120 … LV50=29400）
+   ②LV51-70: 中段。1レベル毎の増し幅が少しずつ大きくなる（LV70到達=100000）
+   ③LV71-99: 終盤。増し幅をさらに急にする＝②より上がりにくい（LV99到達=ちょうど530000）
+   各段は「1レベル毎の必要EXP(Δ)が段ごとに大きくなる」ので、②<③で上がりにくさが段階的に増す。 */
+const LVCUM_M70 = 100000; // LV70到達の累計EXP（②と③の境界）
+function lvCum(n) {
+  const base = 120 * (n - 1) + 10 * (n - 1) * (n - 2);
+  if (n <= 50) return base;
+  const tri = k => k * (k + 1) / 2;
+  const C50 = 29400, D50 = 1080;                       // LV50=29400、LV50到達時のΔ=1080
+  const s2 = (LVCUM_M70 - C50 - 20 * D50) / tri(20);   // ②51-70の増し幅の伸び
+  if (n <= 70) return Math.round(C50 + (n - 50) * D50 + s2 * tri(n - 50));
+  const D70 = D50 + 20 * s2;                            // LV70到達時のΔ
+  const s3 = (530000 - LVCUM_M70 - 29 * D70) / tri(29); // ③71-99の増し幅の伸び（s3>s2＝より急）
+  return Math.round(LVCUM_M70 + (n - 70) * D70 + s3 * tri(n - 70));
+}
+/* LV99到達=530000でレベルEXPは打ち止め。超過分は「やりこみスコア」として別枠で貯まる（最大999999）。 */
+const EXP_CAP = 530000;                     // = lvCum(99)。ここまででLV99カンスト
+const SCORE_MAX = 999999;                   // やりこみスコアの上限
+const EXP_TOTAL_MAX = EXP_CAP + SCORE_MAX;  // 累計EXPの実質上限（1529999）
+function masteryScore(exp) { return Math.max(0, Math.min(SCORE_MAX, exp - EXP_CAP)); }
 function levelFor(exp) { let lv = 1; while (lv < MAX_LV && exp >= lvCum(lv + 1)) lv++; return lv; }
 const PASSIVE = {
   m: { icon: '💥', name: 'たいあたり',       desc: 'つるはし無しで 体当たりで かべを こわせる（クールタイムあり）' },
@@ -215,9 +235,9 @@ const PASSIVE = {
 function tackleCT(level) {
   return Math.max(11, 60 - 0.5 * (Math.min(level, MAX_LV) - 1));
 }
-/* おたからマスター：LV×0.005ずつ係数が下がる（＝カットが強くなる） */
-function coinFactor(level, isF) { return isF ? 0.90 - 0.005 * Math.min(level, MAX_LV) : 0.90; }
-function diaFactor(level, isF)  { return isF ? 0.85 - 0.005 * Math.min(level, MAX_LV) : 0.85; }
+/* おたからマスター：LV×0.003ずつ係数が下がる（＝カットが強くなる） */
+function coinFactor(level, isF) { return isF ? 0.90 - 0.003 * Math.min(level, MAX_LV) : 0.90; }
+function diaFactor(level, isF)  { return isF ? 0.85 - 0.003 * Math.min(level, MAX_LV) : 0.85; }
 
 /* ---- 追加パッシブスキル（③〜⑩・レベルで自動取得） ---- */
 const SKILLS = [
@@ -230,10 +250,10 @@ const SKILLS = [
   { id: 'hansel', lv: 20, icon: '🍞' }, // ⑨ヘンゼル
   { id: 'clone',  lv: 20, icon: '👥' }, // ⑩分身の術
 ];
-/* ③装備中は4マス/秒。LV10から5レベルごとに+1
+/* ③装備中は4マス/秒。LV5から5レベルごとに+0.5マス（LV99=13マス/秒）
    （習得可否はskillAcquired側で判定。中性キャラはLV1から使える） */
 function speedCells(level) {
-  return 4 + Math.floor(Math.max(0, Math.min(level, MAX_LV) - 5) / 5);
+  return 4 + 0.5 * Math.floor(Math.max(0, Math.min(level, MAX_LV) - 5) / 5);
 }
 /* ④LV7で+1%。LV8から1レベルごとに+1%（宝箱の数に掛ける倍率で表現） */
 function chestRateBonus(level) {
@@ -257,8 +277,10 @@ function viewRangeFor(level, base) {
   if (level < 12) return b;
   return Math.min(40, (b + 1) + (Math.min(level, MAX_LV) - 12));
 }
-/* ⑦LV15:2回 LV30:3回 LV50:4回 LV70:5回（つるはしの使用回数／ハシゴの再設置回数） */
+/* ⑦LV15:2 LV30:3 LV50:4 LV70:5 LV80:6 LV90:7回（つるはしの使用回数／ハシゴの再設置回数） */
 function toolUses(level) {
+  if (level >= 90) return 7;
+  if (level >= 80) return 6;
   if (level >= 70) return 5;
   if (level >= 50) return 4;
   if (level >= 30) return 3;
@@ -274,24 +296,41 @@ function warpClosestPct(level) {
   if (level < 17) return 0;
   return Math.min(100, 0.1 + 0.1 * (Math.min(level, MAX_LV) - 17));
 }
-/* ⑨LV20:1段 LV25:2段 LV30:3段（足あとの濃さの段階数） */
+/* ⑨ヘンゼルは装備中、レベルが上がるほど1つの中に能力が次々と発現する複合スキル。
+   足あとの濃さ： LV20:1段 LV30:2段 LV40:3段 */
 function hanselShades(level) {
-  if (level >= 30) return 3;
-  if (level >= 25) return 2;
+  if (level >= 40) return 3;
+  if (level >= 30) return 2;
   if (level >= 20) return 1;
   return 0;
 }
-/* ⑩LV20:1人→10レベルごとに+1（LV90:8人）→LV99で9人（分身は1マス/秒固定） */
+/* ⑨ヘンゼルの追加能力（装備中に指定レベルで発現） */
+function hanselGoalArrow(level) { return level >= 50; }          // LV50：ゴール方向に金矢印
+function hanselCloneCount(level) { return level >= 60 ? 2 : 0; }  // LV60：分身が2人出現
+function hanselWalkBonus(level) { return level >= 70 ? 2 : 0; }   // LV70：歩行 +2マス/秒
+function hanselEmptyReduce(level) { return level >= 80 ? 5 : 0; } // LV80：からっぽ率 -5%
+function hanselWarp(level) { return level >= 90; }               // LV90：ワープ（CT40秒・近リング率4%）
+const HANSEL_WARP_CT = 40, HANSEL_WARP_PCT = 4;
+function hanselChestBonus(level) { return level >= 99 ? 0.30 : 0; } // LV99：宝箱出現率 +30%
+/* ⑩LV20:1人→10レベルごとに+1（LV90:8人）→LV99で9人。
+   分身の移動速度は LV50:2 LV70:3 LV90:5マス/秒（それ未満は1マス/秒） */
 function cloneCount(level) {
   if (level >= 99) return 9;
   if (level < 20) return 0;
   return Math.min(8, 1 + Math.floor((level - 20) / 10));
 }
-const CLONE_SPEED = 1;
+function cloneSpeed(level) {
+  if (level >= 90) return 5;
+  if (level >= 70) return 3;
+  if (level >= 50) return 2;
+  return 1;
+}
 
 /* ---- スキル装備スロット（選んだスキルだけが効く） ----
-   LV10〜19=2 / LV20〜29=3 / LV30〜39=4 / LV40〜49=5 / LV50以降=6（それ以前は1） */
+   LV10-19=2 / 20-29=3 / 30-39=4 / 40-49=5 / 50-69=6 / 70-98=8 / LV99=10（全スキル） */
 function slotCount(level) {
+  if (level >= 99) return 10;
+  if (level >= 70) return 8;
   if (level >= 50) return 6;
   if (level >= 40) return 5;
   if (level >= 30) return 4;
@@ -313,9 +352,12 @@ const api = {
   DIFFS, CHAR_SPEED, TRACE_DELAY_MS, targetSeconds, chestCount, expReward,
   CHEST_ITEMS, rollChest, ITEM_CAPS, finalTimeMs,
   StageTimer, CutsceneCtrl,
-  MAX_LV, lvCum, levelFor, PASSIVE, tackleCT, coinFactor, diaFactor,
+  MAX_LV, lvCum, levelFor, EXP_CAP, SCORE_MAX, EXP_TOTAL_MAX, masteryScore,
+  PASSIVE, tackleCT, coinFactor, diaFactor,
   SKILLS, speedCells, chestRateBonus, emptyRatePct, rollChestWeighted,
-  viewRangeFor, toolUses, warpCT, warpClosestPct, hanselShades, cloneCount, CLONE_SPEED,
+  viewRangeFor, toolUses, warpCT, warpClosestPct, hanselShades, cloneCount, cloneSpeed,
+  hanselGoalArrow, hanselCloneCount, hanselWalkBonus, hanselEmptyReduce,
+  hanselWarp, HANSEL_WARP_CT, HANSEL_WARP_PCT, hanselChestBonus,
   slotCount, skillAcquired,
 };
 if (typeof module !== 'undefined' && module.exports) module.exports = api;

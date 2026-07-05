@@ -53,13 +53,13 @@ console.log('2) つるはし+ハシゴ乱用でも詰み無し: 済');
   ok(L.finalTimeMs(60000, 0, 0) === 60000, '複利: アイテム無しは等倍');
   const v5 = L.finalTimeMs(100000, 5, 5);
   ok(Math.abs(v5 - 100000 * Math.pow(0.9, 5) * Math.pow(0.85, 5)) < 1e-6, '複利: 上限5+5');
-  // ✨おたからマスター LV1: コイン0.895・ダイヤ0.845
-  ok(Math.abs(L.coinFactor(1, true) - 0.895) < 1e-9, 'コイン係数 LV1=0.895');
-  ok(Math.abs(L.diaFactor(1, true) - 0.845) < 1e-9, 'ダイヤ係数 LV1=0.845');
-  ok(Math.abs(L.coinFactor(10, true) - 0.85) < 1e-9, 'コイン係数 LV10=0.850');
+  // ✨おたからマスター LV1: コイン0.897・ダイヤ0.847（LV×0.003）
+  ok(Math.abs(L.coinFactor(1, true) - 0.897) < 1e-9, 'コイン係数 LV1=0.897');
+  ok(Math.abs(L.diaFactor(1, true) - 0.847) < 1e-9, 'ダイヤ係数 LV1=0.847');
+  ok(Math.abs(L.coinFactor(10, true) - 0.87) < 1e-9, 'コイン係数 LV10=0.870');
   ok(L.coinFactor(50, false) === 0.90 && L.diaFactor(50, false) === 0.85, 'パッシブ無効なら標準係数');
   const vf = L.finalTimeMs(100000, 1, 1, L.coinFactor(1, true), L.diaFactor(1, true));
-  ok(Math.abs(vf - 100000 * 0.895 * 0.845) < 1e-6, `強化複利 LV1 期待75627.5 実際${vf}`);
+  ok(Math.abs(vf - 100000 * 0.897 * 0.847) < 1e-6, `強化複利 LV1 期待75975.9 実際${vf}`);
   console.log('4) 複利計算: 済 (標準68.85秒 / マスターLV1で', (vf / 1000).toFixed(3), '秒)');
 }
 
@@ -80,7 +80,17 @@ console.log('2) つるはし+ハシゴ乱用でも詰み無し: 済');
   let mono = true;
   for (let n = 2; n <= 99; n++) if (L.lvCum(n) <= L.lvCum(n - 1)) mono = false;
   ok(mono, '必要EXP単調増加');
-  console.log('4c) レベルカーブ: 済 (LV5=' + L.lvCum(5) + ' / LV99=' + L.lvCum(99) + ' EXP)');
+  // 3段階：①1-50従来 ②51-70中段(LV70=100000) ③71-99終盤(LV99=530000)
+  ok(L.lvCum(50) === 29400, '①LV50は従来どおり29400');
+  ok(L.lvCum(70) === 100000, '②LV70到達=100000（中段の境界）');
+  ok(L.lvCum(99) === 530000, '③LV99到達=530000');
+  // ③71-99の1レベル毎コストが②51-70より大きい＝より上がりにくい
+  const d2 = L.lvCum(70) - L.lvCum(69), d3 = L.lvCum(99) - L.lvCum(98);
+  ok(d3 > d2 && d2 > (L.lvCum(51) - L.lvCum(50)), '段階的に上がりにくい（Δ:①<②<③）');
+  // やりこみスコア＝累計EXP−530000（0〜999999でクランプ）・累計上限1529999
+  ok(L.EXP_CAP === 530000 && L.SCORE_MAX === 999999 && L.EXP_TOTAL_MAX === 1529999, 'スコア定数');
+  ok(L.masteryScore(530000) === 0 && L.masteryScore(700000) === 170000 && L.masteryScore(9e9) === 999999, 'やりこみスコア クランプ');
+  console.log('4c) レベルカーブ: 済 (LV50=' + L.lvCum(50) + ' / LV70=' + L.lvCum(70) + ' / LV99=' + L.lvCum(99) + ' EXP)');
 }
 
 // 5) タイマー＋演出制御（演出中は停止・最大5秒・タップスキップ可）
@@ -102,10 +112,10 @@ console.log('2) つるはし+ハシゴ乱用でも詰み無し: 済');
 
 // 5b) 追加パッシブスキル③〜⑩の計算式
 {
-  // ③スピードアップ：装備中は4、LV10から5レベルごとに+1（未装備の3はゲーム側でゲート）
+  // ③スピードアップ：装備中は4、LV5から5レベルごとに+0.5マス（LV99=13）
   ok(L.speedCells(1) === 4 && L.speedCells(9) === 4, '速度: LV1-9は4');
-  ok(L.speedCells(10) === 5 && L.speedCells(15) === 6, '速度: LV10=5/LV15=6');
-  ok(L.speedCells(99) === 22, '速度: LV99=22');
+  ok(L.speedCells(10) === 4.5 && L.speedCells(15) === 5, '速度: LV10=4.5/LV15=5');
+  ok(L.speedCells(99) === 13, '速度: LV99=13');
   // ④宝箱出現：LV7で+1%、以降+1%/LV
   ok(L.chestRateBonus(6) === 0 && Math.abs(L.chestRateBonus(7) - 0.01) < 1e-9, '宝箱率: LV7=+1%');
   ok(Math.abs(L.chestRateBonus(8) - 0.02) < 1e-9 && Math.abs(L.chestRateBonus(99) - 0.93) < 1e-9, '宝箱率: LV8=+2%/LV99=+93%');
@@ -120,21 +130,29 @@ console.log('2) つるはし+ハシゴ乱用でも詰み無し: 済');
   // ⑥鷹の目：LV12で8、以降+1/LV（上限40）
   ok(L.viewRangeFor(11) === 7 && L.viewRangeFor(12) === 8 && L.viewRangeFor(13) === 9, '視界: LV12=8/LV13=9');
   ok(L.viewRangeFor(99) === 40, '視界: 上限40で頭打ち');
-  // ⑦精密作業：LV15/30/50/70で2/3/4/5回
-  ok(L.toolUses(14) === 1 && L.toolUses(15) === 2 && L.toolUses(30) === 3 && L.toolUses(50) === 4 && L.toolUses(70) === 5, '道具回数 2/3/4/5');
+  // ⑦精密作業：LV15/30/50/70/80/90で2/3/4/5/6/7回
+  ok(L.toolUses(14) === 1 && L.toolUses(15) === 2 && L.toolUses(30) === 3 && L.toolUses(50) === 4 && L.toolUses(70) === 5 && L.toolUses(80) === 6 && L.toolUses(90) === 7, '道具回数 2/3/4/5/6/7');
   // ⑧ワープ：CT LV17=60秒→LV18から-0.5秒/LV（LV99=19秒）・近リング確率0.1%+0.1%/LV
   ok(L.warpCT(17) === 60 && L.warpCT(18) === 59.5 && L.warpCT(99) === 19, 'ワープCT 60→19');
   ok(L.warpClosestPct(16) === 0 && Math.abs(L.warpClosestPct(17) - 0.1) < 1e-9 && Math.abs(L.warpClosestPct(99) - 8.3) < 1e-9, 'ワープ近リング率');
-  // ⑨ヘンゼル：LV20/25/30で1/2/3段
-  ok(L.hanselShades(19) === 0 && L.hanselShades(20) === 1 && L.hanselShades(25) === 2 && L.hanselShades(30) === 3, 'ヘンゼル段階');
+  // ⑨ヘンゼル：足あと LV20/30/40で1/2/3段
+  ok(L.hanselShades(19) === 0 && L.hanselShades(20) === 1 && L.hanselShades(30) === 2 && L.hanselShades(40) === 3, 'ヘンゼル足あと段階');
+  // ⑨ヘンゼルの複合能力（レベルで次々発現）
+  ok(!L.hanselGoalArrow(49) && L.hanselGoalArrow(50), 'ヘンゼル: LV50でゴール矢印');
+  ok(L.hanselCloneCount(59) === 0 && L.hanselCloneCount(60) === 2, 'ヘンゼル: LV60で分身2人');
+  ok(L.hanselWalkBonus(69) === 0 && L.hanselWalkBonus(70) === 2, 'ヘンゼル: LV70で歩行+2マス');
+  ok(L.hanselEmptyReduce(79) === 0 && L.hanselEmptyReduce(80) === 5, 'ヘンゼル: LV80でからっぽ-5%');
+  ok(!L.hanselWarp(89) && L.hanselWarp(90) && L.HANSEL_WARP_CT === 40 && L.HANSEL_WARP_PCT === 4, 'ヘンゼル: LV90でワープCT40/率4%');
+  ok(L.hanselChestBonus(98) === 0 && Math.abs(L.hanselChestBonus(99) - 0.30) < 1e-9, 'ヘンゼル: LV99で宝箱+30%');
   // ⑩分身：LV20から10LVごとに+1・LV99で9人
   ok(L.cloneCount(19) === 0 && L.cloneCount(20) === 1 && L.cloneCount(30) === 2 && L.cloneCount(50) === 4, '分身人数 前半');
   ok(L.cloneCount(90) === 8 && L.cloneCount(98) === 8 && L.cloneCount(99) === 9, '分身人数 LV90=8/LV99=9');
-  ok(L.CLONE_SPEED === 1, '分身は1マス/秒固定');
-  // 装備スロット数：LV10-19=2 / 20-29=3 / 30-39=4 / 40-49=5 / 50+=6
+  ok(L.cloneSpeed(49) === 1 && L.cloneSpeed(50) === 2 && L.cloneSpeed(70) === 3 && L.cloneSpeed(90) === 5, '分身速度 1/2/3/5マス/秒');
+  // 装備スロット数：10-19=2 / 20-29=3 / 30-39=4 / 40-49=5 / 50-69=6 / 70-98=8 / 99=10
   ok(L.slotCount(9) === 1 && L.slotCount(10) === 2 && L.slotCount(19) === 2, 'スロット: LV10-19=2');
   ok(L.slotCount(20) === 3 && L.slotCount(29) === 3 && L.slotCount(30) === 4 && L.slotCount(39) === 4, 'スロット: 20-29=3/30-39=4');
-  ok(L.slotCount(40) === 5 && L.slotCount(49) === 5 && L.slotCount(50) === 6 && L.slotCount(99) === 6, 'スロット: 40-49=5/50+=6');
+  ok(L.slotCount(40) === 5 && L.slotCount(49) === 5 && L.slotCount(50) === 6 && L.slotCount(69) === 6, 'スロット: 40-49=5/50-69=6');
+  ok(L.slotCount(70) === 8 && L.slotCount(98) === 8 && L.slotCount(99) === 10, 'スロット: 70-98=8/99=10');
   // 習得判定：自分の性別は最初から・異性はLV5・③はLV5
   ok(L.skillAcquired('m', 1, 'm') && !L.skillAcquired('f', 1, 'm'), '習得: 自キャラのみLV1');
   ok(L.skillAcquired('f', 5, 'm'), '習得: LV5で他キャラの技も');

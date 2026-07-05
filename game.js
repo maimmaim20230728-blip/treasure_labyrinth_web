@@ -301,19 +301,22 @@ function startStage(di) {
     themeIdx: (Math.random() * THEMES.length) | 0,
     particles: [], shake: 0, cleared: false, tackleReadyAt: 0,
     // ---- 装備スキルだけ反映 ----
-    speed: eq.has('speed') ? L.speedCells(lv) : L.CHAR_SPEED,          // ③スピードアップ
+    speed: (eq.has('speed') ? L.speedCells(lv) : L.CHAR_SPEED)
+         + (eq.has('hansel') ? L.hanselWalkBonus(lv) : 0),            // ③スピード ＋ ⑨LV70で歩行+2
     viewRange: eq.has('hawk') ? L.viewRangeFor(lv) : 7,                // ⑥鷹の目
     pickCharges: 0,                                                    // ⑦精密作業：つるはしの残り追加使用
     ladderRetrievals: eq.has('craft') ? Math.max(0, L.toolUses(lv) - 1) : 0, // ⑦ハシゴ回収の残り回数
     warpReadyAt: 0, warpOk: false,                                     // ⑧ワープ（クールタイム制）
     hanselShades: eq.has('hansel') ? L.hanselShades(lv) : 0,           // ⑨ヘンゼル
     visits: new Uint8Array(diff.w * diff.h),
-    clones: [],                                                        // ⑩分身の術
+    clones: [], cloneSpeed: L.cloneSpeed(lv),                          // ⑩分身の術（速度はLVで加速）
   };
   st.theme = THEMES[st.themeIdx];
   st.cuts = new L.CutsceneCtrl(st.timer);
-  // 宝箱配置（スタート・ゴール以外からランダム。④宝箱出現アップで増量）
-  const n = Math.max(1, Math.round(L.chestCount(diff) * (1 + (eq.has('chest') ? L.chestRateBonus(lv) : 0))));
+  // 宝箱配置（スタート・ゴール以外からランダム。④宝箱出現アップ＋⑨ヘンゼルLV99で増量）
+  const chestBonus = (eq.has('chest') ? L.chestRateBonus(lv) : 0)
+                   + (eq.has('hansel') ? L.hanselChestBonus(lv) : 0);
+  const n = Math.max(1, Math.round(L.chestCount(diff) * (1 + chestBonus)));
   const cand = [];
   const sIdx = start.ry * diff.w + start.rx, gIdx = goal.ry * diff.w + goal.rx;
   for (let i = 0; i < diff.w * diff.h; i++) if (i !== sIdx && i !== gIdx) cand.push(i);
@@ -322,8 +325,14 @@ function startStage(di) {
   st.visits[sIdx] = 1;
   st.trailCol = makeTrail(st.theme);
   st.goalDist = distMap(m, goal.rx, goal.ry);
-  st.warpOk = eq.has('warp') && st.goalDist.some(dv => dv >= 11);
-  st.goalArrow = eq.has('hawk') && lv >= 15; // 🦅LV15から：ゴール方向の矢印
+  // ⑧ワープ ＋ ⑨ヘンゼルLV90のワープ能力（CTは短い方を採用・近リング率は合算）
+  st.warpAbility = eq.has('warp') || (eq.has('hansel') && L.hanselWarp(lv));
+  st.warpOk = st.warpAbility && st.goalDist.some(dv => dv >= 11);
+  { let ct = Infinity, pct = 0;
+    if (eq.has('warp')) { ct = L.warpCT(lv); pct = L.warpClosestPct(lv); }
+    if (eq.has('hansel') && L.hanselWarp(lv)) { ct = Math.min(ct, L.HANSEL_WARP_CT); pct += L.HANSEL_WARP_PCT; }
+    st.warpPct = Math.min(100, pct); st.warpCT = ct; }
+  st.goalArrow = (eq.has('hawk') && lv >= 15) || (eq.has('hansel') && L.hanselGoalArrow(lv)); // 🦅LV15 / 🍞LV50
   spawnClones(st);
   S.stage = st; S.zoom = 1; S.targetMode = null; S.tracing = false;
   showScreen('play');
@@ -428,7 +437,11 @@ function onEnterRoom() {
   }
   if (c.rx === st.goal.rx && c.ry === st.goal.ry) doClear();
 }
-function stEmptyPct(st) { return st.eq.has('lucky') ? L.emptyRatePct(st.lv) : 20; }
+function stEmptyPct(st) {
+  let p = st.eq.has('lucky') ? L.emptyRatePct(st.lv) : 20;
+  if (st.eq.has('hansel')) p -= L.hanselEmptyReduce(st.lv); // ⑨LV80：からっぽ率-5%
+  return Math.max(1, p);
+}
 function applyChest(res) {
   const st = S.stage;
   if (res === 'empty') { toast(t('empty2')); Snd.sfx('empty'); return; }
@@ -604,8 +617,12 @@ function doClear() {
   const isUlt = st.diffIdx === L.DIFFS.length - 1;
   const rew = L.expReward(st.diff.exp, fin, st.targetMs, isUlt); // {exp, mult, fixed}
   const e = rew.exp;
-  S.save.exp += e; S.save.badges[st.diffIdx]++; persist();
+  const prevScore = L.masteryScore(S.save.exp);
+  // LV99到達(=530000)で経験値は打ち止め。超過分はやりこみスコアとして累計上限まで貯まる
+  S.save.exp = Math.min(L.EXP_TOTAL_MAX, S.save.exp + e); S.save.badges[st.diffIdx]++; persist();
   const newLv = L.levelFor(S.save.exp);
+  const newScore = L.masteryScore(S.save.exp);
+  const gotMaster = newScore >= L.SCORE_MAX && prevScore < L.SCORE_MAX; // トレジャーマスター達成の瞬間
   // レベルアップ演出はクリア結果を閉じてから（同時だと見にくいので分離）
   S.pendingLevelUp = (newLv > prevLv) ? { prevLv, newLv } : null;
   setTimeout(() => {
@@ -613,9 +630,9 @@ function doClear() {
     else    { Snd.sfx('clearSoft'); Snd.bgm('clearSoft'); spawnConfetti(25); } // ひかえめ
     buildClearOverlay(raw, fin, ok, e, newLv, coinF, diaF, rew);
     showScreen('clear');
-    // 🎉最高難易度クリア or LV99到達 → コングラチュレーション大演出
+    // 🎉最高難易度クリア or LV99到達 or 🏆トレジャーマスター達成 → 大演出
     const gotLv99 = newLv >= 99 && prevLv < 99;
-    if (isUlt || gotLv99) setTimeout(() => showCongrats(isUlt, gotLv99), 1100);
+    if (isUlt || gotLv99 || gotMaster) setTimeout(() => showCongrats(isUlt, gotLv99, gotMaster), 1100);
   }, 650);
 }
 /* クリア結果を閉じたあとにレベルアップ演出を再生（分離表示） */
@@ -647,6 +664,9 @@ function buildClearOverlay(raw, fin, ok, e, lv, coinF, diaF, rew) {
     html += '<div class="crow cbig">' + pct + '% → ' + tag + '</div>';
   }
   html += '<div class="crow">EXP <b>+' + e + '</b>　(LV ' + lv + ')</div>';
+  // LV99カンスト後は やりこみスコア（累計EXP−530000・最大999999）を金色で表示
+  const sc = L.masteryScore(S.save.exp);
+  if (sc > 0) html += '<div class="crow cbig">' + t('masteryScore') + ' <b>' + sc + '</b> / ' + L.SCORE_MAX + '</div>';
   $('clearBody').innerHTML = html;
 }
 
@@ -679,10 +699,10 @@ function doWarp() { // ⑧1回だけランダムワープ。ゴールから10マ
     if (dist[i] >= 11 && i !== cRoom) { cands.push(i); if (dist[i] < minD) minD = dist[i]; }
   }
   if (!cands.length) { toast(t('warpNo')); Snd.sfx('nope'); return; }
-  st.warpReadyAt = st.gameTime + L.warpCT(st.lv) * 1000; // 使うたびクールタイム
+  st.warpReadyAt = st.gameTime + st.warpCT * 1000; // 使うたびクールタイム（⑧/⑨で決定）
   // レベルが高いほど「いちばんゴール寄り(11マス)のリング」へ飛べる確率が上がる
   const ring = cands.filter(i => dist[i] === minD);
-  const pool = (Math.random() < L.warpClosestPct(st.lv) / 100) ? ring : cands;
+  const pool = (Math.random() < st.warpPct / 100) ? ring : cands;
   const dest = pool[(Math.random() * pool.length) | 0];
   st.plan.length = 0;
   setTarget(null);
@@ -693,8 +713,9 @@ function doWarp() { // ⑧1回だけランダムワープ。ゴールから10マ
   });
   updateSlots();
 }
-function spawnClones(st) { // ⑩分身：装備中＆宝箱がある間だけ働く
-  const n = st.eq.has('clone') ? L.cloneCount(st.lv) : 0;
+function spawnClones(st) { // ⑩分身＋⑨ヘンゼルLV60の分身：装備中＆宝箱がある間だけ働く
+  const n = (st.eq.has('clone') ? L.cloneCount(st.lv) : 0)
+          + (st.eq.has('hansel') ? L.hanselCloneCount(st.lv) : 0);
   if (!n || !st.chests.size) return;
   for (let i = 0; i < n; i++) {
     st.clones.push({
@@ -733,8 +754,8 @@ function updateClones(st, dt) {
       if (!best) { cl.dying = true; continue; }
       cl.target = best.ri; cl.path = best.p.slice(1);
     }
-    // 移動は2マス/秒固定
-    let budget = dt / 1000 * L.CLONE_SPEED * P;
+    // 移動速度はLVで加速（⑩レベル50=2/70=3/90=5マス/秒）
+    let budget = dt / 1000 * st.cloneSpeed * P;
     while (budget > 0 && cl.path.length) {
       const nx = cl.path[0];
       const txx = roomX(nx[0]), tyy = roomY(nx[1]);
@@ -798,18 +819,22 @@ function updateConfetti(dt) {
 }
 
 /* ---- コングラチュレーション（最高難易度クリア・LV99）＋花火 ---- */
-function showCongrats(gotMax, gotLv99) {
+function showCongrats(gotMax, gotLv99, gotMaster) {
   const cg = I18N.congrats[S.save.lang] || I18N.congrats.ja;
   const subs = [];
+  if (gotMaster) subs.push(cg[2]);
   if (gotMax) subs.push(cg[0]);
   if (gotLv99) subs.push(cg[1]);
   $('congratsSub').textContent = subs.join('　');
+  // 🏆トレジャーマスター達成時は最大級：金色見出し＋長め＆多めの花火
+  $('congratsMain').textContent = gotMaster ? ('🏆 ' + t('treasureMaster') + ' 🏆') : '🎉 CONGRATULATIONS!! 🎉';
+  $('congratsMain').classList.toggle('master', !!gotMaster);
   $('congrats').classList.remove('hidden');
-  S.congratsUntil = performance.now() + 9500; // 花火の打ち上げ時間
+  S.congratsUntil = performance.now() + (gotMaster ? 13000 : 9500); // 花火の打ち上げ時間
   S.nextBurst = 0;
   Snd.bgm('congrats');
   Snd.sfx('fanfare');
-  spawnConfetti(260);
+  spawnConfetti(gotMaster ? 420 : 260);
 }
 function hideCongrats() {
   $('congrats').classList.add('hidden');
@@ -906,7 +931,7 @@ function updateHud() {
     $('cntFist').textContent = remain > 0 ? Math.ceil(remain / 1000) + 's' : 'OK';
     $('slotFist').classList.toggle('dim', remain > 0);
   }
-  if (st.eq.has('warp') && st.warpOk) {
+  if (st.warpAbility && st.warpOk) {
     const remainW = Math.max(0, st.warpReadyAt - st.gameTime);
     $('cntWarp').textContent = remainW > 0 ? Math.ceil(remainW / 1000) + 's' : 'OK';
     $('slotWarp').classList.toggle('dim', remainW > 0);
@@ -1394,8 +1419,8 @@ function updateSlots() {
   $('slotLadder').classList.toggle('sel', S.targetMode === 'ladder');
   $('slotFist').classList.toggle('sel', S.targetMode === 'tackle');
   $('slotFist').classList.toggle('hidden', !st.eq.has('m'));
-  // ⑧ワープ（装備中のみ・クールタイム制）
-  const warpVis = st.eq.has('warp');
+  // ⑧ワープ／⑨ヘンゼルLV90（クールタイム制）
+  const warpVis = st.warpAbility;
   $('slotWarp').classList.toggle('hidden', !warpVis);
   if (warpVis && !st.warpOk) { $('cntWarp').textContent = 'ー'; $('slotWarp').classList.add('dim'); }
 }
@@ -1482,6 +1507,12 @@ function refreshTitle() {
   const next = (lv < L.MAX_LV) ? L.lvCum(lv + 1) : null;
   $('expFill').style.width = next ? Math.min(100, 100 * (S.save.exp - curBase) / (next - curBase)) + '%' : '100%';
   $('expTxt').textContent = next ? ('EXP ' + S.save.exp + ' / ' + next) : ('EXP ' + S.save.exp + ' ' + t('expMax'));
+  // やりこみスコア（LV99カンスト後・別枠）とトレジャーマスターの金きらきらバッジ
+  const score = L.masteryScore(S.save.exp), mBox = $('masteryBox'), mBadge = $('masterBadge');
+  if (score > 0) { mBox.classList.remove('hidden'); mBox.textContent = t('masteryScore') + ' ' + score + ' / ' + L.SCORE_MAX; }
+  else mBox.classList.add('hidden');
+  if (score >= L.SCORE_MAX) { mBadge.classList.remove('hidden'); mBadge.querySelector('.mbTxt').textContent = '✨ ' + t('treasureMaster') + ' ✨'; }
+  else mBadge.classList.add('hidden');
   sanitizeEquip();
   $('passiveNow').textContent = t('equip') + ' (' + S.save.equipped.length + '/' + L.slotCount(lv) + '): '
     + S.save.equipped.map(id => SKILL_ICONS[id] + SKILL_INFO[id].name).join(' / ');
