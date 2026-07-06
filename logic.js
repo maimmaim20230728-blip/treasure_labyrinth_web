@@ -21,7 +21,7 @@ function mulberry32(seed) {
    「アイテム無しで必ずゴールできる」を構造的に保証する。
    つるはし(壁→床)もハシゴ(一方通行の追加)も通路を増やすだけなので、
    どう使っても詰みは発生しない（鉄則）。 */
-function generate(w, h, seed) {
+function generate(w, h, seed, opts) {
   const bw = 2 * w + 1, bh = 2 * h + 1;
   const g = new Uint8Array(bw * bh); g.fill(1);
   for (let x = 0; x < bw; x++) { g[x] = 2; g[(bh - 1) * bw + x] = 2; }
@@ -44,7 +44,90 @@ function generate(w, h, seed) {
     }
     if (!adv) st.pop();
   }
-  return { w, h, bw, bh, g, rnd };
+  // シンプルモード（opts.rooms===false）は宝箱部屋なし＝純粋な1マス通路の迷路
+  const rooms = (opts && opts.rooms === false) ? [] : carveRooms(g, bw, bh, w, h, rnd);
+  return { w, h, bw, bh, g, rnd, rooms };
+}
+
+/* 宝箱部屋：広い迷宮に「数マスの開けた区画」を難しさ（＝広さ）依存で配置する。
+   部屋っぽさを出すため、内部は全開放しつつ周囲は封鎖し、出入りする通路は1〜3本だけに絞る。
+   🔴詰み防止：外側（部屋を除く）を連結成分に分け、各成分に必ず1本は出入口を残す
+   （＝どの区画も部屋経由で必ずつながる）。出入口が4本以上必要になる配置は不採用にする。
+   小さい迷路（やさしい等）は純粋な1マス通路のまま。部屋どうしは1マスの余白で分ける。 */
+function carveRooms(g, bw, bh, w, h, rnd) {
+  const rooms = [];
+  const area = w * h;
+  if (Math.min(w, h) < 6 || area < 90) return rooms;        // 小さい迷路は部屋なし
+  const count = Math.min(14, Math.floor(area / 85));         // 部屋数（広い＝難しいほど多い）
+  const maxSide = Math.min(4, 2 + Math.floor(Math.min(w, h) / 12)); // 部屋の最大辺（広いほど大きめ）
+  const occ = new Uint8Array(w * h);                         // 1=部屋or余白（重なり防止）
+  const comp = new Int32Array(w * h);                        // 外側の連結成分ID（作業用）
+  let guard = count * 60;
+  while (rooms.length < count && guard-- > 0) {
+    const rw = 2 + ((rnd() * (maxSide - 1)) | 0);            // 2..maxSide マス
+    const rh = 2 + ((rnd() * (maxSide - 1)) | 0);
+    if (rw > w || rh > h) continue;
+    const rx0 = (rnd() * (w - rw + 1)) | 0, ry0 = (rnd() * (h - rh + 1)) | 0;
+    let clash = false;                                       // 余白1マス込みで重なり判定
+    for (let y = ry0 - 1; y <= ry0 + rh && !clash; y++)
+      for (let x = rx0 - 1; x <= rx0 + rw; x++)
+        if (x >= 0 && y >= 0 && x < w && y < h && occ[y * w + x]) { clash = true; break; }
+    if (clash) continue;
+    const inRoom = (x, y) => x >= rx0 && x < rx0 + rw && y >= ry0 && y < ry0 + rh;
+    // 今 開いている外向きの壁＝出入り口の候補（DFSが作った既存のドア）
+    const doors = [];
+    for (let y = ry0; y < ry0 + rh; y++)
+      for (let x = rx0; x < rx0 + rw; x++)
+        for (let d = 0; d < 4; d++) {
+          const nx = x + DX[d], ny = y + DY[d];
+          if (nx < 0 || ny < 0 || nx >= w || ny >= h || inRoom(nx, ny)) continue;
+          const wi = (2 * y + 1 + DY[d]) * bw + (2 * x + 1 + DX[d]);
+          if (g[wi] === 0) doors.push({ wi, ox: nx, oy: ny });
+        }
+    if (!doors.length) continue;
+    // 外側（部屋を除く）をドアの外側セルから塗り分け、連結成分数を数える
+    comp.fill(-1);
+    let nComp = 0;
+    const doorComp = new Array(doors.length);
+    for (let di = 0; di < doors.length; di++) {
+      const dr = doors[di];
+      let c = comp[dr.oy * w + dr.ox];
+      if (c === -1) {
+        c = nComp++;
+        const q = [dr.oy * w + dr.ox]; comp[dr.oy * w + dr.ox] = c;
+        for (let qi = 0; qi < q.length; qi++) {
+          const cx = q[qi] % w, cy = (q[qi] / w) | 0;
+          for (let d = 0; d < 4; d++) {
+            const nx = cx + DX[d], ny = cy + DY[d];
+            if (nx < 0 || ny < 0 || nx >= w || ny >= h || inRoom(nx, ny)) continue;
+            if (g[(2 * cy + 1 + DY[d]) * bw + (2 * cx + 1 + DX[d])] !== 0) continue;
+            const ni = ny * w + nx;
+            if (comp[ni] !== -1) continue;
+            comp[ni] = c; q.push(ni);
+          }
+        }
+      }
+      doorComp[di] = c;
+    }
+    if (nComp > 3) continue;   // 出入口が4本以上必要＝部屋っぽくないので不採用
+    // 採用：内部を全開放
+    for (let by = 2 * ry0 + 1; by <= 2 * (ry0 + rh - 1) + 1; by++)
+      for (let bx = 2 * rx0 + 1; bx <= 2 * (rx0 + rw - 1) + 1; bx++)
+        g[by * bw + bx] = 0;
+    // 周囲を封鎖し、各成分に1本だけドアを残す（出入口1〜3・連結は保証）
+    const order = doors.map((_, i) => i);
+    for (let i = order.length - 1; i > 0; i--) { const j = (rnd() * (i + 1)) | 0; const t = order[i]; order[i] = order[j]; order[j] = t; }
+    const usedComp = new Set(), keep = new Set();
+    for (const i of order) if (!usedComp.has(doorComp[i])) { usedComp.add(doorComp[i]); keep.add(doors[i].wi); }
+    for (const dr of doors) g[dr.wi] = keep.has(dr.wi) ? 0 : 1;
+    // 占有マーク（余白込み）＋登録
+    const cells = [];
+    for (let y = ry0; y < ry0 + rh; y++) for (let x = rx0; x < rx0 + rw; x++) cells.push(y * w + x);
+    for (let y = ry0 - 1; y <= ry0 + rh; y++) for (let x = rx0 - 1; x <= rx0 + rw; x++)
+      if (x >= 0 && y >= 0 && x < w && y < h) occ[y * w + x] = 1;
+    rooms.push({ x: rx0, y: ry0, w: rw, h: rh, cells, doors: keep.size });
+  }
+  return rooms;
 }
 
 function wallIndex(m, rx, ry, d) { return (2 * ry + 1 + DY[d]) * m.bw + (2 * rx + 1 + DX[d]); }

@@ -239,5 +239,49 @@ console.log('6) 難易度テーブル単調性: 済');
   console.log('7) 19言語辞書の整合性: 済');
 }
 
+// 8) 宝箱部屋（広い迷宮のみ・出入口1〜3本・封鎖しても詰み無し）
+{
+  ok(L.generate(5, 4, 1).rooms.length === 0, '小さい迷路(5x4)は部屋なし=純粋な1マス通路');
+  ok(L.generate(8, 7, 1).rooms.length === 0, 'まだやさしい(8x7)も部屋なし');
+  // 広い迷宮ほど部屋数が多い傾向（複数シードの平均で単調性を確認）
+  const avg = (w, h) => { let s = 0; for (let sd = 1; sd <= 20; sd++) s += L.generate(w, h, sd).rooms.length; return s / 20; };
+  const aMid = avg(15, 12), aBig = avg(30, 24), aMax = avg(48, 40);
+  ok(aMid > 0 && aBig > aMid && aMax > aBig, `部屋数は広い迷宮ほど増える(15x12=${aMid}/30x24=${aBig}/48x40=${aMax})`);
+  // 全マス到達可能を flood で厳密確認（部屋封鎖後も どのマスも必ず行ける＝詰み無し）
+  const reachAll = (m) => {
+    const seen = new Uint8Array(m.w * m.h); const q = [0]; seen[0] = 1; let cnt = 1;
+    for (let qi = 0; qi < q.length; qi++) {
+      const cx = q[qi] % m.w, cy = (q[qi] / m.w) | 0;
+      for (let d = 0; d < 4; d++) if (L.canPass(m, cx, cy, d, null)) {
+        const ni = (cy + L.DY[d]) * m.w + (cx + L.DX[d]);
+        if (!seen[ni]) { seen[ni] = 1; cnt++; q.push(ni); }
+      }
+    }
+    return cnt === m.w * m.h;
+  };
+  let openOk = true, dupOk = true, reachOk = true, doorOk = true, maxDoors = 0;
+  for (const wh of [[15, 12], [24, 19], [48, 40]]) {
+    for (let sd = 1; sd <= 25; sd++) {
+      const m = L.generate(wh[0], wh[1], sd);
+      if (!reachAll(m)) reachOk = false;                    // 全マス到達＝詰み無し
+      const seen = new Set();
+      for (const r of m.rooms) {
+        if (r.w < 2 || r.h < 2) openOk = false;             // 2x2以上の区画
+        if (!(r.doors >= 1 && r.doors <= 3)) doorOk = false; // 出入口1〜3本
+        if (r.doors > maxDoors) maxDoors = r.doors;
+        for (let by = 2 * r.y + 1; by <= 2 * (r.y + r.h - 1) + 1; by++)
+          for (let bx = 2 * r.x + 1; bx <= 2 * (r.x + r.w - 1) + 1; bx++)
+            if (m.g[by * m.bw + bx] !== 0) openOk = false;   // 内部は全て床
+        for (const ci of r.cells) { if (seen.has(ci)) dupOk = false; seen.add(ci); }
+      }
+    }
+  }
+  ok(openOk, '部屋の内部は全マス開放(2x2以上の区画)');
+  ok(doorOk, '部屋の出入口は1〜3本（実測最大' + maxDoors + '）');
+  ok(dupOk, '部屋どうしは重ならない');
+  ok(reachOk, '全マス到達可能（部屋封鎖後も連結＝詰み無し）');
+  console.log('8) 宝箱部屋: 済 (48x40の平均部屋数 ' + avg(48, 40) + ')');
+}
+
 console.log(fails === 0 ? 'ALL OK' : 'FAILURES: ' + fails);
 process.exit(fails ? 1 : 0);

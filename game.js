@@ -268,9 +268,10 @@ function updateCam(dt) {
 }
 
 /* ---- ステージ開始 ---- */
-function startStage(di) {
+function startStage(di, simple) {
+  simple = !!simple;
   const diff = L.DIFFS[di];
-  const m = L.generate(diff.w, diff.h);
+  const m = L.generate(diff.w, diff.h, null, { rooms: !simple }); // シンプルは部屋なしの純粋な迷路
   // スタート＝四隅のどこかランダム／ゴール＝残り三隅 or 真ん中付近からランダム
   const corners = [[0, 0], [diff.w - 1, 0], [0, diff.h - 1], [diff.w - 1, diff.h - 1]];
   const si = (Math.random() * 4) | 0;
@@ -287,9 +288,10 @@ function startStage(di) {
   const path = L.shortestPath(m, start.rx, start.ry, goal.rx, goal.ry, null);
   const lv = L.levelFor(S.save.exp);
   sanitizeEquip();
-  const eq = new Set(S.save.equipped); // 装備したスキルだけが効く
+  // シンプルモードはスキルを一切使わない（装備を外さずに素の迷路を楽しめる）
+  const eq = simple ? new Set() : new Set(S.save.equipped);
   const st = {
-    diffIdx: di, diff, m, start, goal, lv, eq,
+    diffIdx: di, diff, m, start, goal, lv, eq, simple,
     ladders: new Uint8Array(m.bw * m.bh),
     chests: new Map(),
     timer: new L.StageTimer(),
@@ -313,17 +315,37 @@ function startStage(di) {
   };
   st.theme = THEMES[st.themeIdx];
   st.cuts = new L.CutsceneCtrl(st.timer);
-  // 宝箱配置（スタート・ゴール以外からランダム。④宝箱出現アップ＋⑨ヘンゼルLV99で増量）
-  const chestBonus = (eq.has('chest') ? L.chestRateBonus(lv) : 0)
-                   + (eq.has('hansel') ? L.hanselChestBonus(lv) : 0);
-  const n = Math.max(1, Math.round(L.chestCount(diff) * (1 + chestBonus)));
-  const cand = [];
+  // 宝箱配置（シンプルモードは宝箱なし）。④宝箱出現アップ＋⑨ヘンゼルLV99で増量・宝箱部屋を優先的に満たす
   const sIdx = start.ry * diff.w + start.rx, gIdx = goal.ry * diff.w + goal.rx;
-  for (let i = 0; i < diff.w * diff.h; i++) if (i !== sIdx && i !== gIdx) cand.push(i);
-  for (let i = cand.length - 1; i > 0; i--) { const j = (Math.random() * (i + 1)) | 0; const t = cand[i]; cand[i] = cand[j]; cand[j] = t; }
-  for (let i = 0; i < Math.min(n, cand.length); i++) st.chests.set(cand[i], { opened: false, result: null });
+  if (!simple) {
+    const chestBonus = (eq.has('chest') ? L.chestRateBonus(lv) : 0)
+                     + (eq.has('hansel') ? L.hanselChestBonus(lv) : 0);
+    const shuffle = arr => { for (let i = arr.length - 1; i > 0; i--) { const j = (Math.random() * (i + 1)) | 0; const t = arr[i]; arr[i] = arr[j]; arr[j] = t; } return arr; };
+    const rooms = m.rooms || [];
+    // 部屋ぶんだけ宝を増量（部屋数＝難しさ依存）
+    const n = Math.max(1, Math.round((L.chestCount(diff) + rooms.length) * (1 + chestBonus)));
+    const roomSet = new Set();
+    for (const room of rooms) for (const ci of room.cells) if (ci !== sIdx && ci !== gIdx) roomSet.add(ci);
+    const roomCand = shuffle([...roomSet]);        // 宝箱部屋のマス
+    const openCand = [];                           // 通路のマス
+    for (let i = 0; i < diff.w * diff.h; i++) if (i !== sIdx && i !== gIdx && !roomSet.has(i)) openCand.push(i);
+    shuffle(openCand);
+    // 宝の約6割は部屋へ（宝箱部屋らしく）、残りは通路へ。余れば残りの部屋マスへ
+    const roomShare = Math.min(roomCand.length, Math.round(n * 0.6));
+    const order = roomCand.slice(0, roomShare).concat(openCand, roomCand.slice(roomShare));
+    for (let i = 0; i < Math.min(n, order.length); i++) st.chests.set(order[i], { opened: false, result: null });
+  }
   st.visits[sIdx] = 1;
   st.trailCol = makeTrail(st.theme);
+  // 宝箱部屋の床：テーマに馴染む範囲で少し色を変え、通路と区別できるようにする
+  st.roomFloor = mixHex(st.theme.floor, st.theme.top, 0.33);
+  st.roomFloor2 = mixHex(st.theme.floor2, st.theme.top2, 0.33);
+  st.roomMask = new Uint8Array(m.bw * m.bh);
+  for (const room of (m.rooms || [])) {
+    for (let by = 2 * room.y + 1; by <= 2 * (room.y + room.h - 1) + 1; by++)
+      for (let bx = 2 * room.x + 1; bx <= 2 * (room.x + room.w - 1) + 1; bx++)
+        st.roomMask[by * m.bw + bx] = 1;
+  }
   st.goalDist = distMap(m, goal.rx, goal.ry);
   // ⑧ワープ ＋ ⑨ヘンゼルLV90のワープ能力（CTは短い方を採用・近リング率は合算）
   st.warpAbility = eq.has('warp') || (eq.has('hansel') && L.hanselWarp(lv));
@@ -337,7 +359,7 @@ function startStage(di) {
   S.stage = st; S.zoom = 1; S.targetMode = null; S.tracing = false;
   showScreen('play');
   updateSlots(); descDefault();
-  $('diffName').textContent = t('diffs')[di];
+  $('diffName').textContent = t('diffs')[di] + (simple ? '（' + t('simple') + '）' : '');
   $('timeTarget').textContent = t('target') + ' ' + fmt(st.targetMs);
   showStageName(t('themes')[st.themeIdx]); // 画面中央に大きく→ゆっくりフェード
   Snd.bgm(THEME_BGM[st.themeIdx]); // 迷宮の雰囲気に合ったBGM
@@ -616,7 +638,7 @@ function doClear() {
   const ok = fin <= st.targetMs;
   const isUlt = st.diffIdx === L.DIFFS.length - 1;
   const rew = L.expReward(st.diff.exp, fin, st.targetMs, isUlt); // {exp, mult, fixed}
-  const e = rew.exp;
+  const e = st.simple ? Math.round(rew.exp * 1.5) : rew.exp; // シンプルモードは基本EXP1.5倍
   const prevScore = L.masteryScore(S.save.exp);
   // LV99到達(=530000)で経験値は打ち止め。超過分はやりこみスコアとして累計上限まで貯まる
   S.save.exp = Math.min(L.EXP_TOTAL_MAX, S.save.exp + e); S.save.badges[st.diffIdx]++; persist();
@@ -663,7 +685,7 @@ function buildClearOverlay(raw, fin, ok, e, lv, coinF, diaF, rew) {
     const tag = rew.fixed ? '🏆 スペシャル' : 'EXP ×' + rew.mult;
     html += '<div class="crow cbig">' + pct + '% → ' + tag + '</div>';
   }
-  html += '<div class="crow">EXP <b>+' + e + '</b>　(LV ' + lv + ')</div>';
+  html += '<div class="crow">EXP <b>+' + e + '</b>　(LV ' + lv + ')' + (st.simple ? '　<span class="tag">' + t('simple') + ' ×1.5</span>' : '') + '</div>';
   // LV99カンスト後は やりこみスコア（累計EXP−530000・最大999999）を金色で表示
   const sc = L.masteryScore(S.save.exp);
   if (sc > 0) html += '<div class="crow cbig">' + t('masteryScore') + ' <b>' + sc + '</b> / ' + L.SCORE_MAX + '</div>';
@@ -675,6 +697,10 @@ function hexRgb(hx) { const n = parseInt(hx.slice(1), 16); return [(n >> 16) & 2
 function makeTrail(th) { // ⑨足あと色：迷宮ごとに壁色から作る（壁と見分けがつく濃さ）
   const c = hexRgb(th.front);
   return [0.24, 0.42, 0.6].map(a => 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + a + ')');
+}
+function mixHex(a, b, t) { // 2色をtの比率で混ぜる（#rrggbb）
+  const A = hexRgb(a), B = hexRgb(b), ch = i => Math.round(A[i] + (B[i] - A[i]) * t);
+  return '#' + ((1 << 24) + (ch(0) << 16) + (ch(1) << 8) + ch(2)).toString(16).slice(1);
 }
 function distMap(m, gx, gy) { // ゴールからの歩行距離（アイテム無しの通路のみ）
   const dist = new Int32Array(m.w * m.h).fill(-1);
@@ -959,7 +985,8 @@ function render() {
     // 床
     for (let by = y0; by <= y1; by++) for (let bx = x0; bx <= x1; bx++) {
       if (m.g[by * m.bw + bx] !== 0) continue;
-      ctx.fillStyle = ((bx + by) & 1) ? th.floor : th.floor2;
+      const rm = st.roomMask[by * m.bw + bx]; // 宝箱部屋のマスは少し違う床色
+      ctx.fillStyle = ((bx + by) & 1) ? (rm ? st.roomFloor : th.floor) : (rm ? st.roomFloor2 : th.floor2);
       ctx.fillRect(bPos(bx), bPos(by), bSize(bx), bSize(by));
       // ⑨ヘンゼル：歩いた部屋の床に足あと色（通った回数で濃くなる）
       if (st.hanselShades > 0 && (bx & 1) && (by & 1)) {
@@ -1481,7 +1508,7 @@ function applyLang() {
   $('lblCoin').textContent = it[2]; $('lblDia').textContent = it[3];
   $('lblFist').textContent = t('sk').m[0]; $('lblWarp').textContent = t('sk').warp[0];
   if (S.screen === 'play' && S.stage) {
-    $('diffName').textContent = t('diffs')[S.stage.diffIdx];
+    $('diffName').textContent = t('diffs')[S.stage.diffIdx] + (S.stage.simple ? '（' + t('simple') + '）' : '');
     $('timeTarget').textContent = t('target') + ' ' + fmt(S.stage.targetMs);
     descDefault();
   }
@@ -1528,15 +1555,25 @@ function buildDiffList() {
   const el = $('diffList'); el.innerHTML = '';
   L.DIFFS.forEach((d, i) => {
     const locked = i > 0 && S.save.badges[i - 1] <= 0;
+    const row = document.createElement('div'); row.className = 'diffRow';
     const b = document.createElement('button');
     b.className = 'diffBtn' + (locked ? ' locked' : '');
     const badge = S.save.badges[i] > 0 ? '<span class="badge">🏅×' + S.save.badges[i] + '</span>' : '<span class="badge"></span>';
     b.innerHTML = '<span>' + (locked ? '🔒 ' : '') + t('diffs')[i] + '</span><small>' + d.w + '×' + d.h + '</small>' + badge;
     b.onclick = () => {
       if (locked) { toast(t('locked')); Snd.sfx('nope'); return; }
-      Snd.sfx('tap'); startStage(i);
+      Snd.sfx('tap'); startStage(i, false);
     };
-    el.appendChild(b);
+    // シンプルモード：スキル・宝箱なしの素の迷路。装備を外さず遊べてEXPは×1.5
+    const s = document.createElement('button');
+    s.className = 'diffBtn simple' + (locked ? ' locked' : '');
+    s.innerHTML = '<span>' + t('simple') + '</span><small>×1.5</small>';
+    s.onclick = () => {
+      if (locked) { toast(t('locked')); Snd.sfx('nope'); return; }
+      Snd.sfx('tap'); startStage(i, true);
+    };
+    row.appendChild(b); row.appendChild(s);
+    el.appendChild(row);
   });
 }
 function buildSkillCards() {

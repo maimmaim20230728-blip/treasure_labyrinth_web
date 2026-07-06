@@ -77,7 +77,7 @@ const I18N = {
     },
     vSpeed: 'はやさ {n}マス/びょう', vChest: 'しゅつげん ＋{n}%', vLucky: 'からっぽ {n}%', vHawk: 'しかい {n}マス',
     vCraft: 'どうぐ {n}かい', vWarp: 'ちかくワープ {n}%', vHansel: 'あしあと {n}だんかい', vClone: 'ぶんしん {n}にん',
-    vCT: 'CT {n}びょう', vMaster: '🪙×{a}・💎×{b}', chooseLang: 'ことばを えらぶ', expMax: '（LV99 カンスト！）', treasureMaster: 'トレジャーマスター', masteryScore: 'やりこみスコア',
+    vCT: 'CT {n}びょう', vMaster: '🪙×{a}・💎×{b}', chooseLang: 'ことばを えらぶ', expMax: '（LV99 カンスト！）', treasureMaster: 'トレジャーマスター', masteryScore: 'やりこみスコア', simple: 'シンプル',
   },
 
   en: {
@@ -119,7 +119,7 @@ const I18N = {
     },
     vSpeed: 'Speed {n}/s', vChest: 'Chests +{n}%', vLucky: 'Empty {n}%', vHawk: 'Sight {n}',
     vCraft: 'Tools ×{n}', vWarp: 'Near warp {n}%', vHansel: '{n} shades', vClone: '{n} clones',
-    vCT: 'CT {n}s', vMaster: '🪙×{a} 💎×{b}', chooseLang: 'Choose language', expMax: '(MAX level!)', treasureMaster: 'TREASURE MASTER', masteryScore: 'Mastery Score',
+    vCT: 'CT {n}s', vMaster: '🪙×{a} 💎×{b}', chooseLang: 'Choose language', expMax: '(MAX level!)', treasureMaster: 'TREASURE MASTER', masteryScore: 'Mastery Score', simple: 'Simple',
   },
 
   zh: {
@@ -160,7 +160,7 @@ const I18N = {
     },
     vSpeed: '速度 {n}格/秒', vChest: '出现 +{n}%', vLucky: '空箱 {n}%', vHawk: '视野 {n}格',
     vCraft: '工具 {n}次', vWarp: '近点传送 {n}%', vHansel: '足迹 {n}级', vClone: '分身 {n}人',
-    vCT: '冷却 {n}秒', vMaster: '🪙×{a}·💎×{b}', chooseLang: '选择语言', expMax: '（LV99 满级！）', treasureMaster: '宝藏大师', masteryScore: '成就分数',
+    vCT: '冷却 {n}秒', vMaster: '🪙×{a}·💎×{b}', chooseLang: '选择语言', expMax: '（LV99 满级！）', treasureMaster: '宝藏大师', masteryScore: '成就分数', simple: '简约',
   },
 
   'zh-TW': {
@@ -201,7 +201,7 @@ const I18N = {
     },
     vSpeed: '速度 {n}格/秒', vChest: '出現 +{n}%', vLucky: '空箱 {n}%', vHawk: '視野 {n}格',
     vCraft: '工具 {n}次', vWarp: '近點傳送 {n}%', vHansel: '足跡 {n}級', vClone: '分身 {n}人',
-    vCT: '冷卻 {n}秒', vMaster: '🪙×{a}·💎×{b}', chooseLang: '選擇語言', expMax: '（LV99 滿級！）', treasureMaster: '寶藏大師', masteryScore: '成就分數',
+    vCT: '冷卻 {n}秒', vMaster: '🪙×{a}·💎×{b}', chooseLang: '選擇語言', expMax: '（LV99 滿級！）', treasureMaster: '寶藏大師', masteryScore: '成就分數', simple: '簡約',
   },
 
   ko: {
@@ -242,7 +242,7 @@ const I18N = {
     },
     vSpeed: '속도 {n}칸/초', vChest: '출현 +{n}%', vLucky: '빈상자 {n}%', vHawk: '시야 {n}칸',
     vCraft: '도구 {n}회', vWarp: '근접워프 {n}%', vHansel: '발자국 {n}단계', vClone: '분신 {n}명',
-    vCT: '쿨 {n}초', vMaster: '🪙×{a}·💎×{b}', chooseLang: '언어 선택', expMax: '(LV99 만렙!)', treasureMaster: '트레저 마스터', masteryScore: '숙련 점수',
+    vCT: '쿨 {n}초', vMaster: '🪙×{a}·💎×{b}', chooseLang: '언어 선택', expMax: '(LV99 만렙!)', treasureMaster: '트레저 마스터', masteryScore: '숙련 점수', simple: '심플',
   },
 
   es: {
@@ -283,7 +283,7 @@ const I18N = {
     },
     vSpeed: 'Vel. {n}/s', vChest: 'Cofres +{n}%', vLucky: 'Vacío {n}%', vHawk: 'Vista {n}',
     vCraft: 'Usos ×{n}', vWarp: 'Salto cercano {n}%', vHansel: '{n} tonos', vClone: '{n} clones',
-    vCT: 'CT {n}s', vMaster: '🪙×{a} 💎×{b}', chooseLang: 'Elige idioma', expMax: '(¡Nivel MÁXIMO!)', treasureMaster: 'MAESTRO DEL TESORO', masteryScore: 'Puntuación de maestría',
+    vCT: 'CT {n}s', vMaster: '🪙×{a} 💎×{b}', chooseLang: 'Elige idioma', expMax: '(¡Nivel MÁXIMO!)', treasureMaster: 'MAESTRO DEL TESORO', masteryScore: 'Puntuación de maestría', simple: 'Simple',
   },
 
   pt: {
@@ -324,7 +324,7 @@ const I18N = {
     },
     vSpeed: 'Vel. {n}/s', vChest: 'Baús +{n}%', vLucky: 'Vazio {n}%', vHawk: 'Visão {n}',
     vCraft: 'Usos ×{n}', vWarp: 'Salto perto {n}%', vHansel: '{n} tons', vClone: '{n} clones',
-    vCT: 'CT {n}s', vMaster: '🪙×{a} 💎×{b}', chooseLang: 'Escolher idioma', expMax: '(Nível MÁXIMO!)', treasureMaster: 'MESTRE DO TESOURO', masteryScore: 'Pontuação de maestria',
+    vCT: 'CT {n}s', vMaster: '🪙×{a} 💎×{b}', chooseLang: 'Escolher idioma', expMax: '(Nível MÁXIMO!)', treasureMaster: 'MESTRE DO TESOURO', masteryScore: 'Pontuação de maestria', simple: 'Simples',
   },
 
   fr: {
@@ -365,7 +365,7 @@ const I18N = {
     },
     vSpeed: 'Vit. {n}/s', vChest: 'Coffres +{n}%', vLucky: 'Vide {n}%', vHawk: 'Vue {n}',
     vCraft: 'Usages ×{n}', vWarp: 'Saut proche {n}%', vHansel: '{n} teintes', vClone: '{n} clones',
-    vCT: 'CT {n}s', vMaster: '🪙×{a} 💎×{b}', chooseLang: 'Choisir la langue', expMax: '(Niveau MAX !)', treasureMaster: 'MAÎTRE DU TRÉSOR', masteryScore: 'Score de maîtrise',
+    vCT: 'CT {n}s', vMaster: '🪙×{a} 💎×{b}', chooseLang: 'Choisir la langue', expMax: '(Niveau MAX !)', treasureMaster: 'MAÎTRE DU TRÉSOR', masteryScore: 'Score de maîtrise', simple: 'Simple',
   },
 
   de: {
@@ -406,7 +406,7 @@ const I18N = {
     },
     vSpeed: 'Tempo {n}/s', vChest: 'Truhen +{n}%', vLucky: 'Leer {n}%', vHawk: 'Sicht {n}',
     vCraft: 'Nutzung ×{n}', vWarp: 'Nah-Warp {n}%', vHansel: '{n} Stufen', vClone: '{n} Klone',
-    vCT: 'CT {n}s', vMaster: '🪙×{a} 💎×{b}', chooseLang: 'Sprache wählen', expMax: '(MAX-Level!)', treasureMaster: 'SCHATZMEISTER', masteryScore: 'Meisterschaftspunkte',
+    vCT: 'CT {n}s', vMaster: '🪙×{a} 💎×{b}', chooseLang: 'Sprache wählen', expMax: '(MAX-Level!)', treasureMaster: 'SCHATZMEISTER', masteryScore: 'Meisterschaftspunkte', simple: 'Schlicht',
   },
 
   it: {
@@ -447,7 +447,7 @@ const I18N = {
     },
     vSpeed: 'Vel. {n}/s', vChest: 'Forzieri +{n}%', vLucky: 'Vuoto {n}%', vHawk: 'Vista {n}',
     vCraft: 'Usi ×{n}', vWarp: 'Salto vicino {n}%', vHansel: '{n} tonalità', vClone: '{n} cloni',
-    vCT: 'CT {n}s', vMaster: '🪙×{a} 💎×{b}', chooseLang: 'Scegli la lingua', expMax: '(Livello MAX!)', treasureMaster: 'MAESTRO DEL TESORO', masteryScore: 'Punteggio maestria',
+    vCT: 'CT {n}s', vMaster: '🪙×{a} 💎×{b}', chooseLang: 'Scegli la lingua', expMax: '(Livello MAX!)', treasureMaster: 'MAESTRO DEL TESORO', masteryScore: 'Punteggio maestria', simple: 'Semplice',
   },
 
   nl: {
@@ -488,7 +488,7 @@ const I18N = {
     },
     vSpeed: 'Snelh. {n}/s', vChest: 'Kisten +{n}%', vLucky: 'Leeg {n}%', vHawk: 'Zicht {n}',
     vCraft: 'Gebruik ×{n}', vWarp: 'Dichtbij-warp {n}%', vHansel: '{n} tinten', vClone: '{n} klonen',
-    vCT: 'CT {n}s', vMaster: '🪙×{a} 💎×{b}', chooseLang: 'Kies taal', expMax: '(MAX level!)', treasureMaster: 'SCHATMEESTER', masteryScore: 'Meesterschapscore',
+    vCT: 'CT {n}s', vMaster: '🪙×{a} 💎×{b}', chooseLang: 'Kies taal', expMax: '(MAX level!)', treasureMaster: 'SCHATMEESTER', masteryScore: 'Meesterschapscore', simple: 'Simpel',
   },
 
   pl: {
@@ -529,7 +529,7 @@ const I18N = {
     },
     vSpeed: 'Szybk. {n}/s', vChest: 'Skrzynie +{n}%', vLucky: 'Puste {n}%', vHawk: 'Wzrok {n}',
     vCraft: 'Użycia ×{n}', vWarp: 'Bliski teleport {n}%', vHansel: '{n} odcienie', vClone: '{n} klonów',
-    vCT: 'CT {n}s', vMaster: '🪙×{a} 💎×{b}', chooseLang: 'Wybierz język', expMax: '(MAX poziom!)', treasureMaster: 'MISTRZ SKARBÓW', masteryScore: 'Wynik mistrzostwa',
+    vCT: 'CT {n}s', vMaster: '🪙×{a} 💎×{b}', chooseLang: 'Wybierz język', expMax: '(MAX poziom!)', treasureMaster: 'MISTRZ SKARBÓW', masteryScore: 'Wynik mistrzostwa', simple: 'Prosty',
   },
 
   ru: {
@@ -570,7 +570,7 @@ const I18N = {
     },
     vSpeed: 'Скор. {n}/с', vChest: 'Сундуки +{n}%', vLucky: 'Пустые {n}%', vHawk: 'Обзор {n}',
     vCraft: 'Исп. ×{n}', vWarp: 'Ближний тп {n}%', vHansel: '{n} оттенка', vClone: '{n} двойн.',
-    vCT: 'КД {n}с', vMaster: '🪙×{a} 💎×{b}', chooseLang: 'Выбрать язык', expMax: '(МАКС. уровень!)', treasureMaster: 'МАСТЕР СОКРОВИЩ', masteryScore: 'Очки мастерства',
+    vCT: 'КД {n}с', vMaster: '🪙×{a} 💎×{b}', chooseLang: 'Выбрать язык', expMax: '(МАКС. уровень!)', treasureMaster: 'МАСТЕР СОКРОВИЩ', masteryScore: 'Очки мастерства', simple: 'Простой',
   },
 
   tr: {
@@ -611,7 +611,7 @@ const I18N = {
     },
     vSpeed: 'Hız {n}/sn', vChest: 'Sandık +{n}%', vLucky: 'Boş {n}%', vHawk: 'Görüş {n}',
     vCraft: 'Kullanım ×{n}', vWarp: 'Yakın ışınlanma {n}%', vHansel: '{n} ton', vClone: '{n} klon',
-    vCT: 'CT {n}sn', vMaster: '🪙×{a} 💎×{b}', chooseLang: 'Dil seç', expMax: '(MAKS seviye!)', treasureMaster: 'HAZİNE USTASI', masteryScore: 'Ustalık Puanı',
+    vCT: 'CT {n}sn', vMaster: '🪙×{a} 💎×{b}', chooseLang: 'Dil seç', expMax: '(MAKS seviye!)', treasureMaster: 'HAZİNE USTASI', masteryScore: 'Ustalık Puanı', simple: 'Sade',
   },
 
   hi: {
@@ -652,7 +652,7 @@ const I18N = {
     },
     vSpeed: 'गति {n}/से', vChest: 'संदूक +{n}%', vLucky: 'खाली {n}%', vHawk: 'दृष्टि {n}',
     vCraft: 'उपयोग ×{n}', vWarp: 'निकट वार्प {n}%', vHansel: '{n} स्तर', vClone: '{n} प्रतिरूप',
-    vCT: 'CT {n}से', vMaster: '🪙×{a} 💎×{b}', chooseLang: 'भाषा चुनें', expMax: '(अधिकतम स्तर!)', treasureMaster: 'खज़ाना मास्टर', masteryScore: 'महारत स्कोर',
+    vCT: 'CT {n}से', vMaster: '🪙×{a} 💎×{b}', chooseLang: 'भाषा चुनें', expMax: '(अधिकतम स्तर!)', treasureMaster: 'खज़ाना मास्टर', masteryScore: 'महारत स्कोर', simple: 'सरल',
   },
 
   id: {
@@ -693,7 +693,7 @@ const I18N = {
     },
     vSpeed: 'Kec. {n}/dtk', vChest: 'Peti +{n}%', vLucky: 'Kosong {n}%', vHawk: 'Pandangan {n}',
     vCraft: 'Pakai ×{n}', vWarp: 'Warp dekat {n}%', vHansel: '{n} tingkat', vClone: '{n} klon',
-    vCT: 'CT {n}dtk', vMaster: '🪙×{a} 💎×{b}', chooseLang: 'Pilih bahasa', expMax: '(Level MAKS!)', treasureMaster: 'MASTER HARTA', masteryScore: 'Skor Penguasaan',
+    vCT: 'CT {n}dtk', vMaster: '🪙×{a} 💎×{b}', chooseLang: 'Pilih bahasa', expMax: '(Level MAKS!)', treasureMaster: 'MASTER HARTA', masteryScore: 'Skor Penguasaan', simple: 'Simpel',
   },
 
   ar: {
@@ -734,7 +734,7 @@ const I18N = {
     },
     vSpeed: 'السرعة {n}/ث', vChest: 'صناديق +{n}%', vLucky: 'فارغ {n}%', vHawk: 'الرؤية {n}',
     vCraft: 'استخدام ×{n}', vWarp: 'انتقال قريب {n}%', vHansel: '{n} درجات', vClone: '{n} نسخ',
-    vCT: 'انتظار {n}ث', vMaster: '🪙×{a} 💎×{b}', chooseLang: 'اختر اللغة', expMax: '(المستوى الأقصى!)', treasureMaster: 'سيد الكنوز', masteryScore: 'نقاط الإتقان',
+    vCT: 'انتظار {n}ث', vMaster: '🪙×{a} 💎×{b}', chooseLang: 'اختر اللغة', expMax: '(المستوى الأقصى!)', treasureMaster: 'سيد الكنوز', masteryScore: 'نقاط الإتقان', simple: 'بسيط',
   },
 
   bn: {
@@ -775,7 +775,7 @@ const I18N = {
     },
     vSpeed: 'গতি {n}/সে', vChest: 'সিন্দুক +{n}%', vLucky: 'খালি {n}%', vHawk: 'দৃষ্টি {n}',
     vCraft: 'ব্যবহার ×{n}', vWarp: 'কাছের ওয়ার্প {n}%', vHansel: '{n} ধাপ', vClone: '{n} প্রতিরূপ',
-    vCT: 'CT {n}সে', vMaster: '🪙×{a} 💎×{b}', chooseLang: 'ভাষা বাছো', expMax: '(সর্বোচ্চ লেভেল!)', treasureMaster: 'ট্রেজার মাস্টার', masteryScore: 'দক্ষতা স্কোর',
+    vCT: 'CT {n}সে', vMaster: '🪙×{a} 💎×{b}', chooseLang: 'ভাষা বাছো', expMax: '(সর্বোচ্চ লেভেল!)', treasureMaster: 'ট্রেজার মাস্টার', masteryScore: 'দক্ষতা স্কোর', simple: 'সরল',
   },
 
   sw: {
@@ -816,7 +816,7 @@ const I18N = {
     },
     vSpeed: 'Kasi {n}/sek', vChest: 'Masanduku +{n}%', vLucky: 'Tupu {n}%', vHawk: 'Uoni {n}',
     vCraft: 'Matumizi ×{n}', vWarp: 'Warp karibu {n}%', vHansel: 'Vivuli {n}', vClone: 'Nakala {n}',
-    vCT: 'CT {n}sek', vMaster: '🪙×{a} 💎×{b}', chooseLang: 'Chagua lugha', expMax: '(Kiwango cha JUU!)', treasureMaster: 'BINGWA WA HAZINA', masteryScore: 'Alama za Umahiri',
+    vCT: 'CT {n}sek', vMaster: '🪙×{a} 💎×{b}', chooseLang: 'Chagua lugha', expMax: '(Kiwango cha JUU!)', treasureMaster: 'BINGWA WA HAZINA', masteryScore: 'Alama za Umahiri', simple: 'Rahisi',
   },
 
   },
