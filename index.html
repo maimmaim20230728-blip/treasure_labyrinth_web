@@ -113,7 +113,19 @@
 <script src="game.js"></script>
 <script>
 if ('serviceWorker' in navigator && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
-  addEventListener('load', () => navigator.serviceWorker.register('sw.js'));
+  // 起動時に最新版を確認し、新しいバージョンが有効になったら1回だけ自動リロード（更新の取りこぼし防止）
+  let reloading = false;
+  const hadController = !!navigator.serviceWorker.controller; // 初回インストール時のムダなリロードは避ける
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (reloading || !hadController) return;
+    reloading = true; location.reload();
+  });
+  addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').then(reg => {
+      reg.update(); // 起動のたびに新版チェック
+      addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') reg.update(); });
+    }).catch(() => {});
+  });
 }
 </script>
 <script type="module">
