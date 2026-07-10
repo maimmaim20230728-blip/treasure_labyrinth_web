@@ -209,7 +209,8 @@ function loadSave() {
   let s = null;
   try { s = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); } catch (e) {}
   const nd = L.DIFFS.length;
-  S.save = Object.assign({ gender: 'm', exp: 0, badges: [], equipped: null, sound: true, fontScale: 0, volBgm: 1, volSfx: 1 }, s || {});
+  S.save = Object.assign({ gender: 'm', exp: 0, badges: [], equipped: null, sound: true, fontScale: 0, volBgm: 1, volSfx: 1, replays: [] }, s || {});
+  if (!Array.isArray(S.save.replays)) S.save.replays = []; // シンプルモードのリプレイ（最大9件）
   if (!Array.isArray(S.save.badges)) S.save.badges = [];
   while (S.save.badges.length < nd) S.save.badges.push(0); // 難易度が増えても進捗を保持
   if (!Array.isArray(S.save.equipped)) S.save.equipped = [defaultSkill(S.save.gender)];
@@ -271,7 +272,8 @@ function updateCam(dt) {
 function startStage(di, simple) {
   simple = !!simple;
   const diff = L.DIFFS[di];
-  const m = L.generate(diff.w, diff.h, null, { rooms: !simple }); // シンプルは部屋なしの純粋な迷路
+  const seed = (Math.random() * 4294967296) >>> 0; // リプレイ再現用のシード（同じ迷路を作り直せる）
+  const m = L.generate(diff.w, diff.h, seed, { rooms: !simple }); // シンプルは部屋なしの純粋な迷路
   // スタート＝四隅のどこかランダム／ゴール＝残り三隅 or 真ん中付近からランダム
   const corners = [[0, 0], [diff.w - 1, 0], [0, diff.h - 1], [diff.w - 1, diff.h - 1]];
   const si = (Math.random() * 4) | 0;
@@ -291,7 +293,9 @@ function startStage(di, simple) {
   // シンプルモードはスキルを一切使わない（装備を外さずに素の迷路を楽しめる）
   const eq = simple ? new Set() : new Set(S.save.equipped);
   const st = {
-    diffIdx: di, diff, m, start, goal, lv, eq, simple,
+    diffIdx: di, diff, m, start, goal, lv, eq, simple, seed,
+    rec: simple ? { fr: [], lastT: -1 } : null, rep: null, // リプレイ記録/再生
+
     ladders: new Uint8Array(m.bw * m.bh),
     chests: new Map(),
     timer: new L.StageTimer(),
@@ -481,7 +485,7 @@ function applyChest(res) {
 }
 
 /* ---- アイテム使用（ターゲットモード） ---- */
-function playActive() { return S.screen === 'play' && S.stage && !S.stage.cleared && !S.stage.cuts.active; }
+function playActive() { return S.screen === 'play' && S.stage && !S.stage.rep && !S.stage.cleared && !S.stage.cuts.active; }
 function setTarget(mode) {
   S.targetMode = mode;
   updateSlots();
@@ -555,6 +559,7 @@ function attachInput() {
     if (S.pointers.size === 2) { S.tracing = false; S.pinchD = pinchDist(); return; }
     if (S.screen !== 'play' || !S.stage) return;
     const st = S.stage;
+    if (st.rep) return; // リプレイ再生中はなぞり移動しない（ズーム/カメラのみ操作可）
     if (st.cuts.active) { st.cuts.skip(); return; } // タップで演出を即スキップ
     if (st.cleared) return;
     if (S.targetMode) {
@@ -594,6 +599,7 @@ function attachInput() {
     const d = KEYMAP[e.key.toLowerCase()];
     if (d == null) return;
     if (S.screen !== 'play' || !S.stage) return;
+    if (S.stage.rep) return; // リプレイ再生中はキー移動しない
     e.preventDefault();
     if (e.repeat) return; // 押しっぱなしはtick側で毎フレーム処理（OSのリピート待ちを排除）
     S.keysHeld.set(d, S.stage.gameTime); S.lastKeyDir = d;
@@ -645,6 +651,11 @@ function doClear() {
   const newLv = L.levelFor(S.save.exp);
   const newScore = L.masteryScore(S.save.exp);
   const gotMaster = newScore >= L.SCORE_MAX && prevScore < L.SCORE_MAX; // トレジャーマスター達成の瞬間
+  // シンプルモードはリプレイを用意（クリア画面から保存できる）
+  if (st.rec) {
+    st.rec.fr.push(Math.round(st.gameTime), Math.round(st.char.x), Math.round(st.char.y), st.char.dir);
+    S.pendingReplay = { v: 1, diffIdx: st.diffIdx, seed: st.seed, sx: st.start.rx, sy: st.start.ry, gx: st.goal.rx, gy: st.goal.ry, theme: st.themeIdx, fr: st.rec.fr, ms: raw, date: Date.now() };
+  } else S.pendingReplay = null;
   // レベルアップ演出はクリア結果を閉じてから（同時だと見にくいので分離）
   S.pendingLevelUp = (newLv > prevLv) ? { prevLv, newLv } : null;
   setTimeout(() => {
@@ -652,6 +663,8 @@ function doClear() {
     else    { Snd.sfx('clearSoft'); Snd.bgm('clearSoft'); spawnConfetti(25); } // ひかえめ
     buildClearOverlay(raw, fin, ok, e, newLv, coinF, diaF, rew);
     showScreen('clear');
+    $('btnSaveReplay').classList.toggle('hidden', !st.simple); // シンプルのみ保存ボタン
+    if (st.simple) { $('btnSaveReplay').textContent = t('saveReplay'); $('btnSaveReplay').disabled = false; }
     // 🎉最高難易度クリア or LV99到達 or 🏆トレジャーマスター達成 → 大演出
     const gotLv99 = newLv >= 99 && prevLv < 99;
     if (isUlt || gotLv99 || gotMaster) setTimeout(() => showCongrats(isUlt, gotLv99, gotMaster), 1100);
@@ -690,6 +703,125 @@ function buildClearOverlay(raw, fin, ok, e, lv, coinF, diaF, rew) {
   const sc = L.masteryScore(S.save.exp);
   if (sc > 0) html += '<div class="crow cbig">' + t('masteryScore') + ' <b>' + sc + '</b> / ' + L.SCORE_MAX + '</div>';
   $('clearBody').innerHTML = html;
+}
+
+/* ---- リプレイ（シンプルモード限定・動き/向き/停止時間を記録して“再シミュレーション”で再現） ----
+   録画ではなく座標列を記録するので、再生中もズーム/カメラを自由に操作できる。最大9件保存。 */
+const REC_MS = 66; // 記録サンプル間隔
+function recordFrame(st) {
+  const r = st.rec, c = st.char, t = Math.round(st.gameTime);
+  if (r.lastT >= 0 && t - r.lastT < REC_MS) return;
+  const f = r.fr, n = f.length;
+  const x = Math.round(c.x), y = Math.round(c.y), d = c.dir;
+  // 停止が続く間は最後のサンプルの時刻だけ延長（＝停止時間はそのまま再現・データは膨らまない）
+  if (n >= 8 && f[n - 3] === x && f[n - 2] === y && f[n - 1] === d
+             && f[n - 7] === x && f[n - 6] === y && f[n - 5] === d) {
+    f[n - 4] = t;
+  } else f.push(t, x, y, d);
+  r.lastT = t;
+}
+function updateReplay(st, dt) {
+  const r = st.rep, fr = r.fr, c = st.char, n = fr.length;
+  if (r.playing) { r.t += dt; if (r.t >= r.dur) { r.t = r.dur; r.playing = false; updateReplayBar(st); } }
+  if (n >= 4) {
+    let i = 0; while (i + 4 < n && fr[i + 4] <= r.t) i += 4; // 現在時刻の区間を探す
+    const x0 = fr[i + 1], y0 = fr[i + 2], d0 = fr[i + 3];
+    const px = c.x, py = c.y; // 歩行アニメ用（このフレームで動いた距離）
+    if (i + 4 < n) {
+      const t0 = fr[i], t1 = fr[i + 4], x1 = fr[i + 5], y1 = fr[i + 6];
+      const k = t1 > t0 ? Math.min(1, Math.max(0, (r.t - t0) / (t1 - t0))) : 0;
+      c.x = x0 + (x1 - x0) * k; c.y = y0 + (y1 - y0) * k;
+      const dx = x1 - x0, dy = y1 - y0;
+      if (dx !== 0 || dy !== 0) {
+        // 🔴向きは記録値ではなく実際の変位から出す（記録値は区間頭＝一歩前の向きが残り、曲がり角でズレるため）
+        c.dir = (Math.abs(dx) >= Math.abs(dy)) ? (dx > 0 ? 1 : 3) : (dy > 0 ? 2 : 0);
+        c.animT += Math.hypot(c.x - px, c.y - py); // 通常プレイと同じ「移動距離」基準で歩行アニメ
+        c.frame = ((c.animT / (T * 0.8)) | 0) % 2;
+      } else { c.frame = 0; c.animT = 0; } // 停止区間（記録された停止時間ぶん そのまま止まる）
+    } else { c.x = x0; c.y = y0; c.dir = d0; c.frame = 0; } // 終端は記録された最終向き
+  }
+  st.timer.ms = r.t;
+  $('repTime').textContent = fmt(r.t) + ' / ' + fmt(r.dur); // 再生バーの時刻も毎フレーム更新
+}
+function buildReplayStage(rep) {
+  const diff = L.DIFFS[rep.diffIdx];
+  const m = L.generate(diff.w, diff.h, rep.seed, { rooms: false }); // 同じシードで同じ迷路
+  const start = { rx: rep.sx, ry: rep.sy }, goal = { rx: rep.gx, ry: rep.gy };
+  const fr = rep.fr, dur = fr.length ? fr[fr.length - 4] : 0;
+  const st = {
+    diffIdx: rep.diffIdx, diff, m, start, goal, lv: 0, eq: new Set(), simple: true, seed: rep.seed,
+    rec: null, rep: { fr, t: 0, dur, playing: true },
+    ladders: new Uint8Array(m.bw * m.bh), chests: new Map(),
+    timer: new L.StageTimer(), plan: [], gameTime: 0, targetMs: rep.ms,
+    counts: { pick: 0, ladder: 0, coin: 0, diamond: 0 },
+    char: { rx: start.rx, ry: start.ry, x: fr.length ? fr[1] : roomX(start.rx), y: fr.length ? fr[2] : roomY(start.ry), dir: fr.length ? fr[3] : 2, frame: 0, animT: 0, moving: null },
+    cam: { x: roomX(start.rx), y: roomY(start.ry) },
+    themeIdx: rep.theme, particles: [], shake: 0, cleared: false, tackleReadyAt: 0,
+    speed: L.CHAR_SPEED, viewRange: 7, pickCharges: 0, ladderRetrievals: 0,
+    warpReadyAt: 0, warpOk: false, warpAbility: false, hanselShades: 0,
+    visits: new Uint8Array(diff.w * diff.h), clones: [], cloneSpeed: 1, goalArrow: false,
+  };
+  st.theme = THEMES[st.themeIdx];
+  st.cuts = new L.CutsceneCtrl(st.timer);
+  st.trailCol = makeTrail(st.theme);
+  st.roomFloor = mixHex(st.theme.floor, st.theme.top, 0.33);
+  st.roomFloor2 = mixHex(st.theme.floor2, st.theme.top2, 0.33);
+  st.roomMask = new Uint8Array(m.bw * m.bh);
+  st.goalDist = distMap(m, goal.rx, goal.ry);
+  st.timer.ms = 0;
+  return st;
+}
+function startReplay(rep) {
+  S.stage = buildReplayStage(rep); S.zoom = 1; S.targetMode = null; S.tracing = false;
+  showScreen('play');
+  $('diffName').textContent = t('diffs')[rep.diffIdx] + '（' + t('replay') + '）';
+  $('timeTarget').textContent = t('target') + ' ' + fmt(rep.ms);
+  showStageName(t('themes')[S.stage.themeIdx]);
+  Snd.bgm(THEME_BGM[S.stage.themeIdx]);
+  updateReplayBar(S.stage);
+}
+function updateReplayBar(st) {
+  if (!st || !st.rep) return;
+  const r = st.rep;
+  $('btnRepPlay').textContent = r.playing ? '⏸' : (r.t >= r.dur ? '↻' : '▶');
+  $('repTime').textContent = fmt(r.t) + ' / ' + fmt(r.dur);
+}
+function replayToggle() {
+  const st = S.stage; if (!st || !st.rep) return;
+  const r = st.rep;
+  if (r.t >= r.dur) { r.t = 0; r.playing = true; } else r.playing = !r.playing;
+  updateReplayBar(st); Snd.sfx('tap');
+}
+function replayRestart() {
+  const st = S.stage; if (!st || !st.rep) return;
+  st.rep.t = 0; st.rep.playing = true; updateReplayBar(st); Snd.sfx('tap');
+}
+function saveCurrentReplay() {
+  if (!S.pendingReplay) return;
+  S.save.replays.unshift(S.pendingReplay);      // 新しいものを先頭へ
+  while (S.save.replays.length > 9) S.save.replays.pop(); // 最大9件（古いものを消す）
+  persist(); S.pendingReplay = null;
+  $('btnSaveReplay').textContent = '✓ ' + t('replaySaved');
+  $('btnSaveReplay').disabled = true;
+  Snd.sfx('coin');
+}
+function buildReplayList() {
+  $('replayTitle').textContent = '▶ ' + t('replay');
+  const el = $('replayList'); el.innerHTML = '';
+  const list = S.save.replays;
+  if (!list.length) { el.innerHTML = '<div class="repEmpty">' + t('noReplays') + '</div>'; return; }
+  list.forEach((rep, idx) => {
+    const row = document.createElement('div'); row.className = 'repItem';
+    const play = document.createElement('button'); play.className = 'repPlay';
+    const dt = new Date(rep.date || 0);
+    const dstr = (dt.getMonth() + 1) + '/' + dt.getDate() + ' ' + dt.getHours() + ':' + String(dt.getMinutes()).padStart(2, '0');
+    play.innerHTML = '<span>▶ ' + t('diffs')[rep.diffIdx] + '</span><small>' + fmt(rep.ms) + '　' + dstr + '</small>';
+    play.onclick = () => { Snd.sfx('tap'); startReplay(rep); };
+    const del = document.createElement('button'); del.className = 'repDel'; del.textContent = '🗑';
+    del.onclick = () => { list.splice(idx, 1); persist(); Snd.sfx('tap'); buildReplayList(); };
+    row.appendChild(play); row.appendChild(del);
+    el.appendChild(row);
+  });
 }
 
 /* ---- スキル本体（⑧ワープ・⑨ヘンゼル・⑩分身の術） ---- */
@@ -895,7 +1027,9 @@ function updateFireworks(dt) {
 /* ---- 毎フレーム更新 ---- */
 function tick(dt) {
   const st = S.stage;
-  if (st && S.screen === 'play' && !st.cleared) {
+  if (st && S.screen === 'play' && st.rep) {
+    updateReplay(st, dt); // リプレイ再生：記録データからキャラを動かす（ズーム/カメラは通常どおり操作できる）
+  } else if (st && S.screen === 'play' && !st.cleared) {
     st.cuts.update(dt);
     const cutA = st.cuts.active;
     if (cutA) {
@@ -937,6 +1071,7 @@ function tick(dt) {
         const d = S.keysHeld.has(S.lastKeyDir) ? S.lastKeyDir : [...S.keysHeld.keys()][0];
         if (st.gameTime - S.keysHeld.get(d) > 260) keyStep(d, true); // 長押しのみ連続
       }
+      if (st.rec) recordFrame(st); // シンプルモード：動き・向き・停止時間を記録
     }
   }
   if (st) {
@@ -1453,14 +1588,21 @@ function updateSlots() {
 }
 function showScreen(name) {
   S.screen = name;
-  ['title', 'diffSel', 'skillSel', 'clearOv', 'langSel', 'setSel'].forEach(id => $(id).classList.add('hidden'));
+  ['title', 'diffSel', 'skillSel', 'clearOv', 'langSel', 'setSel', 'replaySel'].forEach(id => $(id).classList.add('hidden'));
   ['hudTop', 'hudBottom'].forEach(id => $(id).classList.add('hidden'));
   if (name === 'title') { $('title').classList.remove('hidden'); refreshTitle(); Snd.bgm('title'); }
   else if (name === 'diff') { $('diffSel').classList.remove('hidden'); buildDiffList(); Snd.bgm('title'); }
   else if (name === 'skill') { $('skillSel').classList.remove('hidden'); buildSkillCards(); Snd.bgm('skill'); } // 専用BGM
   else if (name === 'lang') { $('langSel').classList.remove('hidden'); buildLangList(); Snd.bgm('title'); }
   else if (name === 'set') { $('setSel').classList.remove('hidden'); buildSettings(); Snd.bgm('title'); }
-  else if (name === 'play') { $('hudTop').classList.remove('hidden'); $('hudBottom').classList.remove('hidden'); }
+  else if (name === 'replay') { $('replaySel').classList.remove('hidden'); buildReplayList(); Snd.bgm('title'); }
+  else if (name === 'play') {
+    $('hudTop').classList.remove('hidden'); $('hudBottom').classList.remove('hidden');
+    const isRep = !!(S.stage && S.stage.rep); // リプレイ再生中は操作欄→再生バーに切替
+    $('slots').classList.toggle('hidden', isRep);
+    $('desc').classList.toggle('hidden', isRep);
+    $('replayBar').classList.toggle('hidden', !isRep);
+  }
   else if (name === 'clear') { $('clearOv').classList.remove('hidden'); }
 }
 /* ---- 設定（文字サイズ・音量） ---- */
@@ -1550,6 +1692,7 @@ function refreshTitle() {
   $('btnSkill').textContent = '⚙ ' + t('skills');
   $('btnLang').textContent = '🌐 ' + (I18N.langs.find(p => p[0] === S.save.lang) || ['', '?'])[1];
   $('btnSet').textContent = '🔧 ' + t('settings');
+  $('btnReplay').textContent = '▶ ' + t('replay');
 }
 function buildDiffList() {
   const el = $('diffList'); el.innerHTML = '';
@@ -1617,6 +1760,12 @@ function attachUI() {
   $('btnLang').onclick = () => { Snd.sfx('tap'); showScreen('lang'); };
   $('btnSet').onclick = () => { Snd.sfx('tap'); showScreen('set'); };
   $('btnBackTitle4').onclick = () => { Snd.sfx('tap'); showScreen('title'); };
+  // リプレイ
+  $('btnReplay').onclick = () => { Snd.sfx('tap'); showScreen('replay'); };
+  $('btnBackTitle5').onclick = () => { Snd.sfx('tap'); showScreen('title'); };
+  $('btnSaveReplay').onclick = () => { saveCurrentReplay(); };
+  $('btnRepPlay').onclick = replayToggle;
+  $('btnRepRestart').onclick = replayRestart;
   $('congrats').onclick = hideCongrats;
   $('volBgmR').oninput = () => {
     S.save.volBgm = parseFloat($('volBgmR').value); persist();
@@ -1637,10 +1786,11 @@ function attachUI() {
   $('btnReset').onclick = resetView;
   let quitArm = 0;
   $('btnQuit').onclick = () => {
+    if (S.stage && S.stage.rep) { S.stage = null; showScreen('replay'); return; } // リプレイは即戻る
     if (Date.now() - quitArm < 2000) { S.stage = null; quitArm = 0; showScreen('diff'); }
     else { quitArm = Date.now(); toast(t('quit')); }
   };
-  $('btnRetry').onclick = () => { Snd.sfx('tap'); const p = S.pendingLevelUp; startStage(S.stage.diffIdx); S.pendingLevelUp = p; playPendingLevelUp(); };
+  $('btnRetry').onclick = () => { Snd.sfx('tap'); const p = S.pendingLevelUp; startStage(S.stage.diffIdx, S.stage.simple); S.pendingLevelUp = p; playPendingLevelUp(); };
   $('btnNext').onclick = () => { Snd.sfx('tap'); S.stage = null; showScreen('diff'); playPendingLevelUp(); };
   // アイテムスロット
   $('slotPick').onclick = () => {

@@ -144,6 +144,22 @@ button.big {
 .diffBtn.simple small { font-size: 0.7rem; color: var(--gold); opacity: 0.95; }
 .badge { color: var(--gold); font-size: 0.875rem; min-width: 52px; text-align: right; }
 
+/* リプレイ（シンプルモード限定） */
+#btnReplay { font-size: 1rem; }
+#replayList { display: flex; flex-direction: column; gap: 8px; width: min(400px, 94vw); }
+.repItem { display: flex; gap: 6px; align-items: stretch; }
+.repPlay {
+  flex: 1; min-width: 0; display: flex; justify-content: space-between; align-items: center; gap: 8px;
+  background: var(--panel); color: var(--txt);
+  border: 2px solid var(--border); border-radius: 12px; padding: 11px 14px; font-size: 1.05rem;
+}
+.repPlay small { opacity: 0.6; font-size: 0.75rem; white-space: nowrap; }
+.repDel { flex: 0 0 auto; background: #191c36; color: #cfd3ee; border: 2px solid var(--border); border-radius: 12px; padding: 0 14px; font-size: 1.1rem; }
+.repEmpty { opacity: 0.7; font-size: 0.95rem; padding: 22px 0; text-align: center; }
+#replayBar { display: flex; align-items: center; justify-content: center; gap: 12px; padding: 6px 0; }
+#replayBar button { font-size: 1.3rem; background: var(--panel); color: var(--txt); border: 2px solid var(--border); border-radius: 12px; width: 58px; height: 44px; }
+#repTime { font-variant-numeric: tabular-nums; font-size: 1rem; opacity: 0.9; min-width: 132px; text-align: center; }
+
 /* スキル選択 */
 #skillNote { font-size: 0.8rem; opacity: 0.8; margin: 0; }
 #skillCards { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }

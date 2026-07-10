@@ -40,6 +40,11 @@
       <button class="slot hidden" id="slotWarp"><span class="sIco">🌀<b id="cntWarp">OK</b></span><small class="sLbl" id="lblWarp">ワープ</small></button>
     </div>
     <div id="desc"></div>
+    <div id="replayBar" class="hidden">
+      <button id="btnRepPlay">⏸</button>
+      <button id="btnRepRestart">↺</button>
+      <span id="repTime">0:00.0 / 0:00.0</span>
+    </div>
   </div>
 </div>
 
@@ -60,6 +65,7 @@
     <div id="passiveNow"></div>
   </div>
   <button id="btnStart" class="big">▶ はじめる</button>
+  <button id="btnReplay">▶ リプレイ</button>
   <div class="row"><button id="btnSkill">⚙ スキル</button><button id="btnLang">🌐</button><button id="btnSet">🔧</button></div>
   <p class="credit">アプリ開発・介護と支援の相談どころ<a href="https://soyogi.hp.peraichi.com/top" target="_blank" rel="noopener">「そよぎ」</a></p>
 </div>
@@ -100,7 +106,14 @@
 <div id="clearOv" class="overlay hidden">
   <h2 id="clearTitle"></h2>
   <div id="clearBody"></div>
+  <button id="btnSaveReplay" class="hidden">リプレイ保存</button>
   <div class="row"><button id="btnRetry">もういちど</button><button id="btnNext" class="big">つぎへ ▶</button></div>
+</div>
+
+<div id="replaySel" class="overlay hidden">
+  <h2 id="replayTitle">▶ リプレイ</h2>
+  <div id="replayList"></div>
+  <button id="btnBackTitle5">← タイトルへ</button>
 </div>
 
 <div id="toast"></div>
