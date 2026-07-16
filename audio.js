@@ -201,6 +201,8 @@ function unlock() {
 document.addEventListener('pointerdown', unlock, true);
 
 function bgm(name) {
+  // A-6 同じ曲がすでに鳴っているなら流し直さない（メニュー往復で頭出しに戻る問題の回避）
+  if (name === cur && schedT) return;
   cur = name;
   if (!enabled) return;
   if (!ensure() || ctx.state !== 'running') { pending = name; return; }

@@ -221,7 +221,7 @@ const shot3 = `<svg xmlns="http://www.w3.org/2000/svg" width="${SW}" height="${S
   <rect width="${SW}" height="${SH}" fill="${BG}"/>
   ${mazeWalls(SW, SH, 64, 0.35)}
   <text x="${SW / 2}" y="230" font-family="Yu Gothic, Meiryo, sans-serif" font-size="64" font-weight="bold" fill="${GOLD}" text-anchor="middle">たっぷり あそべる</text>
-  ${[['🏰', '9つの', 'めいろテーマ'], ['🌸', '7段階の', 'なんいど'], ['⚙️', '10種の', 'スキル'], ['🌐', '19言語', 'たいおう'], ['🔊', 'BGM＆音量', 'せってい'], ['🔡', 'もじサイズ', 'かえられる']]
+  ${[['🏰', '9つの', 'めいろテーマ'], ['🌸', '8段階の', 'なんいど'], ['⚙️', '10種の', 'スキル'], ['🌐', '19言語', 'たいおう'], ['🔊', 'BGM＆音量', 'せってい'], ['🔡', 'もじサイズ', 'かえられる']]
     .map((f, i) => {
       const col = i % 2, row = (i / 2) | 0;
       const x = 120 + col * 470, y = 360 + row * 400;

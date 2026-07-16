@@ -78,6 +78,7 @@ const I18N = {
     vSpeed: 'はやさ {n}マス/びょう', vChest: 'しゅつげん ＋{n}%', vLucky: 'からっぽ {n}%', vHawk: 'しかい {n}マス',
     vCraft: 'どうぐ {n}かい', vWarp: 'ちかくワープ {n}%', vHansel: 'あしあと {n}だんかい', vClone: 'ぶんしん {n}にん',
     vCT: 'CT {n}びょう', vMaster: '🪙×{a}・💎×{b}', chooseLang: 'ことばを えらぶ', expMax: '（LV99 カンスト！）', treasureMaster: 'トレジャーマスター', masteryScore: 'やりこみスコア', simple: 'シンプル', replay: 'リプレイ', saveReplay: 'リプレイ保存', replaySaved: '保存しました', noReplays: 'まだリプレイがありません',
+    special: 'スペシャル', saveFail: 'ほぞんできませんでした', zukan: 'めいきゅう ずかん', zukanAll: '9つの めいきゅう ぜんぶ クリア！', resume: 'つづきから', hint: 'ヒント', best: 'じこベスト', bestNew: '🎖 じこベスト こうしん！', vibe: 'しんどう',
   },
 
   en: {
@@ -120,6 +121,7 @@ const I18N = {
     vSpeed: 'Speed {n}/s', vChest: 'Chests +{n}%', vLucky: 'Empty {n}%', vHawk: 'Sight {n}',
     vCraft: 'Tools ×{n}', vWarp: 'Near warp {n}%', vHansel: '{n} shades', vClone: '{n} clones',
     vCT: 'CT {n}s', vMaster: '🪙×{a} 💎×{b}', chooseLang: 'Choose language', expMax: '(MAX level!)', treasureMaster: 'TREASURE MASTER', masteryScore: 'Mastery Score', simple: 'Simple', replay: 'Replay', saveReplay: 'Save replay', replaySaved: 'Saved', noReplays: 'No replays yet',
+    special: 'Special', saveFail: 'Could not save', zukan: 'Maze Collection', zukanAll: 'All 9 mazes cleared!', resume: 'Continue', hint: 'Hint', best: 'Best time', bestNew: '🎖 New best time!', vibe: 'Vibration',
   },
 
   zh: {
@@ -161,6 +163,7 @@ const I18N = {
     vSpeed: '速度 {n}格/秒', vChest: '出现 +{n}%', vLucky: '空箱 {n}%', vHawk: '视野 {n}格',
     vCraft: '工具 {n}次', vWarp: '近点传送 {n}%', vHansel: '足迹 {n}级', vClone: '分身 {n}人',
     vCT: '冷却 {n}秒', vMaster: '🪙×{a}·💎×{b}', chooseLang: '选择语言', expMax: '（LV99 满级！）', treasureMaster: '宝藏大师', masteryScore: '成就分数', simple: '简约', replay: '回放', saveReplay: '保存回放', replaySaved: '已保存', noReplays: '还没有回放',
+    special: '特别', saveFail: '无法保存', zukan: '迷宫图鉴', zukanAll: '9种迷宫全部通关！', resume: '继续', hint: '提示', best: '最佳纪录', bestNew: '🎖 刷新最佳纪录！', vibe: '震动',
   },
 
   'zh-TW': {
@@ -202,6 +205,7 @@ const I18N = {
     vSpeed: '速度 {n}格/秒', vChest: '出現 +{n}%', vLucky: '空箱 {n}%', vHawk: '視野 {n}格',
     vCraft: '工具 {n}次', vWarp: '近點傳送 {n}%', vHansel: '足跡 {n}級', vClone: '分身 {n}人',
     vCT: '冷卻 {n}秒', vMaster: '🪙×{a}·💎×{b}', chooseLang: '選擇語言', expMax: '（LV99 滿級！）', treasureMaster: '寶藏大師', masteryScore: '成就分數', simple: '簡約', replay: '重播', saveReplay: '儲存重播', replaySaved: '已儲存', noReplays: '還沒有重播',
+    special: '特別', saveFail: '無法保存', zukan: '迷宮圖鑑', zukanAll: '9種迷宮全部通關！', resume: '繼續', hint: '提示', best: '最佳紀錄', bestNew: '🎖 刷新最佳紀錄！', vibe: '震動',
   },
 
   ko: {
@@ -243,6 +247,7 @@ const I18N = {
     vSpeed: '속도 {n}칸/초', vChest: '출현 +{n}%', vLucky: '빈상자 {n}%', vHawk: '시야 {n}칸',
     vCraft: '도구 {n}회', vWarp: '근접워프 {n}%', vHansel: '발자국 {n}단계', vClone: '분신 {n}명',
     vCT: '쿨 {n}초', vMaster: '🪙×{a}·💎×{b}', chooseLang: '언어 선택', expMax: '(LV99 만렙!)', treasureMaster: '트레저 마스터', masteryScore: '숙련 점수', simple: '심플', replay: '리플레이', saveReplay: '리플레이 저장', replaySaved: '저장됨', noReplays: '아직 리플레이가 없어요',
+    special: '스페셜', saveFail: '저장하지 못했어요', zukan: '미로 도감', zukanAll: '9가지 미로 모두 클리어!', resume: '이어서 하기', hint: '힌트', best: '최고 기록', bestNew: '🎖 최고 기록 경신!', vibe: '진동',
   },
 
   es: {
@@ -284,6 +289,7 @@ const I18N = {
     vSpeed: 'Vel. {n}/s', vChest: 'Cofres +{n}%', vLucky: 'Vacío {n}%', vHawk: 'Vista {n}',
     vCraft: 'Usos ×{n}', vWarp: 'Salto cercano {n}%', vHansel: '{n} tonos', vClone: '{n} clones',
     vCT: 'CT {n}s', vMaster: '🪙×{a} 💎×{b}', chooseLang: 'Elige idioma', expMax: '(¡Nivel MÁXIMO!)', treasureMaster: 'MAESTRO DEL TESORO', masteryScore: 'Puntuación de maestría', simple: 'Simple', replay: 'Repetición', saveReplay: 'Guardar repetición', replaySaved: 'Guardado', noReplays: 'Aún no hay repeticiones',
+    special: 'Especial', saveFail: 'No se pudo guardar', zukan: 'Colección de laberintos', zukanAll: '¡Los 9 laberintos completados!', resume: 'Continuar', hint: 'Pista', best: 'Mejor tiempo', bestNew: '🎖 ¡Nuevo récord personal!', vibe: 'Vibración',
   },
 
   pt: {
@@ -325,6 +331,7 @@ const I18N = {
     vSpeed: 'Vel. {n}/s', vChest: 'Baús +{n}%', vLucky: 'Vazio {n}%', vHawk: 'Visão {n}',
     vCraft: 'Usos ×{n}', vWarp: 'Salto perto {n}%', vHansel: '{n} tons', vClone: '{n} clones',
     vCT: 'CT {n}s', vMaster: '🪙×{a} 💎×{b}', chooseLang: 'Escolher idioma', expMax: '(Nível MÁXIMO!)', treasureMaster: 'MESTRE DO TESOURO', masteryScore: 'Pontuação de maestria', simple: 'Simples', replay: 'Replay', saveReplay: 'Salvar replay', replaySaved: 'Salvo', noReplays: 'Ainda sem replays',
+    special: 'Especial', saveFail: 'Não foi possível salvar', zukan: 'Coleção de labirintos', zukanAll: 'Os 9 labirintos concluídos!', resume: 'Continuar', hint: 'Dica', best: 'Melhor tempo', bestNew: '🎖 Novo recorde pessoal!', vibe: 'Vibração',
   },
 
   fr: {
@@ -366,6 +373,7 @@ const I18N = {
     vSpeed: 'Vit. {n}/s', vChest: 'Coffres +{n}%', vLucky: 'Vide {n}%', vHawk: 'Vue {n}',
     vCraft: 'Usages ×{n}', vWarp: 'Saut proche {n}%', vHansel: '{n} teintes', vClone: '{n} clones',
     vCT: 'CT {n}s', vMaster: '🪙×{a} 💎×{b}', chooseLang: 'Choisir la langue', expMax: '(Niveau MAX !)', treasureMaster: 'MAÎTRE DU TRÉSOR', masteryScore: 'Score de maîtrise', simple: 'Simple', replay: 'Rejouer', saveReplay: 'Enregistrer', replaySaved: 'Enregistré', noReplays: 'Aucun replay',
+    special: 'Spécial', saveFail: 'Échec de l\'enregistrement', zukan: 'Collection de labyrinthes', zukanAll: 'Les 9 labyrinthes terminés !', resume: 'Continuer', hint: 'Indice', best: 'Meilleur temps', bestNew: '🎖 Nouveau record personnel !', vibe: 'Vibrations',
   },
 
   de: {
@@ -407,6 +415,7 @@ const I18N = {
     vSpeed: 'Tempo {n}/s', vChest: 'Truhen +{n}%', vLucky: 'Leer {n}%', vHawk: 'Sicht {n}',
     vCraft: 'Nutzung ×{n}', vWarp: 'Nah-Warp {n}%', vHansel: '{n} Stufen', vClone: '{n} Klone',
     vCT: 'CT {n}s', vMaster: '🪙×{a} 💎×{b}', chooseLang: 'Sprache wählen', expMax: '(MAX-Level!)', treasureMaster: 'SCHATZMEISTER', masteryScore: 'Meisterschaftspunkte', simple: 'Schlicht', replay: 'Wiederholung', saveReplay: 'Speichern', replaySaved: 'Gespeichert', noReplays: 'Noch keine Wiederholungen',
+    special: 'Spezial', saveFail: 'Speichern fehlgeschlagen', zukan: 'Labyrinth-Sammlung', zukanAll: 'Alle 9 Labyrinthe geschafft!', resume: 'Fortsetzen', hint: 'Hinweis', best: 'Bestzeit', bestNew: '🎖 Neue Bestzeit!', vibe: 'Vibration',
   },
 
   it: {
@@ -448,6 +457,7 @@ const I18N = {
     vSpeed: 'Vel. {n}/s', vChest: 'Forzieri +{n}%', vLucky: 'Vuoto {n}%', vHawk: 'Vista {n}',
     vCraft: 'Usi ×{n}', vWarp: 'Salto vicino {n}%', vHansel: '{n} tonalità', vClone: '{n} cloni',
     vCT: 'CT {n}s', vMaster: '🪙×{a} 💎×{b}', chooseLang: 'Scegli la lingua', expMax: '(Livello MAX!)', treasureMaster: 'MAESTRO DEL TESORO', masteryScore: 'Punteggio maestria', simple: 'Semplice', replay: 'Replay', saveReplay: 'Salva replay', replaySaved: 'Salvato', noReplays: 'Ancora nessun replay',
+    special: 'Speciale', saveFail: 'Salvataggio non riuscito', zukan: 'Collezione di labirinti', zukanAll: 'Tutti i 9 labirinti completati!', resume: 'Continua', hint: 'Suggerimento', best: 'Miglior tempo', bestNew: '🎖 Nuovo record personale!', vibe: 'Vibrazione',
   },
 
   nl: {
@@ -489,6 +499,7 @@ const I18N = {
     vSpeed: 'Snelh. {n}/s', vChest: 'Kisten +{n}%', vLucky: 'Leeg {n}%', vHawk: 'Zicht {n}',
     vCraft: 'Gebruik ×{n}', vWarp: 'Dichtbij-warp {n}%', vHansel: '{n} tinten', vClone: '{n} klonen',
     vCT: 'CT {n}s', vMaster: '🪙×{a} 💎×{b}', chooseLang: 'Kies taal', expMax: '(MAX level!)', treasureMaster: 'SCHATMEESTER', masteryScore: 'Meesterschapscore', simple: 'Simpel', replay: 'Herhaling', saveReplay: 'Opslaan', replaySaved: 'Opgeslagen', noReplays: 'Nog geen herhalingen',
+    special: 'Speciaal', saveFail: 'Opslaan mislukt', zukan: 'Doolhofcollectie', zukanAll: 'Alle 9 doolhoven voltooid!', resume: 'Doorgaan', hint: 'Hint', best: 'Beste tijd', bestNew: '🎖 Nieuw persoonlijk record!', vibe: 'Trillen',
   },
 
   pl: {
@@ -530,6 +541,7 @@ const I18N = {
     vSpeed: 'Szybk. {n}/s', vChest: 'Skrzynie +{n}%', vLucky: 'Puste {n}%', vHawk: 'Wzrok {n}',
     vCraft: 'Użycia ×{n}', vWarp: 'Bliski teleport {n}%', vHansel: '{n} odcienie', vClone: '{n} klonów',
     vCT: 'CT {n}s', vMaster: '🪙×{a} 💎×{b}', chooseLang: 'Wybierz język', expMax: '(MAX poziom!)', treasureMaster: 'MISTRZ SKARBÓW', masteryScore: 'Wynik mistrzostwa', simple: 'Prosty', replay: 'Powtórka', saveReplay: 'Zapisz powtórkę', replaySaved: 'Zapisano', noReplays: 'Brak powtórek',
+    special: 'Specjalna', saveFail: 'Nie udało się zapisać', zukan: 'Kolekcja labiryntów', zukanAll: 'Wszystkie 9 labiryntów ukończone!', resume: 'Kontynuuj', hint: 'Podpowiedź', best: 'Najlepszy czas', bestNew: '🎖 Nowy rekord!', vibe: 'Wibracje',
   },
 
   ru: {
@@ -571,6 +583,7 @@ const I18N = {
     vSpeed: 'Скор. {n}/с', vChest: 'Сундуки +{n}%', vLucky: 'Пустые {n}%', vHawk: 'Обзор {n}',
     vCraft: 'Исп. ×{n}', vWarp: 'Ближний тп {n}%', vHansel: '{n} оттенка', vClone: '{n} двойн.',
     vCT: 'КД {n}с', vMaster: '🪙×{a} 💎×{b}', chooseLang: 'Выбрать язык', expMax: '(МАКС. уровень!)', treasureMaster: 'МАСТЕР СОКРОВИЩ', masteryScore: 'Очки мастерства', simple: 'Простой', replay: 'Повтор', saveReplay: 'Сохранить повтор', replaySaved: 'Сохранено', noReplays: 'Пока нет повторов',
+    special: 'Особая', saveFail: 'Не удалось сохранить', zukan: 'Коллекция лабиринтов', zukanAll: 'Все 9 лабиринтов пройдены!', resume: 'Продолжить', hint: 'Подсказка', best: 'Лучшее время', bestNew: '🎖 Новый рекорд!', vibe: 'Вибрация',
   },
 
   tr: {
@@ -612,6 +625,7 @@ const I18N = {
     vSpeed: 'Hız {n}/sn', vChest: 'Sandık +{n}%', vLucky: 'Boş {n}%', vHawk: 'Görüş {n}',
     vCraft: 'Kullanım ×{n}', vWarp: 'Yakın ışınlanma {n}%', vHansel: '{n} ton', vClone: '{n} klon',
     vCT: 'CT {n}sn', vMaster: '🪙×{a} 💎×{b}', chooseLang: 'Dil seç', expMax: '(MAKS seviye!)', treasureMaster: 'HAZİNE USTASI', masteryScore: 'Ustalık Puanı', simple: 'Sade', replay: 'Tekrar', saveReplay: 'Tekrarı kaydet', replaySaved: 'Kaydedildi', noReplays: 'Henüz tekrar yok',
+    special: 'Özel', saveFail: 'Kaydedilemedi', zukan: 'Labirent koleksiyonu', zukanAll: '9 labirentin hepsi tamamlandı!', resume: 'Devam et', hint: 'İpucu', best: 'En iyi süre', bestNew: '🎖 Yeni rekor!', vibe: 'Titreşim',
   },
 
   hi: {
@@ -653,6 +667,7 @@ const I18N = {
     vSpeed: 'गति {n}/से', vChest: 'संदूक +{n}%', vLucky: 'खाली {n}%', vHawk: 'दृष्टि {n}',
     vCraft: 'उपयोग ×{n}', vWarp: 'निकट वार्प {n}%', vHansel: '{n} स्तर', vClone: '{n} प्रतिरूप',
     vCT: 'CT {n}से', vMaster: '🪙×{a} 💎×{b}', chooseLang: 'भाषा चुनें', expMax: '(अधिकतम स्तर!)', treasureMaster: 'खज़ाना मास्टर', masteryScore: 'महारत स्कोर', simple: 'सरल', replay: 'रीप्ले', saveReplay: 'रीप्ले सहेजें', replaySaved: 'सहेजा गया', noReplays: 'अभी कोई रीप्ले नहीं',
+    special: 'स्पेशल', saveFail: 'सहेज नहीं सका', zukan: 'भूलभुलैया संग्रह', zukanAll: 'सभी 9 भूलभुलैया पूरी!', resume: 'जारी रखें', hint: 'संकेत', best: 'सर्वश्रेष्ठ समय', bestNew: '🎖 नया सर्वश्रेष्ठ!', vibe: 'कंपन',
   },
 
   id: {
@@ -694,6 +709,7 @@ const I18N = {
     vSpeed: 'Kec. {n}/dtk', vChest: 'Peti +{n}%', vLucky: 'Kosong {n}%', vHawk: 'Pandangan {n}',
     vCraft: 'Pakai ×{n}', vWarp: 'Warp dekat {n}%', vHansel: '{n} tingkat', vClone: '{n} klon',
     vCT: 'CT {n}dtk', vMaster: '🪙×{a} 💎×{b}', chooseLang: 'Pilih bahasa', expMax: '(Level MAKS!)', treasureMaster: 'MASTER HARTA', masteryScore: 'Skor Penguasaan', simple: 'Simpel', replay: 'Replay', saveReplay: 'Simpan replay', replaySaved: 'Tersimpan', noReplays: 'Belum ada replay',
+    special: 'Spesial', saveFail: 'Gagal menyimpan', zukan: 'Koleksi labirin', zukanAll: 'Semua 9 labirin selesai!', resume: 'Lanjutkan', hint: 'Petunjuk', best: 'Waktu terbaik', bestNew: '🎖 Rekor baru!', vibe: 'Getaran',
   },
 
   ar: {
@@ -735,6 +751,7 @@ const I18N = {
     vSpeed: 'السرعة {n}/ث', vChest: 'صناديق +{n}%', vLucky: 'فارغ {n}%', vHawk: 'الرؤية {n}',
     vCraft: 'استخدام ×{n}', vWarp: 'انتقال قريب {n}%', vHansel: '{n} درجات', vClone: '{n} نسخ',
     vCT: 'انتظار {n}ث', vMaster: '🪙×{a} 💎×{b}', chooseLang: 'اختر اللغة', expMax: '(المستوى الأقصى!)', treasureMaster: 'سيد الكنوز', masteryScore: 'نقاط الإتقان', simple: 'بسيط', replay: 'إعادة', saveReplay: 'حفظ الإعادة', replaySaved: 'تم الحفظ', noReplays: 'لا إعادات بعد',
+    special: 'مميز', saveFail: 'تعذّر الحفظ', zukan: 'مجموعة المتاهات', zukanAll: 'أُنجزت المتاهات التسع كلها!', resume: 'متابعة', hint: 'تلميح', best: 'أفضل وقت', bestNew: '🎖 رقم قياسي جديد!', vibe: 'اهتزاز',
   },
 
   bn: {
@@ -776,6 +793,7 @@ const I18N = {
     vSpeed: 'গতি {n}/সে', vChest: 'সিন্দুক +{n}%', vLucky: 'খালি {n}%', vHawk: 'দৃষ্টি {n}',
     vCraft: 'ব্যবহার ×{n}', vWarp: 'কাছের ওয়ার্প {n}%', vHansel: '{n} ধাপ', vClone: '{n} প্রতিরূপ',
     vCT: 'CT {n}সে', vMaster: '🪙×{a} 💎×{b}', chooseLang: 'ভাষা বাছো', expMax: '(সর্বোচ্চ লেভেল!)', treasureMaster: 'ট্রেজার মাস্টার', masteryScore: 'দক্ষতা স্কোর', simple: 'সরল', replay: 'রিপ্লে', saveReplay: 'রিপ্লে সংরক্ষণ', replaySaved: 'সংরক্ষিত', noReplays: 'এখনও কোন রিপ্লে নেই',
+    special: 'স্পেশাল', saveFail: 'সংরক্ষণ হয়নি', zukan: 'গোলকধাঁধা সংগ্রহ', zukanAll: '৯টি গোলকধাঁধাই ক্লিয়ার!', resume: 'চালিয়ে যান', hint: 'ইঙ্গিত', best: 'সেরা সময়', bestNew: '🎖 নতুন সেরা সময়!', vibe: 'কম্পন',
   },
 
   sw: {
@@ -817,6 +835,7 @@ const I18N = {
     vSpeed: 'Kasi {n}/sek', vChest: 'Masanduku +{n}%', vLucky: 'Tupu {n}%', vHawk: 'Uoni {n}',
     vCraft: 'Matumizi ×{n}', vWarp: 'Warp karibu {n}%', vHansel: 'Vivuli {n}', vClone: 'Nakala {n}',
     vCT: 'CT {n}sek', vMaster: '🪙×{a} 💎×{b}', chooseLang: 'Chagua lugha', expMax: '(Kiwango cha JUU!)', treasureMaster: 'BINGWA WA HAZINA', masteryScore: 'Alama za Umahiri', simple: 'Rahisi', replay: 'Rudia', saveReplay: 'Hifadhi rudia', replaySaved: 'Imehifadhiwa', noReplays: 'Hakuna rudia bado',
+    special: 'Maalum', saveFail: 'Imeshindwa kuhifadhi', zukan: 'Mkusanyiko wa labirinti', zukanAll: 'Labirinti zote 9 zimekamilika!', resume: 'Endelea', hint: 'Dokezo', best: 'Muda bora', bestNew: '🎖 Rekodi mpya!', vibe: 'Mtetemo',
   },
 
   },

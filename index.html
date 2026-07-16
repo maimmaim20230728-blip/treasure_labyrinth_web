@@ -22,6 +22,7 @@
       <div id="timeBox"><div id="timeNow">0:00.0</div><div id="timeTarget"></div></div>
       <div id="diffName"></div>
       <div class="camBtns">
+        <button id="btnHint" title="ヒント" aria-label="ヒント">💡</button>
         <button id="btnZoomOut" title="ズームアウト">➖</button>
         <button id="btnZoomIn" title="ズームイン">➕</button>
         <button id="btnReset" title="してんリセット">🧭</button>
@@ -43,6 +44,7 @@
     <div id="replayBar" class="hidden">
       <button id="btnRepPlay">⏸</button>
       <button id="btnRepRestart">↺</button>
+      <button id="btnRepSpeed">×1</button>
       <span id="repTime">0:00.0 / 0:00.0</span>
     </div>
   </div>
@@ -65,6 +67,7 @@
     <div id="passiveNow"></div>
   </div>
   <button id="btnStart" class="big">▶ はじめる</button>
+  <button id="btnResume" class="hidden">▶ つづきから</button>
   <button id="btnReplay">▶ リプレイ</button>
   <div class="row"><button id="btnSkill">⚙ スキル</button><button id="btnLang">🌐</button><button id="btnSet">🔧</button></div>
   <p class="credit">アプリ開発・介護と支援の相談どころ<a href="https://soyogi.hp.peraichi.com/top" target="_blank" rel="noopener">「そよぎ」</a></p>
@@ -81,6 +84,7 @@
   <div class="setRow"><div class="setLbl" id="fsLabel"></div><div id="fontBtns" class="row"></div></div>
   <div class="setRow"><div class="setLbl" id="bgmLabel"></div><div class="volRow"><input type="range" id="volBgmR" min="0" max="3" step="0.25"><span class="volV" id="volBgmV"></span></div></div>
   <div class="setRow"><div class="setLbl" id="sfxLabel"></div><div class="volRow"><input type="range" id="volSfxR" min="0" max="3" step="0.25"><span class="volV" id="volSfxV"></span></div></div>
+  <div class="setRow"><div class="setLbl" id="vibeLabel"></div><div class="row"><button id="vibeToggle" class="langBtn">OFF</button></div></div>
   <button id="btnBackTitle4">← タイトルへ</button>
 </div>
 
@@ -92,6 +96,7 @@
 <div id="diffSel" class="overlay hidden">
   <h2>めいろを えらぶ</h2>
   <div id="diffList"></div>
+  <div id="zukanBox"></div>
   <button id="btnBackTitle">← タイトルへ</button>
 </div>
 
@@ -126,12 +131,11 @@
 <script src="game.js"></script>
 <script>
 if ('serviceWorker' in navigator && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
-  // 起動時に最新版を確認し、新しいバージョンが有効になったら1回だけ自動リロード（更新の取りこぼし防止）
-  let reloading = false;
+  // A-7 新版が有効になっても即リロードせず、安全な画面（タイトル/難易度選択）到達時に game.js が1回だけリロードする
   const hadController = !!navigator.serviceWorker.controller; // 初回インストール時のムダなリロードは避ける
   navigator.serviceWorker.addEventListener('controllerchange', () => {
-    if (reloading || !hadController) return;
-    reloading = true; location.reload();
+    if (!hadController) return;
+    window.__swReloadPending = true; // プレイ中は発火させず、フラグだけ立てる
   });
   addEventListener('load', () => {
     navigator.serviceWorker.register('sw.js').then(reg => {

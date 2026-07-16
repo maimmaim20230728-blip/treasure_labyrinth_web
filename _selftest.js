@@ -283,5 +283,37 @@ console.log('6) 難易度テーブル単調性: 済');
   console.log('8) 宝箱部屋: 済 (48x40の平均部屋数 ' + avg(48, 40) + ')');
 }
 
+// 9) 追加i18nキー（special/saveFail/zukan/zukanAll/resume/hint/best/bestNew/vibe）が19言語すべてに非空で存在
+{
+  const I = require('./i18n.js');
+  const langs = I.langs.map(p => p[0]);
+  const NEW_KEYS = ['special', 'saveFail', 'zukan', 'zukanAll', 'resume', 'hint', 'best', 'bestNew', 'vibe'];
+  let miss = 0;
+  for (const lg of langs) {
+    const d = I.dict[lg];
+    for (const k of NEW_KEYS) {
+      if (typeof (d && d[k]) !== 'string' || d[k].trim() === '') { miss++; console.log('NG: ' + lg + ' 新キー未設定/空 ' + k); }
+    }
+  }
+  ok(miss === 0, `追加9キー×19言語 非空存在（問題${miss}件）`);
+  console.log('9) 追加i18nキー(新機能): 済');
+}
+
+// 10) じこベスト（最小値更新）と迷宮ずかん（長さ9パディング）の軽い検査（game.js相当のロジック）
+{
+  // best: 同キーはより小さいfinのみ採用
+  const best = {};
+  const upd = (key, fin) => { if (best[key] == null || fin < best[key]) best[key] = fin; };
+  upd('3', 5200); upd('3', 6000); upd('3', 4800); upd('3s', 9000);
+  ok(best['3'] === 4800 && best['3s'] === 9000, 'じこベストは最小値のみ更新');
+  // themeClears: 短い配列でも長さ9へパディングし既存値を保持
+  const pad = (arr, n) => { arr = Array.isArray(arr) ? arr.slice() : []; while (arr.length < n) arr.push(0); return arr; };
+  const tc = pad([2, 1, 0], 9);
+  ok(tc.length === 9 && tc[0] === 2 && tc[1] === 1 && tc[8] === 0, 'themeClearsは長さ9へ後方互換パディング');
+  const allDone = pad([1,1,1,1,1,1,1,1,1], 9).every(v => v > 0);
+  ok(allDone === true, '9テーマ全>0で全クリア判定');
+  console.log('10) じこベスト/ずかんパディング: 済');
+}
+
 console.log(fails === 0 ? 'ALL OK' : 'FAILURES: ' + fails);
 process.exit(fails ? 1 : 0);

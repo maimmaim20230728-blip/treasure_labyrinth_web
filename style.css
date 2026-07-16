@@ -94,10 +94,24 @@ button.big {
   border: none; border-radius: 14px; font-weight: bold; box-shadow: 0 4px 0 #a07f20;
 }
 .row { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
-.row button, #btnBackTitle, #btnBackTitle2, #btnBackTitle3, #btnBackTitle4 {
+.row button, #btnBackTitle, #btnBackTitle2, #btnBackTitle3, #btnBackTitle4, #btnBackTitle5 {
   background: var(--panel); color: var(--txt);
   border: 2px solid var(--border); border-radius: 12px; padding: 10px 16px; font-size: 1rem;
 }
+/* B-3 ヒント💡ボタン（上部HUD・CT中はうすく） */
+#btnHint.dim { opacity: 0.5; }
+/* B-4 じこベスト更新の金色強調 */
+.bestNew { color: var(--gold); font-weight: bold; }
+/* B-1 迷宮ずかん（難易度選択画面の下部・9テーマのクリアコレクション） */
+#zukanBox { width: min(400px, 94vw); }
+.zukanHead { font-size: 0.9rem; color: var(--gold); font-weight: bold; margin: 6px 0 6px; text-align: left; }
+.zukanGrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; }
+.zukanCell {
+  font-size: 0.72rem; background: #191c36; color: #6b7099;
+  border: 2px solid var(--border); border-radius: 8px; padding: 7px 4px;
+  text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.zukanCell.done { color: var(--gold); border-color: var(--gold); }
 #charPick { display: flex; gap: 12px; }
 .charBtn {
   display: flex; flex-direction: column; align-items: center; gap: 4px;
