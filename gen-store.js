@@ -164,7 +164,7 @@ const shot1 = `<svg xmlns="http://www.w3.org/2000/svg" width="${SW}" height="${S
   <rect x="290" y="1000" width="500" height="130" rx="24" fill="${GOLD}"/>
   <text x="${SW / 2}" y="1085" font-family="Yu Gothic, Meiryo, sans-serif" font-size="52" font-weight="bold" fill="#3a2a05" text-anchor="middle">▶ はじめる</text>
   <text x="${SW / 2}" y="1300" font-family="Yu Gothic, Meiryo, sans-serif" font-size="44" fill="#cfd6ff" text-anchor="middle">むりょう・広告なし・オフライン</text>
-  <text x="${SW / 2}" y="1380" font-family="Yu Gothic, Meiryo, sans-serif" font-size="36" fill="#8a90c0" text-anchor="middle">子どもの知育から 大人の脳トレまで</text>
+  <text x="${SW / 2}" y="1380" font-family="Yu Gothic, Meiryo, sans-serif" font-size="36" fill="#8a90c0" text-anchor="middle">息ぬきにも 脳トレにも</text>
 </svg>`;
 
 /* SS2 プレイ画面（HUD＋迷路＋アイテム欄） */

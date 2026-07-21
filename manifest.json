@@ -1,7 +1,7 @@
 {
   "name": "宝の迷宮 - Treasure Labyrinth",
   "short_name": "宝の迷宮",
-  "description": "なぞって すすむ ドットめいろ。子どもの知育から大人の脳トレまで、完全オフラインで遊べる迷路ゲーム。",
+  "description": "なぞって すすむ ドットめいろ。息ぬきにも脳トレにも、完全オフラインで遊べる迷路ゲーム。",
   "start_url": "./",
   "display": "standalone",
   "orientation": "portrait",
