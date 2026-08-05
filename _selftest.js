@@ -315,5 +315,31 @@ console.log('6) 難易度テーブル単調性: 済');
   console.log('10) じこベスト/ずかんパディング: 済');
 }
 
+// 11) [セーフエリア] 端末のバーに食い込まない（targetSdk36 = エッジtoエッジ強制）
+//     WebViewが画面の一番下（ナビゲーションバーの下）まで描かれるため、固定pxのままだと
+//     トーストがナビバーぶん下寄りに出る。viewport-fit=cover があるので env() で補う。
+{
+  const fs = require('fs'), path = require('path');
+  const css = fs.readFileSync(path.join(__dirname, 'style.css'), 'utf8').replace(/\s+/g, '');
+  const html = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf8');
+  ok(/viewport-fit=cover/.test(html), 'viewport に viewport-fit=cover（env()が効く前提）');
+  ok(/#toast\{[^}]*bottom:calc\(112px\+env\(safe-area-inset-bottom\)\)/.test(css),
+     'トーストの bottom に env(safe-area-inset-bottom)');
+  ok(/#hudTop\{[^}]*padding-top:calc\(6px\+env\(safe-area-inset-top\)\)/.test(css),
+     '上部HUDの上余白に env(safe-area-inset-top)');
+  ok(/#hudBottom\{[^}]*padding:6px8pxcalc\(8px\+env\(safe-area-inset-bottom\)\)/.test(css),
+     'アイテム欄の下余白に env(safe-area-inset-bottom)');
+  ok(/\.overlay\{[^}]*padding:calc\(20px\+env\(safe-area-inset-top\)\)calc\(20px\+env\(safe-area-inset-right\)\)calc\(20px\+env\(safe-area-inset-bottom\)\)calc\(20px\+env\(safe-area-inset-left\)\)/.test(css),
+     '全画面オーバーレイの余白が四方ともセーフエリア対応');
+  // 版数の据え置き防止（build.gradle=正。web側フォルダには android/ が無いのでその時は飛ばす）
+  const gradle = path.join(__dirname, 'android', 'app', 'build.gradle');
+  if (fs.existsSync(gradle)) {
+    const name = (fs.readFileSync(gradle, 'utf8').match(/versionName\s+"([^"]+)"/) || [])[1];
+    const txt = fs.readFileSync(path.join(__dirname, 'version.txt'), 'utf8').trim();
+    ok(name === txt, `build.gradle と version.txt の版数が一致（${name} / ${txt}）`);
+  }
+  console.log('11) セーフエリア/版数: 済');
+}
+
 console.log(fails === 0 ? 'ALL OK' : 'FAILURES: ' + fails);
 process.exit(fails ? 1 : 0);

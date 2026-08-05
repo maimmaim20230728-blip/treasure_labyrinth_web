@@ -80,7 +80,11 @@ button { cursor: pointer; font-family: inherit; }
 .overlay {
   position: fixed; inset: 0; z-index: 10;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
-  background: rgba(10, 12, 28, 0.85); padding: 20px; text-align: center; overflow-y: auto;
+  background: rgba(10, 12, 28, 0.85); text-align: center; overflow-y: auto;
+  /* 全画面(inset:0)なので端末のバーの下まで広がる。中身がはみ出してスクロールする時に
+     上端が時計と、下端がナビゲーションバーと重ならないよう余白に safe-area を足す */
+  padding: calc(20px + env(safe-area-inset-top)) calc(20px + env(safe-area-inset-right))
+           calc(20px + env(safe-area-inset-bottom)) calc(20px + env(safe-area-inset-left));
 }
 #title h1 {
   font-size: 2.75rem; margin: 0; color: var(--gold);
@@ -262,9 +266,11 @@ button.big {
 @keyframes cgRainbow { 0% { background-position: 0% 0; } 100% { background-position: 300% 0; } }
 @keyframes cgBounce { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
 
-/* トースト・レベルアップ */
+/* トースト・レベルアップ
+   🔴 targetSdk36(Android15+)はエッジtoエッジ強制で、画面がナビゲーションバーの下まで描かれる。
+   bottom が固定pxだとその分だけ本来より下寄りに出るため、safe-area を足して位置を合わせる。 */
 #toast {
-  position: fixed; left: 50%; bottom: 112px; transform: translateX(-50%);
+  position: fixed; left: 50%; bottom: calc(112px + env(safe-area-inset-bottom)); transform: translateX(-50%);
   background: rgba(0, 0, 0, 0.82); color: #fff; padding: 10px 18px; border-radius: 12px;
   font-size: 0.95rem; z-index: 20; transition: opacity 0.3s; opacity: 0;
   pointer-events: none; white-space: nowrap; max-width: 92vw;
