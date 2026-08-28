@@ -22,4 +22,4 @@
 - スプラッシュ: `icons/icon-192.png` / アイコン: `icons/icon-512.png`
 - カード・OG画像の再生成: `node gen-store.js`（sharp が必要）
 
-介護と支援の相談どころ「そよぎ」 https://soyogi.hp.peraichi.com/top
+介護と支援の相談どころ「そよぎ」 https://soudansoyogi.com/
