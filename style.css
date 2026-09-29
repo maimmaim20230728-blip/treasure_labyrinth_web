@@ -289,3 +289,40 @@ button.big {
   80%  { opacity: 1; }
   100% { opacity: 0; transform: translate(-50%, -60%) scale(1); }
 }
+
+/* はじめての あそびかた（game.js openGuide・2026-09-30）。初回に必ず出す・最後の「▶ あそぶ」でだけ閉じる（✕ は置かない）。
+   画面いっぱい（ほかの画面・トースト・レベルアップより上、CONGRATULATIONS より下）。文字は rem＝「もじの おおきさ」に合わせて大きくなる。
+   本文だけスクロールし、下の「まえへ/つぎへ」は地の色の帯に置く（長いページでも本文が透けない・最後の行が帯に隠れない） */
+#guideOv {
+  position: fixed; inset: 0; z-index: 35;
+  display: flex; flex-direction: column; background: var(--bg);
+}
+.guideBody {
+  flex: 1; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch;
+  padding: calc(16px + env(safe-area-inset-top)) calc(18px + env(safe-area-inset-right)) 24px calc(18px + env(safe-area-inset-left));
+}
+.guideInner { width: min(560px, 100%); margin: 0 auto; text-align: start; }
+.guideTop { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.guideTitle { margin: 0; font-size: 1rem; font-weight: bold; color: var(--gold); }
+.guideStep { margin: 0; font-size: 1rem; font-weight: bold; opacity: 0.85; white-space: nowrap; unicode-bidi: isolate; }
+.guideLang { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 12px; margin-top: 14px; }
+.guideLangLbl { font-size: 0.95rem; opacity: 0.9; }
+.guideLang select {
+  min-height: 44px; font-size: 1rem; font-family: inherit; color: var(--txt);
+  background: var(--panel); border: 2px solid var(--border); border-radius: 10px; padding: 4px 10px;
+}
+.guideH { font-size: 1.35rem; line-height: 1.45; margin: 16px 0 12px; color: var(--gold); word-break: keep-all; overflow-wrap: anywhere; }
+.guideP { font-size: 1.05rem; line-height: 1.85; margin: 0; white-space: pre-line; word-break: keep-all; overflow-wrap: anywhere; }
+.guideDots { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; margin-top: 22px; }
+.guideDot { width: 10px; height: 10px; border-radius: 50%; background: var(--border); }
+.guideDot.on { background: var(--gold); }
+.guideRow {
+  flex: none; display: flex; gap: 10px;
+  padding: 10px calc(16px + env(safe-area-inset-right)) calc(14px + env(safe-area-inset-bottom)) calc(16px + env(safe-area-inset-left));
+  background: #10122a; border-top: 2px solid var(--border);
+}
+.guideRow button {
+  flex: 1 1 0; min-width: 0; min-height: 56px; font-size: 1.1rem; font-weight: bold;
+  background: var(--panel); color: var(--txt); border: 2px solid var(--border); border-radius: 14px; padding: 10px 8px;
+}
+.guideRow .guideNext { background: var(--gold); color: #3a2a05; border-color: var(--gold); box-shadow: 0 4px 0 #a07f20; }

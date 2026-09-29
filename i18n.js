@@ -79,6 +79,28 @@ const I18N = {
     vCraft: 'どうぐ {n}かい', vWarp: 'ちかくワープ {n}%', vHansel: 'あしあと {n}だんかい', vClone: 'ぶんしん {n}にん',
     vCT: 'CT {n}びょう', vMaster: '🪙×{a}・💎×{b}', chooseLang: 'ことばを えらぶ', expMax: '（LV99 カンスト！）', treasureMaster: 'トレジャーマスター', masteryScore: 'やりこみスコア', simple: 'シンプル', replay: 'リプレイ', saveReplay: 'リプレイ保存', replaySaved: '保存しました', noReplays: 'まだリプレイがありません',
     special: 'スペシャル', saveFail: 'ほぞんできませんでした', zukan: 'めいきゅう ずかん', zukanAll: '9つの めいきゅう ぜんぶ クリア！', resume: 'つづきから', hint: 'ヒント', best: 'じこベスト', bestNew: '🎖 じこベスト こうしん！', vibe: 'しんどう',
+    /* はじめての あそびかた（game.js openGuide・2026-09-30）。guideHeads と guideBodies は同じ数。ボタン名は画面の文字と同じ（照らし合わせ=store/_back_check.js） */
+    guideTitle: "あそびかた", guidePrev: "◀ まえへ", guideStart: "▶ あそぶ", guideAgain: "もういちど みる",
+    guideHeads: [
+      "宝の迷宮へ ようこそ",
+      "さいしょに すること",
+      "うごかしかた",
+      "たからばこと アイテム",
+      "ゴールと タイム",
+      "レベルと スキル",
+      "リプレイと ずかん",
+      "きろくと せってい",
+    ],
+    guideBodies: [
+      "ゆびで みちを なぞって すすむ、ドットの めいろゲームだよ。\nめいろの どこかに ある、「ゴール」と 書いた 金の たからばこを めざそう。\nことばは この上の「ことば」で えらべる。あとから タイトルの 🌐 でも かえられるよ。",
+      "タイトルで キャラを「あお」「ロボ」「あか」から えらんで、「▶ はじめる」を おそう。\n「めいろを えらぶ」で「やさしい」から あそぶ。クリアすると つぎの めいろが あそべるように なるよ（ぜんぶで 8つ）。\nよこの「シンプル」は、スキルも たからばこも ない めいろ。もらえる EXPは 1.5ばい。",
+      "ゆびで みちを なぞると、キャラが 0.5びょう おくれて ついてくるよ。すこし さきの マスを タップしても あるく。\n上の ➕ ➖ や 2本の ゆびで ズーム、🧭 で キャラの ところに もどる。\nパソコンでは やじるしキーや WASDでも うごける。",
+      "たからばこに ふれると あく。⛏️つるはし・🪜ハシゴ・🪙コイン・💎ダイヤが 出たり、からっぽだったり するよ。\nつるはしと ハシゴは、下の ボタンを おしてから かべを タップして つかう。\nコインと ダイヤは もっているだけで、ゴールの タイムが へる。下の ボタンを おすと せつめいが 出るよ。",
+      "ゴールすると タイムと「もくひょう」が 出て、EXPが もらえる。もくひょうより はやいほど EXPが ふえるよ。\nつぎは「つぎへ ▶」か「もういちど」。\nこまったら 上の 💡（ヒント）で、すすむ みちが すこし 光る（60びょうに 1かい）。\nやめるときは ✕ を 2かい。とちゅうで とじても、タイトルの「▶ つづきから」で つづけられる（シンプルは のぞく）。",
+      "EXPが たまると レベルが 上がり、パッシブスキルを おぼえる。さいしょの スキルは キャラで ちがうよ（あお：たいあたり、あか：おたからマスター、ロボ：スピードアップ）。\nタイトルの「⚙ スキル」で、スキルを タップして つけはずし。つけられる かずは レベルで ふえる。\nつけた スキルは つぎの めいろから きくよ。",
+      "「シンプル」で クリアすると「リプレイ保存」が 出る。タイトルの「▶ リプレイ」で 見なおせるよ（9こまで）。\n「めいろを えらぶ」の 下の「めいきゅう ずかん」に、クリアした 迷宮が のこる。9つ ぜんぶ あつめよう。",
+      "レベルや きろくは この たんまつの 中だけに のこり、どこにも おくられないよ。\nタイトルの「🔧 せってい」で「もじの おおきさ」「BGMの おおきさ」「こうかおんの おおきさ」「しんどう」を かえられる。\nこの あそびかたは「🔧 せってい」の「あそびかた」の「もういちど みる」で、いつでも 見なおせるよ。",
+    ],
   },
 
   en: {
@@ -122,6 +144,28 @@ const I18N = {
     vCraft: 'Tools ×{n}', vWarp: 'Near warp {n}%', vHansel: '{n} shades', vClone: '{n} clones',
     vCT: 'CT {n}s', vMaster: '🪙×{a} 💎×{b}', chooseLang: 'Choose language', expMax: '(MAX level!)', treasureMaster: 'TREASURE MASTER', masteryScore: 'Mastery Score', simple: 'Simple', replay: 'Replay', saveReplay: 'Save replay', replaySaved: 'Saved', noReplays: 'No replays yet',
     special: 'Special', saveFail: 'Could not save', zukan: 'Maze Collection', zukanAll: 'All 9 mazes cleared!', resume: 'Continue', hint: 'Hint', best: 'Best time', bestNew: '🎖 New best time!', vibe: 'Vibration',
+    /* はじめての あそびかた（game.js openGuide・2026-09-30）。guideHeads と guideBodies は同じ数。ボタン名は画面の文字と同じ（照らし合わせ=store/_back_check.js） */
+    guideTitle: "How to play", guidePrev: "◀ Back", guideStart: "▶ Let's go!", guideAgain: "Show again",
+    guideHeads: [
+      "Welcome to Treasure Labyrinth",
+      "First steps",
+      "How to move",
+      "Chests and items",
+      "Goal and time",
+      "Levels and skills",
+      "Replays and collection",
+      "Records and settings",
+    ],
+    guideBodies: [
+      "A pixel maze game where you trace your path with a finger.\nHead for the gold treasure chest marked “GOAL” somewhere in the maze.\nChoose your language above with “Language”. You can also change it later with 🌐 on the title screen.",
+      "On the title screen, choose a character: “Blue”, “Robo” or “Red”, then tap “▶ Play”.\nIn “Choose a maze”, start with “Easy”. Clearing a maze unlocks the next one (8 in all).\n“Simple”, next to each maze, has no skills and no chests, and gives 1.5× EXP.",
+      "Trace a path with your finger and your hero follows 0.5 seconds behind. You can also tap a square a little ahead.\nZoom with ➕ ➖ at the top or with two fingers; 🧭 brings the view back to your hero.\nOn a computer, the arrow keys or WASD work too.",
+      "Walk into a chest to open it. You may find ⛏️Pickaxe, 🪜Ladder, 🪙Coin or 💎Diamond, or it may be empty.\nTo use a pickaxe or a ladder, tap its button at the bottom, then tap a wall.\nCoins and diamonds work just by carrying them: they cut your time at the goal. Tap an item button to read what it does.",
+      "At the goal you see your time and the “Target”, and you get EXP. The faster you beat the target, the more EXP.\nThen tap “Next ▶” or “Retry”.\nNot sure where to go? 💡 (Hint) at the top lights up the way ahead for a moment (once every 60 seconds).\nTo quit, tap ✕ twice. If you close the app mid-maze, “▶ Continue” on the title screen picks up where you left off (not in Simple).",
+      "Collect EXP to level up and learn passive skills. Each character starts with a different skill (Blue: Tackle, Red: Treasure Master, Robo: Speed Up).\nIn “⚙ Skills” on the title screen, tap a skill to equip or remove it. You can equip more as your level rises.\nEquipped skills work from the next maze.",
+      "Clear a maze in “Simple” and “Save replay” appears. Watch it again with “▶ Replay” on the title screen (up to 9).\n“Maze Collection” below “Choose a maze” keeps the mazes you have cleared. Try to collect all 9.",
+      "Your level and records stay only on this device and are never sent anywhere.\nIn “🔧 Settings” on the title screen, change “Text size”, “Music volume”, “Sound FX volume” and “Vibration”.\nYou can see this guide again at any time with “Show again” next to “How to play” in “🔧 Settings”.",
+    ],
   },
 
   zh: {
@@ -164,6 +208,28 @@ const I18N = {
     vCraft: '工具 {n}次', vWarp: '近点传送 {n}%', vHansel: '足迹 {n}级', vClone: '分身 {n}人',
     vCT: '冷却 {n}秒', vMaster: '🪙×{a}·💎×{b}', chooseLang: '选择语言', expMax: '（LV99 满级！）', treasureMaster: '宝藏大师', masteryScore: '成就分数', simple: '简约', replay: '回放', saveReplay: '保存回放', replaySaved: '已保存', noReplays: '还没有回放',
     special: '特别', saveFail: '无法保存', zukan: '迷宫图鉴', zukanAll: '9种迷宫全部通关！', resume: '继续', hint: '提示', best: '最佳纪录', bestNew: '🎖 刷新最佳纪录！', vibe: '震动',
+    /* はじめての あそびかた（game.js openGuide・2026-09-30）。guideHeads と guideBodies は同じ数。ボタン名は画面の文字と同じ（照らし合わせ=store/_back_check.js） */
+    guideTitle: "玩法", guidePrev: "◀ 上一页", guideStart: "▶ 开始玩！", guideAgain: "再看一次",
+    guideHeads: [
+      "欢迎来到 Treasure Labyrinth",
+      "第一步",
+      "怎么移动",
+      "宝箱和道具",
+      "终点和时间",
+      "等级和技能",
+      "回放和图鉴",
+      "记录和设置",
+    ],
+    guideBodies: [
+      "这是一款用手指描线前进的像素迷宫游戏。\n目标是迷宫某处写着“终点”的金色宝箱。\n可以在上方的“语言”选择语言。之后也能在标题画面用 🌐 更改。",
+      "在标题画面从“蓝色”“机器人”“红色”中选一个角色，再点“▶ 开始”。\n在“选择迷宫”里先玩“简单”。通关后就能玩下一个迷宫（共8个）。\n旁边的“简约”是没有技能也没有宝箱的迷宫，获得的EXP是1.5倍。",
+      "用手指描出路线，角色会晚0.5秒跟上。点前方不远的格子也能走过去。\n用上方的 ➕ ➖ 或双指缩放，点 🧭 回到角色所在的位置。\n在电脑上也可以用方向键或WASD移动。",
+      "碰到宝箱就会打开，可能出现⛏️镐子、🪜梯子、🪙金币、💎钻石，也可能是空的。\n镐子和梯子要先点下方的按钮，再点墙壁来使用。\n金币和钻石只要带着就有效，到终点时会缩短时间。点下方的按钮可以看说明。",
+      "到达终点会显示时间和“目标”，并获得EXP。比目标越快，EXP越多。\n接着点“下一个 ▶”或“再来一次”。\n不知道往哪走时，点上方的 💡（提示），前方的路会亮一下（每60秒1次）。\n想退出就点两次 ✕。中途关掉应用，也能在标题画面用“▶ 继续”接着玩（简约模式除外）。",
+      "攒够EXP就会升级，并学会被动技能。每个角色一开始的技能不同（蓝色：冲撞，红色：寻宝大师，机器人：加速）。\n在标题画面的“⚙ 技能”里点技能来装备或卸下。能装备的数量会随等级增加。\n装备的技能从下一个迷宫开始生效。",
+      "用“简约”通关后会出现“保存回放”。可以在标题画面的“▶ 回放”重看（最多9个）。\n“选择迷宫”下方的“迷宫图鉴”会记下你通关过的迷宫。把9个都收集齐吧。",
+      "等级和记录只保存在这台设备里，不会发送到任何地方。\n在标题画面的“🔧 设置”里可以更改“文字大小”“音乐音量”“音效音量”“震动”。\n本说明随时可以在“🔧 设置”的“玩法”旁点“再看一次”重新查看。",
+    ],
   },
 
   'zh-TW': {
@@ -206,6 +272,28 @@ const I18N = {
     vCraft: '工具 {n}次', vWarp: '近點傳送 {n}%', vHansel: '足跡 {n}級', vClone: '分身 {n}人',
     vCT: '冷卻 {n}秒', vMaster: '🪙×{a}·💎×{b}', chooseLang: '選擇語言', expMax: '（LV99 滿級！）', treasureMaster: '寶藏大師', masteryScore: '成就分數', simple: '簡約', replay: '重播', saveReplay: '儲存重播', replaySaved: '已儲存', noReplays: '還沒有重播',
     special: '特別', saveFail: '無法保存', zukan: '迷宮圖鑑', zukanAll: '9種迷宮全部通關！', resume: '繼續', hint: '提示', best: '最佳紀錄', bestNew: '🎖 刷新最佳紀錄！', vibe: '震動',
+    /* はじめての あそびかた（game.js openGuide・2026-09-30）。guideHeads と guideBodies は同じ数。ボタン名は画面の文字と同じ（照らし合わせ=store/_back_check.js） */
+    guideTitle: "玩法", guidePrev: "◀ 上一頁", guideStart: "▶ 開始玩！", guideAgain: "再看一次",
+    guideHeads: [
+      "歡迎來到 Treasure Labyrinth",
+      "第一步",
+      "怎麼移動",
+      "寶箱和道具",
+      "終點和時間",
+      "等級和技能",
+      "重播和圖鑑",
+      "紀錄和設定",
+    ],
+    guideBodies: [
+      "這是一款用手指描線前進的像素迷宮遊戲。\n目標是迷宮某處寫著「終點」的金色寶箱。\n可以在上方的「語言」選擇語言。之後也能在標題畫面用 🌐 更改。",
+      "在標題畫面從「藍色」「機器人」「紅色」中選一個角色，再點「▶ 開始」。\n在「選擇迷宮」裡先玩「簡單」。過關後就能玩下一個迷宮（共8個）。\n旁邊的「簡約」是沒有技能也沒有寶箱的迷宮，獲得的EXP是1.5倍。",
+      "用手指描出路線，角色會晚0.5秒跟上。點前方不遠的格子也能走過去。\n用上方的 ➕ ➖ 或雙指縮放，點 🧭 回到角色所在的位置。\n在電腦上也可以用方向鍵或WASD移動。",
+      "碰到寶箱就會打開，可能出現⛏️鎬子、🪜梯子、🪙金幣、💎鑽石，也可能是空的。\n鎬子和梯子要先點下方的按鈕，再點牆壁來使用。\n金幣和鑽石只要帶著就有效，到終點時會縮短時間。點下方的按鈕可以看說明。",
+      "到達終點會顯示時間和「目標」，並獲得EXP。比目標越快，EXP越多。\n接著點「下一個 ▶」或「再來一次」。\n不知道往哪走時，點上方的 💡（提示），前方的路會亮一下（每60秒1次）。\n想退出就點兩次 ✕。中途關掉應用程式，也能在標題畫面用「▶ 繼續」接著玩（簡約模式除外）。",
+      "累積EXP就會升級，並學會被動技能。每個角色一開始的技能不同（藍色：衝撞，紅色：尋寶大師，機器人：加速）。\n在標題畫面的「⚙ 技能」裡點技能來裝備或卸下。能裝備的數量會隨等級增加。\n裝備的技能從下一個迷宮開始生效。",
+      "用「簡約」過關後會出現「儲存重播」。可以在標題畫面的「▶ 重播」重看（最多9個）。\n「選擇迷宮」下方的「迷宮圖鑑」會記下你過關的迷宮。把9個都收集齊吧。",
+      "等級和紀錄只保存在這台裝置裡，不會傳送到任何地方。\n在標題畫面的「🔧 設定」裡可以更改「文字大小」「音樂音量」「音效音量」「震動」。\n本說明隨時可以在「🔧 設定」的「玩法」旁點「再看一次」重新查看。",
+    ],
   },
 
   ko: {
@@ -248,6 +336,28 @@ const I18N = {
     vCraft: '도구 {n}회', vWarp: '근접워프 {n}%', vHansel: '발자국 {n}단계', vClone: '분신 {n}명',
     vCT: '쿨 {n}초', vMaster: '🪙×{a}·💎×{b}', chooseLang: '언어 선택', expMax: '(LV99 만렙!)', treasureMaster: '트레저 마스터', masteryScore: '숙련 점수', simple: '심플', replay: '리플레이', saveReplay: '리플레이 저장', replaySaved: '저장됨', noReplays: '아직 리플레이가 없어요',
     special: '스페셜', saveFail: '저장하지 못했어요', zukan: '미로 도감', zukanAll: '9가지 미로 모두 클리어!', resume: '이어서 하기', hint: '힌트', best: '최고 기록', bestNew: '🎖 최고 기록 경신!', vibe: '진동',
+    /* はじめての あそびかた（game.js openGuide・2026-09-30）。guideHeads と guideBodies は同じ数。ボタン名は画面の文字と同じ（照らし合わせ=store/_back_check.js） */
+    guideTitle: "노는 법", guidePrev: "◀ 이전", guideStart: "▶ 놀아요!", guideAgain: "다시 보기",
+    guideHeads: [
+      "Treasure Labyrinth에 오신 걸 환영해요",
+      "처음 할 일",
+      "움직이는 법",
+      "보물 상자와 아이템",
+      "골과 시간",
+      "레벨과 스킬",
+      "리플레이와 도감",
+      "기록과 설정",
+    ],
+    guideBodies: [
+      "손가락으로 길을 그려서 나아가는 도트 미로 게임이에요.\n미로 어딘가에 있는, “골”이라고 적힌 금색 보물 상자를 찾아가요.\n언어는 위의 “언어”에서 고를 수 있어요. 나중에 타이틀의 🌐로도 바꿀 수 있어요.",
+      "타이틀에서 캐릭터를 “파랑” “로보” “빨강” 중에서 고르고 “▶ 시작”을 눌러요.\n“미로 선택”에서 “쉬움”부터 시작해요. 클리어하면 다음 미로를 할 수 있어요(모두 8개).\n옆의 “심플”은 스킬도 보물 상자도 없는 미로예요. 받는 EXP는 1.5배예요.",
+      "손가락으로 길을 그리면 캐릭터가 0.5초 늦게 따라와요. 조금 앞의 칸을 탭해도 걸어가요.\n위의 ➕ ➖나 두 손가락으로 확대·축소하고, 🧭로 캐릭터 위치로 돌아가요.\n컴퓨터에서는 방향키나 WASD로도 움직일 수 있어요.",
+      "보물 상자에 닿으면 열려요. ⛏️곡괭이·🪜사다리·🪙코인·💎다이아가 나오거나, 비어 있기도 해요.\n곡괭이와 사다리는 아래 버튼을 누른 다음 벽을 탭해서 써요.\n코인과 다이아는 갖고 있기만 하면 골에서 시간이 줄어요. 아래 버튼을 누르면 설명이 나와요.",
+      "골에 도착하면 시간과 “목표”가 나오고 EXP를 받아요. 목표보다 빠를수록 EXP가 많아져요.\n그다음은 “다음 ▶” 또는 “한번 더”.\n길을 모르겠으면 위의 💡(힌트)를 눌러요. 갈 길이 잠깐 빛나요(60초에 한 번).\n그만둘 때는 ✕를 두 번. 도중에 앱을 닫아도 타이틀의 “▶ 이어서 하기”로 계속할 수 있어요(심플은 제외).",
+      "EXP가 모이면 레벨이 오르고 패시브 스킬을 배워요. 처음 스킬은 캐릭터마다 달라요(파랑: 몸통박치기, 빨강: 보물 마스터, 로보: 스피드 업).\n타이틀의 “⚙ 스킬”에서 스킬을 탭해서 장착하거나 빼요. 장착할 수 있는 수는 레벨에 따라 늘어요.\n장착한 스킬은 다음 미로부터 적용돼요.",
+      "“심플”로 클리어하면 “리플레이 저장”이 나와요. 타이틀의 “▶ 리플레이”에서 다시 볼 수 있어요(9개까지).\n“미로 선택” 아래의 “미로 도감”에 클리어한 미로가 남아요. 9개를 모두 모아 봐요.",
+      "레벨과 기록은 이 기기 안에만 남고 어디에도 보내지 않아요.\n타이틀의 “🔧 설정”에서 “글자 크기” “음악 볼륨” “효과음 볼륨” “진동”을 바꿀 수 있어요.\n이 안내는 “🔧 설정”의 “노는 법” 옆 “다시 보기”로 언제든 다시 볼 수 있어요.",
+    ],
   },
 
   es: {
@@ -290,6 +400,28 @@ const I18N = {
     vCraft: 'Usos ×{n}', vWarp: 'Salto cercano {n}%', vHansel: '{n} tonos', vClone: '{n} clones',
     vCT: 'CT {n}s', vMaster: '🪙×{a} 💎×{b}', chooseLang: 'Elige idioma', expMax: '(¡Nivel MÁXIMO!)', treasureMaster: 'MAESTRO DEL TESORO', masteryScore: 'Puntuación de maestría', simple: 'Simple', replay: 'Repetición', saveReplay: 'Guardar repetición', replaySaved: 'Guardado', noReplays: 'Aún no hay repeticiones',
     special: 'Especial', saveFail: 'No se pudo guardar', zukan: 'Colección de laberintos', zukanAll: '¡Los 9 laberintos completados!', resume: 'Continuar', hint: 'Pista', best: 'Mejor tiempo', bestNew: '🎖 ¡Nuevo récord personal!', vibe: 'Vibración',
+    /* はじめての あそびかた（game.js openGuide・2026-09-30）。guideHeads と guideBodies は同じ数。ボタン名は画面の文字と同じ（照らし合わせ=store/_back_check.js） */
+    guideTitle: "Cómo se juega", guidePrev: "◀ Anterior", guideStart: "▶ ¡A jugar!", guideAgain: "Ver otra vez",
+    guideHeads: [
+      "Te damos la bienvenida a Treasure Labyrinth",
+      "Primeros pasos",
+      "Cómo moverte",
+      "Cofres y objetos",
+      "Meta y tiempo",
+      "Niveles y habilidades",
+      "Repeticiones y colección",
+      "Récords y ajustes",
+    ],
+    guideBodies: [
+      "Un juego de laberintos de píxeles en el que trazas el camino con el dedo.\nBusca el cofre dorado con el cartel «META», que está en algún lugar del laberinto.\nElige el idioma arriba en «Idioma». Luego también puedes cambiarlo con 🌐 en la pantalla de título.",
+      "En la pantalla de título elige un personaje: «Azul», «Robo» o «Rojo», y toca «▶ Jugar».\nEn «Elige un laberinto» empieza por «Fácil». Al superar un laberinto se abre el siguiente (8 en total).\n«Simple», al lado de cada laberinto, no tiene habilidades ni cofres, y da 1,5 veces más EXP.",
+      "Traza el camino con el dedo y tu personaje te sigue medio segundo después. También puedes tocar una casilla un poco más adelante.\nAcerca o aleja con ➕ ➖ arriba o con dos dedos; 🧭 vuelve a centrar la vista en tu personaje.\nEn el ordenador también funcionan las flechas o WASD.",
+      "Al llegar a un cofre, se abre. Puede salir ⛏️Pico, 🪜Escalera, 🪙Moneda o 💎Diamante, o puede estar vacío.\nPara usar el pico o la escalera, toca su botón abajo y luego toca una pared.\nLas monedas y los diamantes funcionan con solo llevarlos: reducen tu tiempo en la meta. Toca el botón de un objeto para ver qué hace.",
+      "En la meta ves tu tiempo y el «Objetivo», y ganas EXP. Cuanto más rápido que el objetivo, más EXP.\nLuego toca «Siguiente ▶» u «Otra vez».\n¿No sabes por dónde ir? 💡 (Pista) arriba ilumina un momento el camino (una vez cada 60 segundos).\nPara salir, toca ✕ dos veces. Si cierras la app a mitad, «▶ Continuar» en la pantalla de título sigue donde lo dejaste (no en Simple).",
+      "Con EXP subes de nivel y aprendes habilidades pasivas. Cada personaje empieza con una distinta (Azul: Embestida, Rojo: Maestra del Tesoro, Robo: Velocidad).\nEn «⚙ Habilidades» de la pantalla de título, toca una habilidad para equiparla o quitarla. Puedes equipar más al subir de nivel.\nLas habilidades equipadas funcionan desde el siguiente laberinto.",
+      "Si superas un laberinto en «Simple», aparece «Guardar repetición». Vuelve a verla con «▶ Repetición» en la pantalla de título (hasta 9).\n«Colección de laberintos», debajo de «Elige un laberinto», guarda los laberintos que has superado. Intenta reunir los 9.",
+      "Tu nivel y tus récords se quedan solo en este dispositivo y no se envían a ningún sitio.\nEn «🔧 Ajustes» de la pantalla de título puedes cambiar «Tamaño de letra», «Volumen de música», «Volumen de efectos» y «Vibración».\nPuedes volver a ver esta guía cuando quieras con «Ver otra vez», junto a «Cómo se juega», en «🔧 Ajustes».",
+    ],
   },
 
   pt: {
@@ -332,6 +464,28 @@ const I18N = {
     vCraft: 'Usos ×{n}', vWarp: 'Salto perto {n}%', vHansel: '{n} tons', vClone: '{n} clones',
     vCT: 'CT {n}s', vMaster: '🪙×{a} 💎×{b}', chooseLang: 'Escolher idioma', expMax: '(Nível MÁXIMO!)', treasureMaster: 'MESTRE DO TESOURO', masteryScore: 'Pontuação de maestria', simple: 'Simples', replay: 'Replay', saveReplay: 'Salvar replay', replaySaved: 'Salvo', noReplays: 'Ainda sem replays',
     special: 'Especial', saveFail: 'Não foi possível salvar', zukan: 'Coleção de labirintos', zukanAll: 'Os 9 labirintos concluídos!', resume: 'Continuar', hint: 'Dica', best: 'Melhor tempo', bestNew: '🎖 Novo recorde pessoal!', vibe: 'Vibração',
+    /* はじめての あそびかた（game.js openGuide・2026-09-30）。guideHeads と guideBodies は同じ数。ボタン名は画面の文字と同じ（照らし合わせ=store/_back_check.js） */
+    guideTitle: "Como jogar", guidePrev: "◀ Anterior", guideStart: "▶ Vamos jogar!", guideAgain: "Ver de novo",
+    guideHeads: [
+      "Boas-vindas ao Treasure Labyrinth",
+      "Primeiros passos",
+      "Como se mover",
+      "Baús e itens",
+      "Chegada e tempo",
+      "Níveis e habilidades",
+      "Replays e coleção",
+      "Recordes e opções",
+    ],
+    guideBodies: [
+      "Um jogo de labirinto em pixels em que você traça o caminho com o dedo.\nProcure o baú dourado com a placa “META”, que fica em algum lugar do labirinto.\nEscolha o idioma acima em “Idioma”. Depois também dá para trocar com 🌐 na tela de título.",
+      "Na tela de título, escolha um personagem: “Azul”, “Robô” ou “Vermelho”, e toque em “▶ Jogar”.\nEm “Escolha um labirinto”, comece pelo “Fácil”. Ao passar um labirinto, o próximo é liberado (8 no total).\n“Simples”, ao lado de cada labirinto, não tem habilidades nem baús e dá 1,5 vez mais EXP.",
+      "Trace o caminho com o dedo e seu personagem segue meio segundo depois. Você também pode tocar numa casa um pouco à frente.\nAproxime ou afaste com ➕ ➖ em cima ou com dois dedos; 🧭 volta a mostrar seu personagem.\nNo computador, as setas ou WASD também funcionam.",
+      "Ao chegar a um baú, ele abre. Pode sair ⛏️Picareta, 🪜Escada, 🪙Moeda ou 💎Diamante, ou ele pode estar vazio.\nPara usar a picareta ou a escada, toque no botão dela embaixo e depois toque numa parede.\nMoedas e diamantes funcionam só de carregar: reduzem seu tempo na chegada. Toque no botão de um item para ver o que ele faz.",
+      "Na chegada você vê seu tempo e a “Meta”, e ganha EXP. Quanto mais rápido que a meta, mais EXP.\nDepois toque em “Próximo ▶” ou “De novo”.\nSem saber para onde ir? 💡 (Dica) em cima ilumina o caminho por um instante (uma vez a cada 60 segundos).\nPara sair, toque em ✕ duas vezes. Se fechar o app no meio, “▶ Continuar” na tela de título retoma de onde parou (não no Simples).",
+      "Com EXP você sobe de nível e aprende habilidades passivas. Cada personagem começa com uma diferente (Azul: Investida, Vermelho: Mestra do Tesouro, Robô: Velocidade).\nEm “⚙ Habilidades” na tela de título, toque numa habilidade para equipar ou tirar. Dá para equipar mais conforme o nível sobe.\nAs habilidades equipadas valem a partir do próximo labirinto.",
+      "Ao passar um labirinto no “Simples”, aparece “Salvar replay”. Veja de novo em “▶ Replay” na tela de título (até 9).\nA “Coleção de labirintos”, embaixo de “Escolha um labirinto”, guarda os labirintos que você passou. Tente juntar os 9.",
+      "Seu nível e seus recordes ficam só neste aparelho e não são enviados para lugar nenhum.\nEm “🔧 Opções” na tela de título você muda “Tamanho da letra”, “Volume da música”, “Volume dos efeitos” e “Vibração”.\nVocê pode ver este guia de novo quando quiser em “Ver de novo”, ao lado de “Como jogar”, em “🔧 Opções”.",
+    ],
   },
 
   fr: {
@@ -374,6 +528,28 @@ const I18N = {
     vCraft: 'Usages ×{n}', vWarp: 'Saut proche {n}%', vHansel: '{n} teintes', vClone: '{n} clones',
     vCT: 'CT {n}s', vMaster: '🪙×{a} 💎×{b}', chooseLang: 'Choisir la langue', expMax: '(Niveau MAX !)', treasureMaster: 'MAÎTRE DU TRÉSOR', masteryScore: 'Score de maîtrise', simple: 'Simple', replay: 'Rejouer', saveReplay: 'Enregistrer', replaySaved: 'Enregistré', noReplays: 'Aucun replay',
     special: 'Spécial', saveFail: 'Échec de l\'enregistrement', zukan: 'Collection de labyrinthes', zukanAll: 'Les 9 labyrinthes terminés !', resume: 'Continuer', hint: 'Indice', best: 'Meilleur temps', bestNew: '🎖 Nouveau record personnel !', vibe: 'Vibrations',
+    /* はじめての あそびかた（game.js openGuide・2026-09-30）。guideHeads と guideBodies は同じ数。ボタン名は画面の文字と同じ（照らし合わせ=store/_back_check.js） */
+    guideTitle: "Comment jouer", guidePrev: "◀ Précédent", guideStart: "▶ C’est parti !", guideAgain: "Revoir",
+    guideHeads: [
+      "Bienvenue dans Treasure Labyrinth",
+      "Premiers pas",
+      "Se déplacer",
+      "Coffres et objets",
+      "Arrivée et temps",
+      "Niveaux et talents",
+      "Rejouer et collection",
+      "Records et réglages",
+    ],
+    guideBodies: [
+      "Un jeu de labyrinthe en pixels où tu traces le chemin du doigt.\nVise le coffre doré marqué « BUT », caché quelque part dans le labyrinthe.\nChoisis la langue ci-dessus avec « Langue ». Tu pourras aussi la changer plus tard avec 🌐 sur l’écran titre.",
+      "Sur l’écran titre, choisis un personnage : « Bleu », « Robo » ou « Rouge », puis touche « ▶ Jouer ».\nDans « Choisis un labyrinthe », commence par « Facile ». Réussir un labyrinthe ouvre le suivant (8 en tout).\n« Simple », à côté de chaque labyrinthe, n’a ni talents ni coffres et donne 1,5 fois plus d’EXP.",
+      "Trace le chemin du doigt : ton héros suit une demi-seconde plus tard. Tu peux aussi toucher une case un peu plus loin.\nZoome avec ➕ ➖ en haut ou avec deux doigts ; 🧭 recentre la vue sur ton héros.\nSur ordinateur, les flèches ou WASD marchent aussi.",
+      "Un coffre s’ouvre quand tu arrives dessus. Il peut contenir ⛏️Pioche, 🪜Échelle, 🪙Pièce ou 💎Diamant, ou être vide.\nPour utiliser une pioche ou une échelle, touche son bouton en bas, puis touche un mur.\nLes pièces et les diamants agissent dès que tu les portes : ils réduisent ton temps à l’arrivée. Touche le bouton d’un objet pour lire à quoi il sert.",
+      "À l’arrivée, tu vois ton temps et l’« Objectif », et tu gagnes de l’EXP. Plus tu bats l’objectif, plus tu gagnes d’EXP.\nTouche ensuite « Suivant ▶ » ou « Encore ».\nTu ne sais plus où aller ? 💡 (Indice) en haut éclaire un instant le chemin (une fois toutes les 60 secondes).\nPour quitter, touche ✕ deux fois. Si tu fermes l’appli en cours de route, « ▶ Continuer » sur l’écran titre reprend là où tu en étais (sauf en Simple).",
+      "L’EXP te fait monter de niveau et apprendre des talents passifs. Chaque personnage commence avec un talent différent (Bleu : Charge, Rouge : Maîtresse du Trésor, Robo : Vitesse).\nDans « ⚙ Talents » sur l’écran titre, touche un talent pour l’équiper ou le retirer. Tu peux en équiper plus en montant de niveau.\nLes talents équipés agissent à partir du labyrinthe suivant.",
+      "Si tu réussis un labyrinthe en « Simple », « Enregistrer » apparaît. Revois la partie avec « ▶ Rejouer » sur l’écran titre (jusqu’à 9).\nLa « Collection de labyrinthes », sous « Choisis un labyrinthe », garde les labyrinthes réussis. Essaie de réunir les 9.",
+      "Ton niveau et tes records restent uniquement sur cet appareil et ne sont envoyés nulle part.\nDans « 🔧 Réglages » sur l’écran titre, tu peux changer « Taille du texte », « Volume musique », « Volume effets » et « Vibrations ».\nTu peux revoir ce guide à tout moment avec « Revoir », à côté de « Comment jouer », dans « 🔧 Réglages ».",
+    ],
   },
 
   de: {
@@ -416,6 +592,28 @@ const I18N = {
     vCraft: 'Nutzung ×{n}', vWarp: 'Nah-Warp {n}%', vHansel: '{n} Stufen', vClone: '{n} Klone',
     vCT: 'CT {n}s', vMaster: '🪙×{a} 💎×{b}', chooseLang: 'Sprache wählen', expMax: '(MAX-Level!)', treasureMaster: 'SCHATZMEISTER', masteryScore: 'Meisterschaftspunkte', simple: 'Schlicht', replay: 'Wiederholung', saveReplay: 'Speichern', replaySaved: 'Gespeichert', noReplays: 'Noch keine Wiederholungen',
     special: 'Spezial', saveFail: 'Speichern fehlgeschlagen', zukan: 'Labyrinth-Sammlung', zukanAll: 'Alle 9 Labyrinthe geschafft!', resume: 'Fortsetzen', hint: 'Hinweis', best: 'Bestzeit', bestNew: '🎖 Neue Bestzeit!', vibe: 'Vibration',
+    /* はじめての あそびかた（game.js openGuide・2026-09-30）。guideHeads と guideBodies は同じ数。ボタン名は画面の文字と同じ（照らし合わせ=store/_back_check.js） */
+    guideTitle: "So wird gespielt", guidePrev: "◀ Zurück", guideStart: "▶ Los geht’s!", guideAgain: "Nochmal ansehen",
+    guideHeads: [
+      "Willkommen bei Treasure Labyrinth",
+      "Die ersten Schritte",
+      "So bewegst du dich",
+      "Truhen und Gegenstände",
+      "Ankommen und Zeit",
+      "Level und Skills",
+      "Wiederholung und Sammlung",
+      "Daten und Einstellungen",
+    ],
+    guideBodies: [
+      "Ein Pixel-Labyrinthspiel, in dem du den Weg mit dem Finger ziehst.\nDein Ziel ist die goldene Schatztruhe mit dem Schild „ZIEL“ irgendwo im Labyrinth.\nDie Sprache wählst du oben bei „Sprache“. Später geht das auch mit 🌐 auf dem Titelbildschirm.",
+      "Wähle auf dem Titelbildschirm eine Figur: „Blau“, „Robo“ oder „Rot“, und tippe auf „▶ Spielen“.\nFang unter „Labyrinth wählen“ mit „Leicht“ an. Schaffst du ein Labyrinth, wird das nächste freigeschaltet (insgesamt 8).\n„Schlicht“ neben jedem Labyrinth hat keine Skills und keine Truhen und gibt 1,5-mal so viel EXP.",
+      "Zieh den Weg mit dem Finger, und deine Figur folgt eine halbe Sekunde später. Du kannst auch ein Feld etwas weiter vorn antippen.\nZoome mit ➕ ➖ oben oder mit zwei Fingern; 🧭 holt die Ansicht zurück zu deiner Figur.\nAm Computer gehen auch die Pfeiltasten oder WASD.",
+      "Läufst du in eine Truhe, geht sie auf. Darin kann ⛏️Spitzhacke, 🪜Leiter, 🪙Münze oder 💎Diamant sein, oder sie ist leer.\nFür Spitzhacke oder Leiter tippst du unten auf den passenden Knopf und dann auf eine Wand.\nMünzen und Diamanten wirken schon, wenn du sie dabeihast: Sie verkürzen deine Zeit am Ende. Tippe auf den Knopf eines Gegenstands, um zu lesen, was er macht.",
+      "Bist du angekommen, siehst du deine Zeit und das „Ziel“ und bekommst EXP. Je schneller du als das Ziel bist, desto mehr EXP.\nDann tippe auf „Weiter ▶“ oder „Nochmal“.\nKommst du nicht weiter? 💡 (Hinweis) oben lässt den Weg kurz aufleuchten (einmal alle 60 Sekunden).\nZum Aufhören tippe zweimal auf ✕. Schließt du die App mittendrin, geht es auf dem Titelbildschirm mit „▶ Fortsetzen“ weiter (nicht bei Schlicht).",
+      "Mit EXP steigst du im Level auf und lernst passive Skills. Jede Figur startet mit einem anderen Skill (Blau: Rempler, Rot: Schatzmeisterin, Robo: Tempo).\nIn „⚙ Skills“ auf dem Titelbildschirm tippst du einen Skill an, um ihn anzulegen oder abzulegen. Mit höherem Level kannst du mehr anlegen.\nAngelegte Skills wirken ab dem nächsten Labyrinth.",
+      "Schaffst du ein Labyrinth in „Schlicht“, erscheint „Speichern“. Ansehen kannst du die Aufnahme mit „▶ Wiederholung“ auf dem Titelbildschirm (bis zu 9).\nDie „Labyrinth-Sammlung“ unter „Labyrinth wählen“ merkt sich die geschafften Labyrinthe. Sammle alle 9.",
+      "Dein Level und deine Rekorde bleiben nur auf diesem Gerät und werden nirgendwohin gesendet.\nIn „🔧 Einstellungen“ auf dem Titelbildschirm änderst du „Schriftgröße“, „Musik-Lautstärke“, „Effekt-Lautstärke“ und „Vibration“.\nDiese Anleitung siehst du jederzeit wieder mit „Nochmal ansehen“ neben „So wird gespielt“ in „🔧 Einstellungen“.",
+    ],
   },
 
   it: {
@@ -458,6 +656,28 @@ const I18N = {
     vCraft: 'Usi ×{n}', vWarp: 'Salto vicino {n}%', vHansel: '{n} tonalità', vClone: '{n} cloni',
     vCT: 'CT {n}s', vMaster: '🪙×{a} 💎×{b}', chooseLang: 'Scegli la lingua', expMax: '(Livello MAX!)', treasureMaster: 'MAESTRO DEL TESORO', masteryScore: 'Punteggio maestria', simple: 'Semplice', replay: 'Replay', saveReplay: 'Salva replay', replaySaved: 'Salvato', noReplays: 'Ancora nessun replay',
     special: 'Speciale', saveFail: 'Salvataggio non riuscito', zukan: 'Collezione di labirinti', zukanAll: 'Tutti i 9 labirinti completati!', resume: 'Continua', hint: 'Suggerimento', best: 'Miglior tempo', bestNew: '🎖 Nuovo record personale!', vibe: 'Vibrazione',
+    /* はじめての あそびかた（game.js openGuide・2026-09-30）。guideHeads と guideBodies は同じ数。ボタン名は画面の文字と同じ（照らし合わせ=store/_back_check.js） */
+    guideTitle: "Come si gioca", guidePrev: "◀ Indietro", guideStart: "▶ Si gioca!", guideAgain: "Rivedi",
+    guideHeads: [
+      "Ti diamo il benvenuto in Treasure Labyrinth",
+      "Primi passi",
+      "Come muoversi",
+      "Scrigni e oggetti",
+      "Arrivo e tempo",
+      "Livelli e abilità",
+      "Replay e collezione",
+      "Record e impostazioni",
+    ],
+    guideBodies: [
+      "Un gioco di labirinti in pixel in cui tracci la strada col dito.\nCerca lo scrigno d’oro con la scritta «META», nascosto da qualche parte nel labirinto.\nScegli la lingua qui sopra con «Lingua». Più tardi puoi cambiarla anche con 🌐 nella schermata del titolo.",
+      "Nella schermata del titolo scegli un personaggio: «Blu», «Robo» o «Rosso», poi tocca «▶ Gioca».\nIn «Scegli un labirinto» comincia da «Facile». Superato un labirinto, si sblocca il successivo (8 in tutto).\n«Semplice», accanto a ogni labirinto, non ha abilità né scrigni e dà 1,5 volte l’EXP.",
+      "Traccia la strada col dito e il tuo personaggio ti segue mezzo secondo dopo. Puoi anche toccare una casella poco più avanti.\nIngrandisci o riduci con ➕ ➖ in alto o con due dita; 🧭 riporta la vista sul tuo personaggio.\nSul computer funzionano anche le frecce o WASD.",
+      "Quando raggiungi uno scrigno, si apre. Può uscire ⛏️Piccone, 🪜Scala, 🪙Moneta o 💎Diamante, oppure può essere vuoto.\nPer usare il piccone o la scala, tocca il suo pulsante in basso e poi tocca un muro.\nMonete e diamanti funzionano solo portandoli con te: riducono il tempo all’arrivo. Tocca il pulsante di un oggetto per leggere a cosa serve.",
+      "All’arrivo vedi il tuo tempo e l’«Obiettivo», e ottieni EXP. Più sei veloce rispetto all’obiettivo, più EXP ricevi.\nPoi tocca «Avanti ▶» o «Riprova».\nNon sai dove andare? 💡 (Suggerimento) in alto illumina per un attimo la strada (una volta ogni 60 secondi).\nPer uscire tocca ✕ due volte. Se chiudi l’app a metà, «▶ Continua» nella schermata del titolo riprende da dove eri (non in Semplice).",
+      "Con l’EXP sali di livello e impari abilità passive. Ogni personaggio parte con un’abilità diversa (Blu: Spallata, Rosso: Maestra del Tesoro, Robo: Velocità).\nIn «⚙ Abilità» nella schermata del titolo, tocca un’abilità per equipaggiarla o toglierla. Salendo di livello ne puoi equipaggiare di più.\nLe abilità equipaggiate valgono dal labirinto successivo.",
+      "Se superi un labirinto in «Semplice», compare «Salva replay». Rivedilo con «▶ Replay» nella schermata del titolo (fino a 9).\nLa «Collezione di labirinti», sotto «Scegli un labirinto», tiene i labirinti che hai superato. Prova a raccoglierli tutti e 9.",
+      "Il tuo livello e i tuoi record restano solo su questo dispositivo e non vengono inviati da nessuna parte.\nIn «🔧 Impostazioni» nella schermata del titolo puoi cambiare «Dimensione testo», «Volume musica», «Volume effetti» e «Vibrazione».\nPuoi rivedere questa guida quando vuoi con «Rivedi», accanto a «Come si gioca», in «🔧 Impostazioni».",
+    ],
   },
 
   nl: {
@@ -500,6 +720,28 @@ const I18N = {
     vCraft: 'Gebruik ×{n}', vWarp: 'Dichtbij-warp {n}%', vHansel: '{n} tinten', vClone: '{n} klonen',
     vCT: 'CT {n}s', vMaster: '🪙×{a} 💎×{b}', chooseLang: 'Kies taal', expMax: '(MAX level!)', treasureMaster: 'SCHATMEESTER', masteryScore: 'Meesterschapscore', simple: 'Simpel', replay: 'Herhaling', saveReplay: 'Opslaan', replaySaved: 'Opgeslagen', noReplays: 'Nog geen herhalingen',
     special: 'Speciaal', saveFail: 'Opslaan mislukt', zukan: 'Doolhofcollectie', zukanAll: 'Alle 9 doolhoven voltooid!', resume: 'Doorgaan', hint: 'Hint', best: 'Beste tijd', bestNew: '🎖 Nieuw persoonlijk record!', vibe: 'Trillen',
+    /* はじめての あそびかた（game.js openGuide・2026-09-30）。guideHeads と guideBodies は同じ数。ボタン名は画面の文字と同じ（照らし合わせ=store/_back_check.js） */
+    guideTitle: "Zo speel je", guidePrev: "◀ Vorige", guideStart: "▶ Spelen maar!", guideAgain: "Opnieuw bekijken",
+    guideHeads: [
+      "Welkom bij Treasure Labyrinth",
+      "De eerste stappen",
+      "Zo beweeg je",
+      "Kisten en voorwerpen",
+      "Finish en tijd",
+      "Levels en skills",
+      "Herhalingen en collectie",
+      "Gegevens en instellingen",
+    ],
+    guideBodies: [
+      "Een pixeldoolhofspel waarin je de weg met je vinger tekent.\nZoek de gouden schatkist met het bordje “FINISH”, ergens in het doolhof.\nKies de taal hierboven bij “Taal”. Later kan dat ook met 🌐 op het titelscherm.",
+      "Kies op het titelscherm een personage: “Blauw”, “Robo” of “Rood”, en tik op “▶ Spelen”.\nBegin bij “Kies een doolhof” met “Makkelijk”. Haal je een doolhof, dan gaat het volgende open (8 in totaal).\n“Simpel”, naast elk doolhof, heeft geen skills en geen kisten en geeft 1,5 keer zoveel EXP.",
+      "Teken de weg met je vinger; je personage volgt een halve seconde later. Je kunt ook op een vakje iets verderop tikken.\nZoom met ➕ ➖ bovenaan of met twee vingers; 🧭 brengt het beeld terug naar je personage.\nOp een computer werken ook de pijltjestoetsen of WASD.",
+      "Loop je tegen een kist aan, dan gaat hij open. Er kan ⛏️Houweel, 🪜Ladder, 🪙Munt of 💎Diamant in zitten, of hij is leeg.\nVoor een houweel of ladder tik je onderaan op de knop en daarna op een muur.\nMunten en diamanten werken al als je ze bij je hebt: ze verkorten je tijd bij de finish. Tik op de knop van een voorwerp om te lezen wat het doet.",
+      "Bij de finish zie je je tijd en het “Doel”, en krijg je EXP. Hoe sneller dan het doel, hoe meer EXP.\nTik daarna op “Volgende ▶” of “Opnieuw”.\nWeet je de weg niet? 💡 (Hint) bovenaan laat de weg even oplichten (eens per 60 seconden).\nStoppen doe je door twee keer op ✕ te tikken. Sluit je de app halverwege, dan ga je op het titelscherm verder met “▶ Doorgaan” (niet bij Simpel).",
+      "Met EXP stijg je in level en leer je passieve skills. Elk personage begint met een andere skill (Blauw: Beuk, Rood: Schatmeester, Robo: Snelheid).\nTik in “⚙ Skills” op het titelscherm op een skill om hem aan te zetten of weg te halen. Hoe hoger je level, hoe meer je kunt aanzetten.\nAangezette skills werken vanaf het volgende doolhof.",
+      "Haal je een doolhof in “Simpel”, dan verschijnt “Opslaan”. Bekijk het opnieuw met “▶ Herhaling” op het titelscherm (tot 9).\nDe “Doolhofcollectie” onder “Kies een doolhof” onthoudt de doolhoven die je gehaald hebt. Verzamel ze alle 9.",
+      "Je level en records blijven alleen op dit apparaat en worden nergens naartoe gestuurd.\nIn “🔧 Instellingen” op het titelscherm verander je “Tekstgrootte”, “Muziekvolume”, “Effectvolume” en “Trillen”.\nDeze uitleg zie je altijd weer met “Opnieuw bekijken” naast “Zo speel je” in “🔧 Instellingen”.",
+    ],
   },
 
   pl: {
@@ -542,6 +784,28 @@ const I18N = {
     vCraft: 'Użycia ×{n}', vWarp: 'Bliski teleport {n}%', vHansel: '{n} odcienie', vClone: '{n} klonów',
     vCT: 'CT {n}s', vMaster: '🪙×{a} 💎×{b}', chooseLang: 'Wybierz język', expMax: '(MAX poziom!)', treasureMaster: 'MISTRZ SKARBÓW', masteryScore: 'Wynik mistrzostwa', simple: 'Prosty', replay: 'Powtórka', saveReplay: 'Zapisz powtórkę', replaySaved: 'Zapisano', noReplays: 'Brak powtórek',
     special: 'Specjalna', saveFail: 'Nie udało się zapisać', zukan: 'Kolekcja labiryntów', zukanAll: 'Wszystkie 9 labiryntów ukończone!', resume: 'Kontynuuj', hint: 'Podpowiedź', best: 'Najlepszy czas', bestNew: '🎖 Nowy rekord!', vibe: 'Wibracje',
+    /* はじめての あそびかた（game.js openGuide・2026-09-30）。guideHeads と guideBodies は同じ数。ボタン名は画面の文字と同じ（照らし合わせ=store/_back_check.js） */
+    guideTitle: "Jak grać", guidePrev: "◀ Wstecz", guideStart: "▶ Gramy!", guideAgain: "Pokaż ponownie",
+    guideHeads: [
+      "Witaj w Treasure Labyrinth",
+      "Pierwsze kroki",
+      "Jak się poruszać",
+      "Skrzynie i przedmioty",
+      "Meta i czas",
+      "Poziomy i umiejętności",
+      "Powtórki i kolekcja",
+      "Wyniki i ustawienia",
+    ],
+    guideBodies: [
+      "Pikselowa gra w labirynt, w której rysujesz drogę palcem.\nTwoim celem jest złota skrzynia z napisem „META”, ukryta gdzieś w labiryncie.\nJęzyk wybierzesz powyżej w polu „Język”. Później możesz go też zmienić przyciskiem 🌐 na ekranie tytułowym.",
+      "Na ekranie tytułowym wybierz postać: „Niebieski”, „Robot” albo „Czerwony”, i stuknij „▶ Graj”.\nW „Wybierz labirynt” zacznij od „Łatwy”. Po przejściu labiryntu odblokowuje się następny (w sumie 8).\n„Prosty” obok każdego labiryntu nie ma umiejętności ani skrzyń i daje 1,5 raza więcej EXP.",
+      "Rysuj drogę palcem, a twoja postać idzie za nią pół sekundy później. Możesz też stuknąć pole trochę dalej.\nPrzybliżaj i oddalaj przyciskami ➕ ➖ u góry albo dwoma palcami; 🧭 wraca widokiem do postaci.\nNa komputerze działają też strzałki lub WASD.",
+      "Skrzynia otwiera się, gdy do niej dojdziesz. Może w niej być ⛏️Kilof, 🪜Drabina, 🪙Moneta albo 💎Diament, może też być pusta.\nAby użyć kilofa lub drabiny, stuknij odpowiedni przycisk na dole, a potem ścianę.\nMonety i diamenty działają, gdy po prostu je masz: skracają twój czas na mecie. Stuknij przycisk przedmiotu, aby przeczytać, do czego służy.",
+      "Na mecie widzisz swój czas i „Cel”, i dostajesz EXP. Im szybciej od celu, tym więcej EXP.\nPotem stuknij „Dalej ▶” albo „Jeszcze raz”.\nNie wiesz, dokąd iść? 💡 (Podpowiedź) u góry na chwilę podświetla drogę (raz na 60 sekund).\nAby wyjść, stuknij ✕ dwa razy. Jeśli zamkniesz aplikację w trakcie, „▶ Kontynuuj” na ekranie tytułowym wznowi grę (nie w trybie Prosty).",
+      "Za EXP awansujesz i uczysz się umiejętności pasywnych. Każda postać zaczyna z inną umiejętnością (Niebieski: Taran, Czerwony: Mistrzyni Skarbów, Robot: Przyspieszenie).\nW „⚙ Umiejętności” na ekranie tytułowym stuknij umiejętność, aby ją założyć albo zdjąć. Im wyższy poziom, tym więcej możesz założyć.\nZałożone umiejętności działają od następnego labiryntu.",
+      "Gdy przejdziesz labirynt w trybie „Prosty”, pojawi się „Zapisz powtórkę”. Obejrzysz ją w „▶ Powtórka” na ekranie tytułowym (do 9).\n„Kolekcja labiryntów” pod „Wybierz labirynt” zapamiętuje przebyte labirynty. Zbierz wszystkie 9.",
+      "Twój poziom i wyniki zostają tylko na tym urządzeniu i nigdzie nie są wysyłane.\nW „🔧 Ustawienia” na ekranie tytułowym zmienisz „Rozmiar tekstu”, „Głośność muzyki”, „Głośność efektów” i „Wibracje”.\nTen poradnik zobaczysz ponownie w każdej chwili: „Pokaż ponownie” obok „Jak grać” w „🔧 Ustawienia”.",
+    ],
   },
 
   ru: {
@@ -584,6 +848,28 @@ const I18N = {
     vCraft: 'Исп. ×{n}', vWarp: 'Ближний тп {n}%', vHansel: '{n} оттенка', vClone: '{n} двойн.',
     vCT: 'КД {n}с', vMaster: '🪙×{a} 💎×{b}', chooseLang: 'Выбрать язык', expMax: '(МАКС. уровень!)', treasureMaster: 'МАСТЕР СОКРОВИЩ', masteryScore: 'Очки мастерства', simple: 'Простой', replay: 'Повтор', saveReplay: 'Сохранить повтор', replaySaved: 'Сохранено', noReplays: 'Пока нет повторов',
     special: 'Особая', saveFail: 'Не удалось сохранить', zukan: 'Коллекция лабиринтов', zukanAll: 'Все 9 лабиринтов пройдены!', resume: 'Продолжить', hint: 'Подсказка', best: 'Лучшее время', bestNew: '🎖 Новый рекорд!', vibe: 'Вибрация',
+    /* はじめての あそびかた（game.js openGuide・2026-09-30）。guideHeads と guideBodies は同じ数。ボタン名は画面の文字と同じ（照らし合わせ=store/_back_check.js） */
+    guideTitle: "Как играть", guidePrev: "◀ Назад", guideStart: "▶ Играем!", guideAgain: "Показать снова",
+    guideHeads: [
+      "Добро пожаловать в Treasure Labyrinth",
+      "Первые шаги",
+      "Как двигаться",
+      "Сундуки и предметы",
+      "Финиш и время",
+      "Уровни и навыки",
+      "Повторы и коллекция",
+      "Данные и настройки",
+    ],
+    guideBodies: [
+      "Пиксельная игра-лабиринт: ты рисуешь путь пальцем.\nЦель: золотой сундук с надписью «ФИНИШ», спрятанный где-то в лабиринте.\nЯзык можно выбрать выше в поле «Язык». Позже его можно сменить кнопкой 🌐 на титульном экране.",
+      "На титульном экране выбери героя: «Синий», «Робо» или «Красный», и нажми «▶ Играть».\nВ «Выбери лабиринт» начни с «Легко». Пройдёшь лабиринт, откроется следующий (всего 8).\n«Простой» рядом с каждым лабиринтом: без навыков и сундуков, а EXP в 1,5 раза больше.",
+      "Рисуй путь пальцем, и герой идёт следом с задержкой в полсекунды. Можно и нажать на клетку чуть впереди.\nМасштаб меняется кнопками ➕ ➖ вверху или двумя пальцами; 🧭 возвращает вид к герою.\nНа компьютере работают стрелки или WASD.",
+      "Сундук открывается, когда ты до него доходишь. В нём может быть ⛏️Кирка, 🪜Лестница, 🪙Монета или 💎Алмаз, а может быть пусто.\nЧтобы использовать кирку или лестницу, нажми её кнопку внизу, а потом стену.\nМонеты и алмазы работают, пока они у тебя: они уменьшают время на финише. Нажми кнопку предмета, чтобы прочитать, что он делает.",
+      "На финише видно твоё время и «Цель», и ты получаешь EXP. Чем быстрее цели, тем больше EXP.\nПотом нажми «Дальше ▶» или «Ещё раз».\nНе знаешь, куда идти? 💡 (Подсказка) вверху ненадолго подсвечивает путь (раз в 60 секунд).\nЧтобы выйти, нажми ✕ два раза. Если закроешь приложение посреди лабиринта, «▶ Продолжить» на титульном экране вернёт тебя туда же (кроме режима «Простой»).",
+      "С EXP растёт уровень и открываются пассивные навыки. У каждого героя свой первый навык (Синий: Таран, Красный: Мастер сокровищ, Робо: Ускорение).\nВ «⚙ Навыки» на титульном экране нажимай на навык, чтобы надеть или снять его. Чем выше уровень, тем больше можно надеть.\nНадетые навыки работают со следующего лабиринта.",
+      "Если пройти лабиринт в режиме «Простой», появится «Сохранить повтор». Посмотреть его можно в «▶ Повтор» на титульном экране (до 9).\n«Коллекция лабиринтов» под «Выбери лабиринт» хранит пройденные лабиринты. Собери все 9.",
+      "Уровень и рекорды хранятся только на этом устройстве и никуда не отправляются.\nВ «🔧 Настройки» на титульном экране можно изменить «Размер текста», «Громкость музыки», «Громкость эффектов» и «Вибрация».\nЭту подсказку можно открыть снова в любой момент: «Показать снова» рядом с «Как играть» в «🔧 Настройки».",
+    ],
   },
 
   tr: {
@@ -626,6 +912,28 @@ const I18N = {
     vCraft: 'Kullanım ×{n}', vWarp: 'Yakın ışınlanma {n}%', vHansel: '{n} ton', vClone: '{n} klon',
     vCT: 'CT {n}sn', vMaster: '🪙×{a} 💎×{b}', chooseLang: 'Dil seç', expMax: '(MAKS seviye!)', treasureMaster: 'HAZİNE USTASI', masteryScore: 'Ustalık Puanı', simple: 'Sade', replay: 'Tekrar', saveReplay: 'Tekrarı kaydet', replaySaved: 'Kaydedildi', noReplays: 'Henüz tekrar yok',
     special: 'Özel', saveFail: 'Kaydedilemedi', zukan: 'Labirent koleksiyonu', zukanAll: '9 labirentin hepsi tamamlandı!', resume: 'Devam et', hint: 'İpucu', best: 'En iyi süre', bestNew: '🎖 Yeni rekor!', vibe: 'Titreşim',
+    /* はじめての あそびかた（game.js openGuide・2026-09-30）。guideHeads と guideBodies は同じ数。ボタン名は画面の文字と同じ（照らし合わせ=store/_back_check.js） */
+    guideTitle: "Nasıl oynanır", guidePrev: "◀ Geri", guideStart: "▶ Hadi oyna!", guideAgain: "Tekrar göster",
+    guideHeads: [
+      "Treasure Labyrinth’e hoş geldin",
+      "İlk adımlar",
+      "Nasıl hareket edilir",
+      "Sandıklar ve eşyalar",
+      "Hedef ve süre",
+      "Seviyeler ve beceriler",
+      "Tekrarlar ve koleksiyon",
+      "Kayıtlar ve ayarlar",
+    ],
+    guideBodies: [
+      "Yolu parmağınla çizerek ilerlediğin pikselli bir labirent oyunu.\nLabirentin bir yerindeki, üstünde “HEDEF” yazan altın hazine sandığına ulaş.\nDili yukarıdaki “Dil” kısmından seçebilirsin. Sonra başlık ekranındaki 🌐 ile de değiştirebilirsin.",
+      "Başlık ekranında bir karakter seç: “Mavi”, “Robo” ya da “Kırmızı”, sonra “▶ Oyna” düğmesine dokun.\n“Labirent seç” bölümünde “Kolay” ile başla. Bir labirenti geçince sıradaki açılır (toplam 8).\nHer labirentin yanındaki “Sade” düğmesinde beceri ve sandık yoktur; 1,5 kat EXP verir.",
+      "Yolu parmağınla çiz, karakterin yarım saniye sonra peşinden gelsin. Biraz ilerideki bir kareye dokunsan da yürür.\nÜstteki ➕ ➖ ile ya da iki parmakla yakınlaştır; 🧭 görüntüyü karakterine geri getirir.\nBilgisayarda yön tuşları veya WASD de çalışır.",
+      "Sandığa varınca açılır. İçinden ⛏️Kazma, 🪜Merdiven, 🪙Para ya da 💎Elmas çıkabilir, boş da olabilir.\nKazma veya merdiveni kullanmak için alttaki düğmesine, sonra bir duvara dokun.\nParalar ve elmaslar sadece üzerinde olunca işe yarar: hedefteki süreni kısaltır. Ne işe yaradığını okumak için eşyanın düğmesine dokun.",
+      "Hedefe varınca süren ve “Hedef” süresi görünür, EXP kazanırsın. Hedef süreden ne kadar hızlıysan o kadar çok EXP.\nSonra “Sonraki ▶” ya da “Tekrar” düğmesine dokun.\nYolu bulamadın mı? Üstteki 💡 (İpucu) yolu kısa bir süre aydınlatır (60 saniyede bir).\nÇıkmak için ✕ düğmesine iki kez dokun. Uygulamayı yarıda kapatırsan başlık ekranındaki “▶ Devam et” kaldığın yerden sürdürür (Sade hariç).",
+      "EXP ile seviye atlar ve pasif beceriler öğrenirsin. Her karakter farklı bir beceriyle başlar (Mavi: Omuz Atışı, Kırmızı: Hazine Ustası, Robo: Hızlanma).\nBaşlık ekranındaki “⚙ Beceriler” bölümünde bir beceriye dokunarak tak ya da çıkar. Seviye yükseldikçe daha fazla takabilirsin.\nTakılı beceriler bir sonraki labirentten itibaren çalışır.",
+      "“Sade” modunda bir labirenti geçince “Tekrarı kaydet” çıkar. Başlık ekranındaki “▶ Tekrar” ile yeniden izleyebilirsin (en fazla 9).\n“Labirent seç” altındaki “Labirent koleksiyonu”, geçtiğin labirentleri tutar. 9 labirentin hepsini topla.",
+      "Seviyen ve rekorların yalnızca bu cihazda kalır, hiçbir yere gönderilmez.\nBaşlık ekranındaki “🔧 Ayarlar” bölümünde “Yazı boyutu”, “Müzik sesi”, “Efekt sesi” ve “Titreşim” ayarlarını değiştirebilirsin.\nBu rehberi istediğin zaman “🔧 Ayarlar” içinde “Nasıl oynanır” yanındaki “Tekrar göster” ile yeniden görebilirsin.",
+    ],
   },
 
   hi: {
@@ -668,6 +976,28 @@ const I18N = {
     vCraft: 'उपयोग ×{n}', vWarp: 'निकट वार्प {n}%', vHansel: '{n} स्तर', vClone: '{n} प्रतिरूप',
     vCT: 'CT {n}से', vMaster: '🪙×{a} 💎×{b}', chooseLang: 'भाषा चुनें', expMax: '(अधिकतम स्तर!)', treasureMaster: 'खज़ाना मास्टर', masteryScore: 'महारत स्कोर', simple: 'सरल', replay: 'रीप्ले', saveReplay: 'रीप्ले सहेजें', replaySaved: 'सहेजा गया', noReplays: 'अभी कोई रीप्ले नहीं',
     special: 'स्पेशल', saveFail: 'सहेज नहीं सका', zukan: 'भूलभुलैया संग्रह', zukanAll: 'सभी 9 भूलभुलैया पूरी!', resume: 'जारी रखें', hint: 'संकेत', best: 'सर्वश्रेष्ठ समय', bestNew: '🎖 नया सर्वश्रेष्ठ!', vibe: 'कंपन',
+    /* はじめての あそびかた（game.js openGuide・2026-09-30）。guideHeads と guideBodies は同じ数。ボタン名は画面の文字と同じ（照らし合わせ=store/_back_check.js） */
+    guideTitle: "कैसे खेलें", guidePrev: "◀ पिछला", guideStart: "▶ चलिए खेलें!", guideAgain: "फिर से देखें",
+    guideHeads: [
+      "Treasure Labyrinth में आपका स्वागत है",
+      "पहला कदम",
+      "कैसे चलें",
+      "संदूक और चीज़ें",
+      "लक्ष्य और समय",
+      "स्तर और कौशल",
+      "रीप्ले और संग्रह",
+      "रिकॉर्ड और सेटिंग",
+    ],
+    guideBodies: [
+      "यह पिक्सेल भूलभुलैया खेल है, जिसमें आप उंगली से रास्ता खींचकर आगे बढ़ते हैं।\nभूलभुलैया में कहीं रखा, “लक्ष्य” लिखा सुनहरा खज़ाने का संदूक ढूँढें।\nभाषा ऊपर “भाषा” से चुनें। बाद में शीर्षक स्क्रीन के 🌐 से भी बदल सकते हैं।",
+      "शीर्षक स्क्रीन पर “नीला”, “रोबो” या “लाल” में से किरदार चुनें और “▶ खेलें” दबाएँ।\n“भूलभुलैया चुनें” में “आसान” से शुरू करें। एक भूलभुलैया पार करने पर अगली खुलती है (कुल 8)।\nहर भूलभुलैया के बगल वाली “सरल” में न कौशल हैं न संदूक, और EXP 1.5 गुना मिलता है।",
+      "उंगली से रास्ता खींचें, किरदार आधे सेकंड बाद पीछे चलेगा। थोड़ा आगे के खाने पर टैप करने से भी चलता है।\nऊपर के ➕ ➖ या दो उंगलियों से ज़ूम करें; 🧭 से दृश्य वापस किरदार पर आता है।\nकंप्यूटर पर तीर वाली कुंजियाँ या WASD भी चलती हैं।",
+      "संदूक तक पहुँचते ही वह खुल जाता है। उसमें ⛏️कुदाल, 🪜सीढ़ी, 🪙सिक्का या 💎हीरा मिल सकता है, या वह खाली हो सकता है।\nकुदाल या सीढ़ी इस्तेमाल करने के लिए नीचे उसका बटन दबाएँ, फिर दीवार पर टैप करें।\nसिक्के और हीरे बस पास रखने से काम करते हैं: लक्ष्य पर आपका समय घटाते हैं। किसी चीज़ का बटन दबाकर उसका काम पढ़ें।",
+      "लक्ष्य पर पहुँचने पर आपका समय और तय “लक्ष्य” दिखता है, और EXP मिलता है। लक्ष्य से जितना तेज़, उतना ज़्यादा EXP।\nफिर “आगे ▶” या “फिर से” दबाएँ।\nरास्ता न सूझे तो ऊपर का 💡 (संकेत) थोड़ी देर आगे का रास्ता चमकाता है (60 सेकंड में एक बार)।\nछोड़ने के लिए ✕ दो बार दबाएँ। बीच में ऐप बंद करें तो शीर्षक स्क्रीन के “▶ जारी रखें” से वहीं से खेल सकते हैं (सरल में नहीं)।",
+      "EXP से स्तर बढ़ता है और आप निष्क्रिय कौशल सीखते हैं। हर किरदार का पहला कौशल अलग है (नीला: टक्कर, लाल: खज़ाना मास्टर, रोबो: गति वृद्धि)।\nशीर्षक स्क्रीन के “⚙ कौशल” में कौशल पर टैप करके लगाएँ या हटाएँ। स्तर बढ़ने पर ज़्यादा लगा सकते हैं।\nलगाए गए कौशल अगली भूलभुलैया से असर करते हैं।",
+      "“सरल” में भूलभुलैया पार करने पर “रीप्ले सहेजें” आता है। शीर्षक स्क्रीन के “▶ रीप्ले” से फिर देखें (9 तक)।\n“भूलभुलैया चुनें” के नीचे “भूलभुलैया संग्रह” में पार की गई भूलभुलैयाएँ दर्ज रहती हैं। सभी 9 इकट्ठा करें।",
+      "आपका स्तर और रिकॉर्ड सिर्फ़ इसी डिवाइस में रहते हैं, कहीं भेजे नहीं जाते।\nशीर्षक स्क्रीन की “🔧 सेटिंग” में “अक्षर का आकार”, “संगीत की आवाज़”, “प्रभाव की आवाज़” और “कंपन” बदल सकते हैं।\nयह गाइड कभी भी “🔧 सेटिंग” में “कैसे खेलें” के पास “फिर से देखें” से दोबारा देख सकते हैं।",
+    ],
   },
 
   id: {
@@ -710,6 +1040,28 @@ const I18N = {
     vCraft: 'Pakai ×{n}', vWarp: 'Warp dekat {n}%', vHansel: '{n} tingkat', vClone: '{n} klon',
     vCT: 'CT {n}dtk', vMaster: '🪙×{a} 💎×{b}', chooseLang: 'Pilih bahasa', expMax: '(Level MAKS!)', treasureMaster: 'MASTER HARTA', masteryScore: 'Skor Penguasaan', simple: 'Simpel', replay: 'Replay', saveReplay: 'Simpan replay', replaySaved: 'Tersimpan', noReplays: 'Belum ada replay',
     special: 'Spesial', saveFail: 'Gagal menyimpan', zukan: 'Koleksi labirin', zukanAll: 'Semua 9 labirin selesai!', resume: 'Lanjutkan', hint: 'Petunjuk', best: 'Waktu terbaik', bestNew: '🎖 Rekor baru!', vibe: 'Getaran',
+    /* はじめての あそびかた（game.js openGuide・2026-09-30）。guideHeads と guideBodies は同じ数。ボタン名は画面の文字と同じ（照らし合わせ=store/_back_check.js） */
+    guideTitle: "Cara bermain", guidePrev: "◀ Sebelumnya", guideStart: "▶ Ayo main!", guideAgain: "Lihat lagi",
+    guideHeads: [
+      "Selamat datang di Treasure Labyrinth",
+      "Langkah pertama",
+      "Cara bergerak",
+      "Peti dan item",
+      "Finis dan waktu",
+      "Level dan skill",
+      "Replay dan koleksi",
+      "Catatan dan pengaturan",
+    ],
+    guideBodies: [
+      "Game labirin piksel yang dimainkan dengan menggores jalur pakai jari.\nTuju peti harta emas bertanda “FINIS” yang ada di suatu tempat di labirin.\nPilih bahasa di atas lewat “Bahasa”. Nanti juga bisa diganti dengan 🌐 di layar judul.",
+      "Di layar judul, pilih karakter: “Biru”, “Robo”, atau “Merah”, lalu ketuk “▶ Main”.\nDi “Pilih labirin”, mulai dari “Mudah”. Setelah satu labirin selesai, labirin berikutnya terbuka (total 8).\n“Simpel” di samping tiap labirin tidak punya skill dan peti, dan memberi EXP 1,5 kali.",
+      "Gores jalur dengan jari, karaktermu mengikuti setengah detik kemudian. Mengetuk kotak sedikit di depan juga bisa.\nPerbesar atau perkecil dengan ➕ ➖ di atas atau dengan dua jari; 🧭 mengembalikan tampilan ke karaktermu.\nDi komputer, tombol panah atau WASD juga bisa.",
+      "Peti terbuka saat kamu sampai di sana. Isinya bisa ⛏️Beliung, 🪜Tangga, 🪙Koin, atau 💎Berlian, atau kosong.\nUntuk memakai beliung atau tangga, ketuk tombolnya di bawah, lalu ketuk dinding.\nKoin dan berlian bekerja cukup dengan dibawa: waktu di finis jadi lebih singkat. Ketuk tombol item untuk membaca kegunaannya.",
+      "Di finis kamu melihat waktumu dan “Target”, lalu dapat EXP. Makin cepat dari target, makin banyak EXP.\nSetelah itu ketuk “Lanjut ▶” atau “Ulangi”.\nBingung arah? 💡 (Petunjuk) di atas menyalakan jalur sebentar (sekali tiap 60 detik).\nUntuk berhenti, ketuk ✕ dua kali. Kalau aplikasi ditutup di tengah jalan, “▶ Lanjutkan” di layar judul melanjutkan dari posisi terakhir (kecuali Simpel).",
+      "Dengan EXP levelmu naik dan kamu mempelajari skill pasif. Tiap karakter mulai dengan skill yang berbeda (Biru: Tabrak, Merah: Master Harta, Robo: Percepat).\nDi “⚙ Skill” pada layar judul, ketuk skill untuk memasang atau melepasnya. Makin tinggi level, makin banyak yang bisa dipasang.\nSkill yang dipasang berlaku mulai labirin berikutnya.",
+      "Kalau menyelesaikan labirin di “Simpel”, muncul “Simpan replay”. Tonton lagi lewat “▶ Replay” di layar judul (sampai 9).\n“Koleksi labirin” di bawah “Pilih labirin” mencatat labirin yang sudah kamu selesaikan. Kumpulkan kesembilannya.",
+      "Level dan catatanmu hanya ada di perangkat ini dan tidak dikirim ke mana pun.\nDi “🔧 Pengaturan” pada layar judul, kamu bisa mengubah “Ukuran huruf”, “Volume musik”, “Volume efek”, dan “Getaran”.\nPanduan ini bisa dilihat lagi kapan saja lewat “Lihat lagi” di samping “Cara bermain” pada “🔧 Pengaturan”.",
+    ],
   },
 
   ar: {
@@ -752,6 +1104,28 @@ const I18N = {
     vCraft: 'استخدام ×{n}', vWarp: 'انتقال قريب {n}%', vHansel: '{n} درجات', vClone: '{n} نسخ',
     vCT: 'انتظار {n}ث', vMaster: '🪙×{a} 💎×{b}', chooseLang: 'اختر اللغة', expMax: '(المستوى الأقصى!)', treasureMaster: 'سيد الكنوز', masteryScore: 'نقاط الإتقان', simple: 'بسيط', replay: 'إعادة', saveReplay: 'حفظ الإعادة', replaySaved: 'تم الحفظ', noReplays: 'لا إعادات بعد',
     special: 'مميز', saveFail: 'تعذّر الحفظ', zukan: 'مجموعة المتاهات', zukanAll: 'أُنجزت المتاهات التسع كلها!', resume: 'متابعة', hint: 'تلميح', best: 'أفضل وقت', bestNew: '🎖 رقم قياسي جديد!', vibe: 'اهتزاز',
+    /* はじめての あそびかた（game.js openGuide・2026-09-30）。guideHeads と guideBodies は同じ数。ボタン名は画面の文字と同じ（照らし合わせ=store/_back_check.js） */
+    guideTitle: "طريقة اللعب", guidePrev: "السابق", guideStart: "▶ لنلعب!", guideAgain: "عرض مرة أخرى",
+    guideHeads: [
+      "مرحبًا بك في Treasure Labyrinth",
+      "الخطوات الأولى",
+      "طريقة الحركة",
+      "الصناديق والأدوات",
+      "الهدف والوقت",
+      "المستويات والمهارات",
+      "الإعادات والمجموعة",
+      "السجلات والإعدادات",
+    ],
+    guideBodies: [
+      "لعبة متاهة بالبكسل ترسم فيها الطريق بإصبعك.\nتوجّه إلى صندوق الكنز الذهبي المكتوب عليه «الهدف» في مكان ما من المتاهة.\nاختر اللغة من «اللغة» في الأعلى. ويمكنك تغييرها لاحقًا من 🌐 في شاشة البداية.",
+      "في شاشة البداية اختر شخصية: «أزرق» أو «روبو» أو «أحمر»، ثم اضغط «▶ العب».\nفي «اختر متاهة» ابدأ بـ«سهل». عندما تنهي متاهة تُفتح التالية (8 متاهات).\n«بسيط» بجانب كل متاهة بلا مهارات ولا صناديق، ويعطي EXP مضاعفًا 1.5 مرة.",
+      "ارسم الطريق بإصبعك فتتبعك الشخصية بعد نصف ثانية. ويمكنك أيضًا لمس مربع أمامك بقليل.\nكبّر وصغّر بـ ➕ ➖ في الأعلى أو بإصبعين، و🧭 تعيد العرض إلى شخصيتك.\nعلى الكمبيوتر تعمل أيضًا مفاتيح الأسهم أو WASD.",
+      "يُفتح الصندوق عندما تصل إليه. قد تجد فيه ⛏️معول أو 🪜سلّم أو 🪙عملة أو 💎ماسة، وقد يكون فارغًا.\nلاستخدام المعول أو السلّم اضغط زره في الأسفل ثم المس جدارًا.\nالعملات والماسات تعمل بمجرد حملها: تُقصّر وقتك عند الهدف. اضغط زر أي أداة لتقرأ ما تفعله.",
+      "عند الوصول يظهر وقتك و«الهدف»، وتحصل على EXP. كلما كنت أسرع من الهدف زادت EXP.\nبعدها اضغط «التالي ▶» أو «مرة أخرى».\nإن لم تعرف الطريق فاضغط 💡 (تلميح) في الأعلى ليضيء الطريق للحظة (مرة كل 60 ثانية).\nللخروج اضغط ✕ مرتين. وإذا أغلقت التطبيق في منتصف المتاهة، يكمل «▶ متابعة» في شاشة البداية من حيث توقفت (ما عدا «بسيط»).",
+      "بالـEXP يرتفع مستواك وتتعلم مهارات سلبية. تبدأ كل شخصية بمهارة مختلفة (أزرق: اندفاع، أحمر: سيدة الكنوز، روبو: تسريع).\nفي «⚙ المهارات» بشاشة البداية المس مهارة لتجهيزها أو إزالتها. كلما ارتفع مستواك أمكنك تجهيز المزيد.\nتعمل المهارات المجهزة ابتداءً من المتاهة التالية.",
+      "إذا أنهيت متاهة في «بسيط» يظهر «حفظ الإعادة». شاهدها مجددًا من «▶ إعادة» في شاشة البداية (حتى 9).\n«مجموعة المتاهات» تحت «اختر متاهة» تحفظ المتاهات التي أنهيتها. اجمع التسع كلها.",
+      "مستواك وسجلاتك تبقى في هذا الجهاز فقط ولا تُرسَل إلى أي مكان.\nفي «🔧 الإعدادات» بشاشة البداية يمكنك تغيير «حجم الخط» و«صوت الموسيقى» و«صوت المؤثرات» و«اهتزاز».\nيمكنك رؤية هذا الدليل مجددًا في أي وقت عبر «عرض مرة أخرى» بجانب «طريقة اللعب» في «🔧 الإعدادات».",
+    ],
   },
 
   bn: {
@@ -794,6 +1168,28 @@ const I18N = {
     vCraft: 'ব্যবহার ×{n}', vWarp: 'কাছের ওয়ার্প {n}%', vHansel: '{n} ধাপ', vClone: '{n} প্রতিরূপ',
     vCT: 'CT {n}সে', vMaster: '🪙×{a} 💎×{b}', chooseLang: 'ভাষা বাছো', expMax: '(সর্বোচ্চ লেভেল!)', treasureMaster: 'ট্রেজার মাস্টার', masteryScore: 'দক্ষতা স্কোর', simple: 'সরল', replay: 'রিপ্লে', saveReplay: 'রিপ্লে সংরক্ষণ', replaySaved: 'সংরক্ষিত', noReplays: 'এখনও কোন রিপ্লে নেই',
     special: 'স্পেশাল', saveFail: 'সংরক্ষণ হয়নি', zukan: 'গোলকধাঁধা সংগ্রহ', zukanAll: '৯টি গোলকধাঁধাই ক্লিয়ার!', resume: 'চালিয়ে যান', hint: 'ইঙ্গিত', best: 'সেরা সময়', bestNew: '🎖 নতুন সেরা সময়!', vibe: 'কম্পন',
+    /* はじめての あそびかた（game.js openGuide・2026-09-30）。guideHeads と guideBodies は同じ数。ボタン名は画面の文字と同じ（照らし合わせ=store/_back_check.js） */
+    guideTitle: "কীভাবে খেলবে", guidePrev: "◀ আগের", guideStart: "▶ চলো খেলি!", guideAgain: "আবার দেখো",
+    guideHeads: [
+      "Treasure Labyrinth-এ স্বাগতম",
+      "প্রথম ধাপ",
+      "কীভাবে চলবে",
+      "সিন্দুক আর জিনিস",
+      "লক্ষ্য আর সময়",
+      "লেভেল আর দক্ষতা",
+      "রিপ্লে আর সংগ্রহ",
+      "রেকর্ড আর সেটিংস",
+    ],
+    guideBodies: [
+      "আঙুল দিয়ে পথ এঁকে এগোনোর পিক্সেল গোলকধাঁধার খেলা।\nগোলকধাঁধার কোথাও থাকা, “লক্ষ্য” লেখা সোনার গুপ্তধনের সিন্দুকের দিকে যাও।\nওপরের “ভাষা” থেকে ভাষা বাছো। পরে শিরোনাম পর্দার 🌐 দিয়েও বদলাতে পারবে।",
+      "শিরোনাম পর্দায় “নীল”, “রোবো” বা “লাল” থেকে চরিত্র বাছো, তারপর “▶ খেলো” চাপো।\n“গোলকধাঁধা বাছো”-তে “সহজ” দিয়ে শুরু করো। একটা পার হলে পরেরটা খোলে (মোট 8টি)।\nপ্রতিটির পাশের “সরল”-এ দক্ষতা বা সিন্দুক নেই, আর EXP মেলে 1.5 গুণ।",
+      "আঙুল দিয়ে পথ আঁকো, চরিত্র আধা সেকেন্ড পরে পিছু পিছু আসবে। একটু সামনের ঘরে টোকা দিলেও হাঁটে।\nওপরের ➕ ➖ বা দুই আঙুলে জুম করো; 🧭 দৃশ্যকে চরিত্রের কাছে ফিরিয়ে আনে।\nকম্পিউটারে তীরচিহ্নের কী বা WASD দিয়েও চলা যায়।",
+      "সিন্দুকে পৌঁছালেই খুলে যায়। ভেতরে ⛏️গাঁইতি, 🪜মই, 🪙কয়েন বা 💎হীরা থাকতে পারে, আবার খালিও হতে পারে।\nগাঁইতি বা মই ব্যবহার করতে নিচের বোতাম চেপে তারপর দেয়ালে টোকা দাও।\nকয়েন আর হীরা শুধু সাথে রাখলেই কাজ করে: লক্ষ্যে পৌঁছানোর সময় কমায়। কোনো জিনিসের বোতাম চাপলে তার কাজ লেখা দেখা যায়।",
+      "লক্ষ্যে পৌঁছালে তোমার সময় আর নির্ধারিত “লক্ষ্য” দেখা যায়, আর EXP মেলে। লক্ষ্যের চেয়ে যত দ্রুত, তত বেশি EXP।\nতারপর “পরের ▶” বা “আবার” চাপো।\nপথ না বুঝলে ওপরের 💡 (ইঙ্গিত) কিছুক্ষণ সামনের পথ আলোকিত করে (60 সেকেন্ডে একবার)।\nছাড়তে ✕ দুবার চাপো। মাঝপথে অ্যাপ বন্ধ করলেও শিরোনাম পর্দার “▶ চালিয়ে যান” দিয়ে সেখান থেকে খেলা যায় (সরল বাদে)।",
+      "EXP জমলে লেভেল বাড়ে আর প্যাসিভ দক্ষতা শেখা যায়। প্রতিটি চরিত্রের প্রথম দক্ষতা আলাদা (নীল: ধাক্কা, লাল: গুপ্তধন মাস্টার, রোবো: গতি বৃদ্ধি)।\nশিরোনাম পর্দার “⚙ দক্ষতা”-তে দক্ষতায় টোকা দিয়ে পরাও বা খোলো। লেভেল বাড়লে আরও বেশি পরানো যায়।\nপরানো দক্ষতা পরের গোলকধাঁধা থেকে কাজ করে।",
+      "“সরল”-এ পার হলে “রিপ্লে সংরক্ষণ” আসে। শিরোনাম পর্দার “▶ রিপ্লে” দিয়ে আবার দেখো (9টি পর্যন্ত)।\n“গোলকধাঁধা বাছো”-র নিচে “গোলকধাঁধা সংগ্রহ”-তে পার হওয়া গোলকধাঁধাগুলো থাকে। 9টিই জোগাড় করো।",
+      "তোমার লেভেল আর রেকর্ড শুধু এই ডিভাইসে থাকে, কোথাও পাঠানো হয় না।\nশিরোনাম পর্দার “🔧 সেটিংস”-এ “অক্ষরের আকার”, “সংগীতের ভলিউম”, “শব্দ-প্রভাবের ভলিউম” আর “কম্পন” বদলানো যায়।\nএই নির্দেশিকা যেকোনো সময় “🔧 সেটিংস”-এ “কীভাবে খেলবে”-র পাশে “আবার দেখো” দিয়ে আবার দেখা যায়।",
+    ],
   },
 
   sw: {
@@ -836,6 +1232,28 @@ const I18N = {
     vCraft: 'Matumizi ×{n}', vWarp: 'Warp karibu {n}%', vHansel: 'Vivuli {n}', vClone: 'Nakala {n}',
     vCT: 'CT {n}sek', vMaster: '🪙×{a} 💎×{b}', chooseLang: 'Chagua lugha', expMax: '(Kiwango cha JUU!)', treasureMaster: 'BINGWA WA HAZINA', masteryScore: 'Alama za Umahiri', simple: 'Rahisi', replay: 'Rudia', saveReplay: 'Hifadhi rudia', replaySaved: 'Imehifadhiwa', noReplays: 'Hakuna rudia bado',
     special: 'Maalum', saveFail: 'Imeshindwa kuhifadhi', zukan: 'Mkusanyiko wa labirinti', zukanAll: 'Labirinti zote 9 zimekamilika!', resume: 'Endelea', hint: 'Dokezo', best: 'Muda bora', bestNew: '🎖 Rekodi mpya!', vibe: 'Mtetemo',
+    /* はじめての あそびかた（game.js openGuide・2026-09-30）。guideHeads と guideBodies は同じ数。ボタン名は画面の文字と同じ（照らし合わせ=store/_back_check.js） */
+    guideTitle: "Jinsi ya kucheza", guidePrev: "◀ Nyuma", guideStart: "▶ Tucheze!", guideAgain: "Onyesha tena",
+    guideHeads: [
+      "Karibu Treasure Labyrinth",
+      "Hatua za kwanza",
+      "Jinsi ya kusogea",
+      "Masanduku na vifaa",
+      "Lengo na muda",
+      "Viwango na ujuzi",
+      "Marudio na mkusanyiko",
+      "Rekodi na mipangilio",
+    ],
+    guideBodies: [
+      "Mchezo wa labirinti wa pikseli ambapo unachora njia kwa kidole.\nLenga sanduku la hazina la dhahabu lenye alama “LENGO”, lililo mahali fulani ndani ya labirinti.\nChagua lugha hapo juu kwenye “Lugha”. Baadaye unaweza kuibadilisha pia kwa 🌐 kwenye skrini ya kichwa.",
+      "Kwenye skrini ya kichwa chagua mhusika: “Bluu”, “Roboti” au “Nyekundu”, kisha gusa “▶ Cheza”.\nKatika “Chagua labirinti” anza na “Rahisi”. Ukimaliza labirinti moja, inayofuata inafunguka (8 kwa jumla).\nKitufe kidogo “Rahisi” kilicho kando ya kila labirinti (chenye ×1.5) ni labirinti bila ujuzi wala masanduku, na kinatoa EXP mara 1.5.",
+      "Chora njia kwa kidole, na mhusika wako atafuata nusu sekunde baadaye. Unaweza pia kugusa kisanduku kilicho mbele kidogo.\nKuza au punguza kwa ➕ ➖ juu au kwa vidole viwili; 🧭 inarudisha mwonekano kwa mhusika wako.\nKwenye kompyuta, vitufe vya mishale au WASD vinafanya kazi pia.",
+      "Sanduku hufunguka unapolifikia. Linaweza kuwa na ⛏️Sururu, 🪜Ngazi, 🪙Sarafu au 💎Almasi, au kuwa tupu.\nIli kutumia sururu au ngazi, gusa kitufe chake chini, kisha gusa ukuta.\nSarafu na almasi hufanya kazi kwa kuzibeba tu: hupunguza muda wako kwenye lengo. Gusa kitufe cha kifaa ili usome kinachofanya.",
+      "Ukifika mwisho unaona muda wako na “Lengo”, na unapata EXP. Kadiri unavyokuwa haraka kuliko lengo, ndivyo EXP inavyoongezeka.\nKisha gusa “Endelea ▶” au “Tena”.\nHujui pa kwenda? 💡 (Dokezo) juu inaangaza njia kwa muda mfupi (mara moja kila sekunde 60).\nIli kuacha, gusa ✕ mara mbili. Ukifunga programu katikati, “▶ Endelea” kwenye skrini ya kichwa inakurudisha ulipoishia (haifanyi kazi kwa labirinti za kitufe “Rahisi” chenye ×1.5).",
+      "Kwa EXP unapanda kiwango na kujifunza ujuzi wa kudumu. Kila mhusika anaanza na ujuzi tofauti (Bluu: Kugonga, Nyekundu: Bingwa wa Hazina, Roboti: Kasi Zaidi).\nKatika “⚙ Ujuzi” kwenye skrini ya kichwa, gusa ujuzi ili kuuvaa au kuuvua. Kiwango kikipanda, unaweza kuvaa zaidi.\nUjuzi uliovaliwa unafanya kazi kuanzia labirinti inayofuata.",
+      "Ukimaliza labirinti ya kitufe “Rahisi” chenye ×1.5, “Hifadhi rudia” inaonekana. Itazame tena kwa “▶ Rudia” kwenye skrini ya kichwa (hadi 9).\n“Mkusanyiko wa labirinti” chini ya “Chagua labirinti” unahifadhi labirinti ulizomaliza. Kusanya zote 9.",
+      "Kiwango na rekodi zako zinabaki kwenye kifaa hiki tu na hazitumwi popote.\nKatika “🔧 Mipangilio” kwenye skrini ya kichwa unaweza kubadilisha “Ukubwa wa maandishi”, “Sauti ya muziki”, “Sauti ya athari” na “Mtetemo”.\nUnaweza kuona mwongozo huu tena wakati wowote kwa “Onyesha tena” kando ya “Jinsi ya kucheza” katika “🔧 Mipangilio”.",
+    ],
   },
 
   },

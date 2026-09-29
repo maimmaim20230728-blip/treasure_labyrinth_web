@@ -1900,6 +1900,16 @@ function buildSettings() {
     if (S.save.vibe && navigator.vibrate) { try { navigator.vibrate(30); } catch (e) {} }
     buildSettings();
   };
+  // あそびかたを もういちど みる（2026-09-30）。index.html は Play版/Web版で別なので、行は ここで作る
+  let gr = $('guideRow');
+  if (!gr) {
+    gr = document.createElement('div'); gr.className = 'setRow'; gr.id = 'guideRow';
+    gr.innerHTML = '<div class="setLbl" id="guideLbl"></div><div class="row"><button id="btnGuide" class="langBtn"></button></div>';
+    $('setSel').insertBefore(gr, $('btnBackTitle4'));
+    $('btnGuide').onclick = () => { Snd.sfx('tap'); openGuide(false); };
+  }
+  $('guideLbl').textContent = t('guideTitle');
+  $('btnGuide').textContent = t('guideAgain');
 }
 /* ---- 言語の適用と切替 ---- */
 function applyLang() {
@@ -1930,6 +1940,7 @@ function applyLang() {
     $('timeTarget').textContent = t('target') + ' ' + fmt(S.stage.targetMs);
     descDefault();
   }
+  if (guideOv && guideOv._draw) guideOv._draw(); // 開いている あそびかた も訳し直す（2026-09-30）
 }
 function buildLangList() {
   const el = $('langList'); el.innerHTML = '';
@@ -2142,9 +2153,89 @@ function attachUI() {
   attachInput();
 }
 
+/* ---- はじめての あそびかた（初回の案内・2026-09-30） ----
+   ヒロさん「ひとつずつ・そよぎ みたいなタイプのアプリは、必ず最初に使い方の丁寧な説明を出してほしい。10代の情報室のように」。
+   ・初回起動で必ず出す（最後まで読むまで、開くたびに出る）。文言は i18n.js の guideTitle / guidePrev / guideStart / guideAgain / guideHeads[] / guideBodies[]（19言語）
+   ・1ページずつ「◀ まえへ」「つぎへ ▶」で進む。閉じるのは最後のページの「▶ あそぶ」だけ（✕ は置かない）
+   ・ことば（1ページ目だけ）: 案内は画面いっぱいで タイトルの 🌐 も覆うので、ここで同じ19言語から選べる（選ぶと案内も その言語に）
+   ・戻るボタン（Play版・onBack）: 2ページ目から＝まえのページ／1ページ目＝初回なら後ろに下げる（閉じない）、せっていから開いたときは閉じる
+   ・読み終えたら localStorage 'tlab.guide.v1'。せっていの「あそびかた」の「もういちど みる」で いつでも もう一度（隠れた入口は無い）
+   ・初回は 案内が出ているあいだ 音を止めておき（Snd.setEnabled(false)）、「▶ あそぶ」で閉じてから タイトルの曲にする（勝手に鳴り出さない）
+   ・画面の部品は ここで作る（index.html は Play版と Web版で別のため・Web版も game.js / style.css / i18n.js の写しで同じになる） */
+const GUIDE_KEY = 'tlab.guide.v1';
+let guideOv = null; // 開いている あそびかた（二重に開かない）
+function guideDone() { try { const v = localStorage.getItem(GUIDE_KEY); return v === '1' || v === 'true'; } catch (e) { return false; } }
+function openGuide(first) {
+  if (guideOv) return;
+  const bodies0 = t('guideBodies');
+  if (!Array.isArray(bodies0) || !bodies0.length) return;
+  let i = 0;
+  const mk = (tag, cls) => { const e = document.createElement(tag); if (cls) e.className = cls; return e; };
+  const ov = mk('div'); ov.id = 'guideOv';
+  ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-modal', 'true');
+  const body = mk('div', 'guideBody'), inner = mk('div', 'guideInner');
+  const top = mk('div', 'guideTop'), ttl = mk('p', 'guideTitle'), step = mk('p', 'guideStep');
+  step.setAttribute('dir', 'ltr'); // 「1 / 8」は ar でも左から（「8 / 1」に見せない）
+  top.appendChild(ttl); top.appendChild(step);
+  const langRow = mk('div', 'guideLang'), langLbl = mk('span', 'guideLangLbl'), sel = mk('select');
+  sel.setAttribute('aria-label', 'Language / ことば');
+  I18N.langs.forEach(pair => { const o = mk('option'); o.value = pair[0]; o.textContent = pair[1]; sel.appendChild(o); });
+  sel.onchange = () => {
+    S.save.lang = sel.value; persist();
+    applyLang(); // → draw（案内も訳し直す）
+    if (S.screen === 'title') refreshTitle(); else if (S.screen === 'set') buildSettings();
+    Snd.sfx('tap');
+  };
+  langRow.appendChild(langLbl); langRow.appendChild(sel);
+  const h = mk('h2', 'guideH'), p = mk('p', 'guideP'), dots = mk('div', 'guideDots');
+  dots.setAttribute('aria-hidden', 'true');
+  inner.appendChild(top); inner.appendChild(langRow); inner.appendChild(h); inner.appendChild(p); inner.appendChild(dots);
+  body.appendChild(inner);
+  const row = mk('div', 'guideRow'), prevB = mk('button', 'guidePrev'), nextB = mk('button', 'guideNext');
+  prevB.type = 'button'; nextB.type = 'button';
+  row.appendChild(prevB); row.appendChild(nextB);
+  ov.appendChild(body); ov.appendChild(row);
+  function draw() {
+    const heads = t('guideHeads'), bodies = t('guideBodies'), n = bodies.length;
+    if (i > n - 1) i = n - 1;
+    ov.setAttribute('aria-label', t('guideTitle'));
+    ttl.textContent = t('guideTitle');
+    step.textContent = (i + 1) + ' / ' + n;
+    langRow.classList.toggle('hidden', i !== 0);
+    langLbl.textContent = t('lang');
+    sel.value = S.save.lang;
+    h.textContent = heads[i] || '';
+    p.textContent = bodies[i];
+    dots.innerHTML = '';
+    for (let d = 0; d < n; d++) dots.appendChild(mk('span', 'guideDot' + (d === i ? ' on' : '')));
+    prevB.textContent = t('guidePrev');
+    prevB.style.visibility = (i === 0) ? 'hidden' : 'visible'; // 「つぎへ」の位置を変えない
+    nextB.textContent = (i === n - 1) ? t('guideStart') : t('next');
+    body.scrollTop = 0;
+  }
+  function close() {
+    if (ov.parentNode) ov.parentNode.removeChild(ov);
+    guideOv = null;
+    try { localStorage.setItem(GUIDE_KEY, '1'); } catch (e) {}
+    if (first) Snd.setEnabled(true); // 初回は ここで いまの画面の曲（タイトル）が始まる
+  }
+  ov._draw = draw;
+  ov._back = () => {
+    if (i > 0) { i--; draw(); return; }
+    if (first) minimizeApp(); else close();
+  };
+  prevB.onclick = () => { if (i > 0) { Snd.sfx('tap'); i--; draw(); } };
+  nextB.onclick = () => { Snd.sfx('tap'); if (i < t('guideBodies').length - 1) { i++; draw(); } else close(); };
+  guideOv = ov;
+  draw();
+  document.body.appendChild(ov);
+  try { nextB.focus(); } catch (e) {}
+}
+
 /* ---- Android の戻るボタン（Play版だけ・2026-09-30） ----
    @capacitor/app が無いと、戻るを押すとアプリごと後ろに下がっていた（Android 11 以前は閉じる）。
-   押したときの順: ①CONGRATULATIONS の大演出が出ていたら、タップと同じく閉じる（下のクリア画面は残る）
+   押したときの順: ⓪はじめての あそびかた（2026-09-30）が出ていたら、2ページ目から まえのページ／1ページ目は 初回なら④と同じ（閉じない）・せっていから開いたときは閉じる
+                  ①CONGRATULATIONS の大演出が出ていたら、タップと同じく閉じる（下のクリア画面は残る）
                   ②めいろの中の段（つるはし・ハシゴ・たいあたり の かべえらび）を やめる（スロットをもう一度押すのと同じ）
                   ③タイトル以外の画面は、その画面の「← タイトルへ」と同じ行き先
                     ・めいろで遊んでいる最中＝✕ と同じ（「もういちど ✕ で めいろを やめる」＝2回で やめる。リプレイ中は すぐ一覧へ）
@@ -2167,6 +2258,7 @@ function minimizeApp() {
   try { if (ap) { const p = ap.minimizeApp(); if (p && p.catch) p.catch(() => {}); } } catch (e) {}
 }
 function onBack() {
+  if (guideOv) { guideOv._back(); return; }
   if (!$('congrats').classList.contains('hidden')) { hideCongrats(); return; }
   const s = S.screen, st = S.stage;
   if (s === 'title') { minimizeApp(); return; }
@@ -2225,7 +2317,10 @@ function boot() {
   applyFont();
   Snd.setVolumes(S.save.volBgm, S.save.volSfx);
   resize();
+  const firstGuide = !guideDone(); // はじめての あそびかた（読み終えるまで毎回・2026-09-30）
+  if (firstGuide) Snd.setEnabled(false); // 案内のあいだは タイトルの曲を鳴らさない（閉じたら setEnabled(true) で始まる）
   showScreen('title');
+  if (firstGuide) openGuide(true);
   watchBack(); // Android の戻るボタン（Play版だけ）
   requestAnimationFrame(frame);
 }
