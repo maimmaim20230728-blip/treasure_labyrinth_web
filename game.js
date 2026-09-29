@@ -2142,6 +2142,55 @@ function attachUI() {
   attachInput();
 }
 
+/* ---- Android の戻るボタン（Play版だけ・2026-09-30） ----
+   @capacitor/app が無いと、戻るを押すとアプリごと後ろに下がっていた（Android 11 以前は閉じる）。
+   押したときの順: ①CONGRATULATIONS の大演出が出ていたら、タップと同じく閉じる（下のクリア画面は残る）
+                  ②めいろの中の段（つるはし・ハシゴ・たいあたり の かべえらび）を やめる（スロットをもう一度押すのと同じ）
+                  ③タイトル以外の画面は、その画面の「← タイトルへ」と同じ行き先
+                    ・めいろで遊んでいる最中＝✕ と同じ（「もういちど ✕ で めいろを やめる」＝2回で やめる。リプレイ中は すぐ一覧へ）
+                    ・ゴールした直後（クリア画面が出るまで）は何もしない／クリア画面＝「つぎへ」と同じ（記録は済んでいる）
+                  ④タイトルでは、アプリを後ろに下げる（minimizeApp。中身はそのまま）
+   Web版（ブラウザ・Farcaster）は何も変えない。🔴プラグインは Capacitor.Plugins.App から取る（registerPlugin は WebView に無い） */
+function isNativeApp() {
+  try { const c = window.Capacitor; return !!(c && typeof c.isNativePlatform === 'function' && c.isNativePlatform()); } catch (e) { return false; }
+}
+function nativePlugin(name, fn) {
+  try {
+    const c = window.Capacitor;
+    if (typeof c.isPluginAvailable === 'function' && !c.isPluginAvailable(name)) return null;
+    const p = c.Plugins && c.Plugins[name];
+    return (p && typeof p[fn] === 'function') ? p : null;
+  } catch (e) { return null; }
+}
+function minimizeApp() {
+  const ap = nativePlugin('App', 'minimizeApp');
+  try { if (ap) { const p = ap.minimizeApp(); if (p && p.catch) p.catch(() => {}); } } catch (e) {}
+}
+function onBack() {
+  if (!$('congrats').classList.contains('hidden')) { hideCongrats(); return; }
+  const s = S.screen, st = S.stage;
+  if (s === 'title') { minimizeApp(); return; }
+  if (s === 'play') {
+    if (st && !st.rep && S.targetMode) { setTarget(null); return; }
+    if (st && !st.rep && st.cleared) return;
+    $('btnQuit').click(); return;
+  }
+  if (s === 'clear') { $('btnNext').click(); return; }
+  if (s === 'lang') { Snd.sfx('tap'); showScreen('title'); return; }   // 「← タイトルへ」(btnBackTitle3)と同じ行き先
+  const btn = { diff: 'btnBackTitle', skill: 'btnBackTitle2', set: 'btnBackTitle4', replay: 'btnBackTitle5' }[s];
+  if (btn) { $(btn).click(); return; }
+  showScreen('title');
+}
+function watchBack() {
+  if (!isNativeApp()) return;
+  const ap = nativePlugin('App', 'addListener');
+  if (!ap) return;
+  try {
+    const r = ap.addListener('backButton', () => { try { onBack(); } catch (e) { console.error('back error:', e); } });
+    if (r && r.catch) r.catch(() => {});
+  } catch (e) {}
+}
+
 /* ---- メインループ ---- */
 let lastTs = 0;
 let roboBlinkState = -1;
@@ -2177,6 +2226,7 @@ function boot() {
   Snd.setVolumes(S.save.volBgm, S.save.volSfx);
   resize();
   showScreen('title');
+  watchBack(); // Android の戻るボタン（Play版だけ）
   requestAnimationFrame(frame);
 }
 boot();
