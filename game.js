@@ -2071,6 +2071,7 @@ function attachUI() {
   $('btnBackTitle2').onclick = () => { Snd.sfx('tap'); showScreen('title'); };
   $('btnSkill').onclick = () => { Snd.sfx('tap'); showScreen('skill'); };
   $('btnLang').onclick = () => { Snd.sfx('tap'); showScreen('lang'); };
+  $('btnBackTitle3').onclick = () => { Snd.sfx('tap'); showScreen('title'); }; // ことば の「← タイトルへ」（押しても何も起きなかった・2026-09-30）
   $('btnSet').onclick = () => { Snd.sfx('tap'); showScreen('set'); };
   $('btnBackTitle4').onclick = () => { Snd.sfx('tap'); showScreen('title'); };
   $('btnHint').onclick = () => { useHint(); }; // B-3 ヒント
