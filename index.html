@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>宝の迷宮 - Treasure Labyrinth</title>
-<meta name="description" content="なぞって すすむ ドットめいろ。息ぬきにも脳トレにも、完全オフラインで遊べる迷路ゲーム。">
+<meta name="description" content="なぞって すすむ ドットめいろ。息ぬきにも、じっくり頭を使いたいときにも。完全オフラインで遊べる迷路ゲーム。">
 <meta name="theme-color" content="#141628">
 <meta property="og:title" content="宝の迷宮 - Treasure Labyrinth">
 <meta property="og:description" content="なぞって すすむ ドットめいろ。介護と支援の相談どころ「そよぎ」提供。">
@@ -88,7 +88,7 @@
   <button id="btnBackTitle4">← タイトルへ</button>
 </div>
 
-<div id="congrats" class="hidden">
+<div id="congrats" class="hidden" role="button" tabindex="0">
   <div id="congratsMain">🎉 CONGRATULATIONS!! 🎉</div>
   <div id="congratsSub"></div>
 </div>
@@ -121,7 +121,8 @@
   <button id="btnBackTitle5">← タイトルへ</button>
 </div>
 
-<div id="toast"></div>
+<div id="toast" role="status" aria-live="polite"></div>
+<div id="srLive" class="srOnly" aria-live="polite"></div>
 <div id="lvup"></div>
 <div id="stagename"></div>
 
@@ -146,11 +147,13 @@ if ('serviceWorker' in navigator && location.hostname !== 'localhost' && locatio
 }
 </script>
 <script type="module">
-/* Farcaster Mini App: フレーム内で開かれた時に ready() を送る */
-try {
-  const { sdk } = await import('https://esm.sh/@farcaster/miniapp-sdk');
-  await sdk.actions.ready();
-} catch (e) { /* 通常ブラウザでは何もしない */ }
+  /* Farcaster の中(iframe / アプリの WebView)で開いたときだけ SDK を読む。ふつうのブラウザ・PWA では外へつながない */
+  if ((window.self !== window.top) || window.ReactNativeWebView) {
+    try {
+      const { sdk } = await import("https://esm.sh/@farcaster/miniapp-sdk");
+      await sdk.actions.ready();
+    } catch (e) { /* Farcaster外では何もしない */ }
+  }
 </script>
 </body>
 </html>

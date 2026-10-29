@@ -1012,13 +1012,21 @@ function saveCurrentReplay() {
   if (!persist()) {                             // 保存に失敗＝偽の成功表示をしない
     S.save.replays = backup;
     $('btnSaveReplay').textContent = t('saveFail'); // disabledにしない＝もう一度押せる
+    srSay(t('saveFail'));
     Snd.sfx('nope');
     return;
   }
   S.pendingReplay = null;
   $('btnSaveReplay').textContent = '✓ ' + t('replaySaved');
   $('btnSaveReplay').disabled = true;
+  srSay(t('replaySaved'));
   Snd.sfx('coin');
+}
+// 読み上げソフトへの知らせ（ボタンの文字が変わるだけだと伝わらないため。#srLive は画面に出ない aria-live）
+function srSay(msg) {
+  const el = $('srLive'); if (!el) return;
+  el.textContent = '';
+  setTimeout(() => { el.textContent = msg; }, 60);
 }
 function buildReplayList() {
   $('replayTitle').textContent = '▶ ' + t('replay');
@@ -1231,6 +1239,7 @@ function showCongrats(gotMax, gotLv99, gotMaster) {
   $('congratsMain').textContent = gotMaster ? ('🏆 ' + t('treasureMaster') + ' 🏆') : '🎉 CONGRATULATIONS!! 🎉';
   $('congratsMain').classList.toggle('master', !!gotMaster);
   $('congrats').classList.remove('hidden');
+  try { $('congrats').focus({ preventScroll: true }); } catch (e) {} // キーボードの Enter / スペースで閉じられるように
   S.congratsUntil = performance.now() + (gotMaster ? 13000 : 9500); // 花火の打ち上げ時間
   S.nextBurst = 0;
   Snd.bgm('congrats');
@@ -2083,6 +2092,10 @@ function attachUI() {
   $('btnRepRestart').onclick = replayRestart;
   $('btnRepSpeed').onclick = replaySpeedCycle; // B-6 倍速切替
   $('congrats').onclick = hideCongrats;
+  // キーボード・スイッチでも閉じられるように（Enter / スペース）
+  $('congrats').addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') { e.preventDefault(); hideCongrats(); }
+  });
   // B-2 中断スナップショット：バックグラウンド化した瞬間に保存
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') saveResumeOnHide(); });
   $('volBgmR').oninput = () => {

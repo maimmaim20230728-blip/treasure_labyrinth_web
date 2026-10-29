@@ -281,6 +281,8 @@ button.big {
   pointer-events: none; white-space: nowrap; max-width: 92vw;
 }
 #toast.show { opacity: 1; }
+/* 読み上げソフトへの知らせ（画面には出さない） */
+.srOnly { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 #lvup {
   position: fixed; left: 50%; top: 38%; transform: translate(-50%, -50%) scale(0.6);
   color: var(--gold); font-size: 2.1rem; font-weight: bold;

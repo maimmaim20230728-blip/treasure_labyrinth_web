@@ -199,6 +199,14 @@ function unlock() {
   else if (pending) { const p = pending; pending = null; bgm(p); }
 }
 document.addEventListener('pointerdown', unlock, true);
+/* ホームに戻る・ほかのアプリに切り替える・タブを隠すと音を止め、戻ったら続きから鳴らす(BGMが鳴り続けないように) */
+function _suspendNow() { if (ctx && ctx.state === 'running') { try { ctx.suspend().catch(() => {}); } catch (e) {} } }
+document.addEventListener('visibilitychange', () => {
+  if (!ctx) return;
+  if (document.hidden) { _suspendNow(); return; }
+  try { ctx.resume().catch(() => {}); } catch (e) {}
+});
+addEventListener('pagehide', _suspendNow);
 
 function bgm(name) {
   // A-6 同じ曲がすでに鳴っているなら流し直さない（メニュー往復で頭出しに戻る問題の回避）
