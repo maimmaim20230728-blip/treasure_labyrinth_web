@@ -227,6 +227,20 @@ button.big {
 .volRow { display: flex; align-items: center; gap: 10px; }
 .volRow input[type=range] { flex: 1; height: 36px; accent-color: var(--gold); }
 .volV { min-width: 58px; text-align: right; color: var(--gold); font-size: 1rem; font-weight: bold; }
+/* 見やすい配色・きろくのバックアップ・版の数字（game.js buildSettings が行を作る・2026-11-11） */
+#bkText {
+  width: 100%; box-sizing: border-box; min-height: 4.5rem; padding: 8px; resize: vertical;
+  font-size: 0.8rem; line-height: 1.4; font-family: monospace; color: var(--txt); direction: ltr; text-align: left;
+  background: #10122a; border: 2px solid var(--border); border-radius: 8px; word-break: break-all;
+}
+#bkRow .row button { flex: 1 1 0; min-width: 0; }
+.bkMsg { font-size: 0.85rem; line-height: 1.5; color: var(--gold); text-align: start; }
+.bkMsg:empty { display: none; }
+.setVer { width: min(380px, 92vw); font-size: 0.8rem; text-align: center; }
+#verTxt { opacity: 0.8; }
+#verNote { display: block; margin-top: 4px; color: var(--gold); line-height: 1.5; }
+#verNote:empty { display: none; }
+#updNote { color: var(--gold); opacity: 1; font-size: 0.85rem; line-height: 1.5; }
 
 /* クリア画面（紙吹雪が見えるよう半透明） */
 #clearOv { background: rgba(10, 12, 28, 0.75); }
@@ -323,6 +337,11 @@ button.big {
 .guideDots { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; margin-top: 22px; }
 .guideDot { width: 10px; height: 10px; border-radius: 50%; background: var(--border); }
 .guideDot.on { background: var(--gold); }
+.guideSimple {
+  display: block; width: 100%; margin-top: 20px; min-height: 56px; font-size: 1.1rem; font-weight: bold;
+  background: var(--panel); color: var(--txt); border: 2px solid var(--gold); border-radius: 14px; padding: 10px 8px;
+  word-break: keep-all; overflow-wrap: anywhere;
+}
 .guideRow {
   flex: none; display: flex; gap: 10px;
   padding: 10px calc(16px + env(safe-area-inset-right)) calc(14px + env(safe-area-inset-bottom)) calc(16px + env(safe-area-inset-left));

@@ -48,6 +48,32 @@ const THEMES = [
   { name: 'うみの迷宮',   floor: '#f2e6c0', floor2: '#eaddb2', top: '#4a9ad4', top2: '#418cc4', front: '#2f6da0', front2: '#28608e', line: '#22507a' },
   { name: 'さくらの迷宮', floor: '#dcecc0', floor2: '#d2e4b4', top: '#f6c6d8', top2: '#f0b8cd', front: '#96604a', front2: '#875540', line: '#6e4433' },
 ];
+const APP_VER = '1.15'; // せっていの下に小さく出す版の数字（不具合を伝えるとき・更新直後の確かめ用）。版上げのときは build.gradle の versionName・version.txt とそろえる
+/* 見やすい配色（せってい・2026-11-11）：壁と床の明るさの差を大きくする。床が明るい迷宮は壁を濃く、床が暗い迷宮は壁を明るく。
+   足あと色は壁の front から作るので、壁と床の差にそのまま付いてくる。st.theme は迷路を作るときに決まる＝次のめいろから反映 */
+const HC_THEMES = {};
+function lumOf(hx) { // 相対輝度（WCAG）
+  const c = hexRgb(hx).map(v => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); });
+  return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+}
+function contrastOf(a, b) { const x = lumOf(a), y = lumOf(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); }
+function hcTheme(idx) {
+  if (HC_THEMES[idx]) return HC_THEMES[idx];
+  const th = THEMES[idx], mx = mixHex;
+  const o = lumOf(th.floor) > 0.3
+    ? { name: th.name, floor: mx(th.floor, '#ffffff', 0.45), floor2: mx(th.floor2, '#ffffff', 0.4),
+        top: mx(th.top, '#000000', 0.6), top2: mx(th.top2, '#000000', 0.66), front: mx(th.front, '#000000', 0.7), front2: mx(th.front2, '#000000', 0.74), line: '#000000' }
+    : { name: th.name, floor: mx(th.floor, '#000000', 0.45), floor2: mx(th.floor2, '#000000', 0.4),
+        top: mx(th.top, '#ffffff', 0.62), top2: mx(th.top2, '#ffffff', 0.56), front: mx(th.front, '#ffffff', 0.34), front2: mx(th.front2, '#ffffff', 0.3), line: '#ffffff' };
+  HC_THEMES[idx] = o;
+  return o;
+}
+function themeOf(idx) { return (S.save && S.save.hc) ? hcTheme(idx) : THEMES[idx]; }
+function setRoomFloors(st) { // 宝箱部屋の床色（見やすい配色のときは壁との差を残すため、混ぜる量を小さく）
+  const r = (S.save && S.save.hc) ? 0.12 : 0.33;
+  st.roomFloor = mixHex(st.theme.floor, st.theme.top, r);
+  st.roomFloor2 = mixHex(st.theme.floor2, st.theme.top2, r);
+}
 const CONF_COLS = ['#f5c542', '#ff6b6b', '#4ecdc4', '#7bd44a', '#6f9dff', '#e08bff'];
 /* テーマ順（石/森/氷/遺跡/菓子/夜/溶岩/海/桜）に対応するBGM */
 const THEME_BGM = ['maze1', 'mazeForest', 'maze2', 'mazeRuins', 'mazeCandy', 'mazeNight', 'mazeLava', 'mazeSea', 'mazeSakura'];
@@ -212,7 +238,7 @@ function loadSave() {
   try { s = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); } catch (e) {}
   const nd = L.DIFFS.length;
   const has = k => !!(s && typeof s === 'object' && k in s); // 旧セーブに無いフィールドかの判定（後方互換）
-  S.save = Object.assign({ gender: 'm', exp: 0, badges: [], equipped: null, sound: true, fontScale: 0, volBgm: 1, volSfx: 1, replays: [], themeClears: [], zukanAllDone: false, lv99Celebrated: false, masterCelebrated: false, best: {}, vibe: false }, s || {});
+  S.save = Object.assign({ gender: 'm', exp: 0, badges: [], equipped: null, sound: true, fontScale: 0, volBgm: 1, volSfx: 1, replays: [], themeClears: [], zukanAllDone: false, lv99Celebrated: false, masterCelebrated: false, best: {}, vibe: false, hc: false }, s || {});
   if (!Array.isArray(S.save.replays)) S.save.replays = []; // シンプルモードのリプレイ（最大9件）
   if (!Array.isArray(S.save.badges)) S.save.badges = [];
   while (S.save.badges.length < nd) S.save.badges.push(0); // 難易度が増えても進捗を保持
@@ -231,6 +257,7 @@ function loadSave() {
   if (typeof S.save.best !== 'object' || S.save.best === null || Array.isArray(S.save.best)) S.save.best = {};
   // B-5 振動フィードバック（既定OFF）
   S.save.vibe = !!S.save.vibe;
+  S.save.hc = !!S.save.hc; // 見やすい配色（既定OFF・2026-11-11）
   if (!S.save.lang || !I18N.dict[S.save.lang]) S.save.lang = detectLang();
   sanitizeEquip();
   Snd.setEnabled(true); // 音のON/OFFは廃止。ミュートは設定の音量スライダー(0%)で行う
@@ -373,7 +400,7 @@ function startStage(di, simple) {
     hintReadyAt: 0, hintCells: null, hintUntil: 0,                     // B-3 ヒント（正解ルート先7マス）
     brokenWalls: [],                                                   // つるはし/体当たりで壊した壁index（つづきから復元用）
   };
-  st.theme = THEMES[st.themeIdx];
+  st.theme = themeOf(st.themeIdx);
   st.cuts = new L.CutsceneCtrl(st.timer);
   // 宝箱配置（シンプルモードは宝箱なし）。④宝箱出現アップ＋⑨ヘンゼルLV99で増量・宝箱部屋を優先的に満たす
   const sIdx = start.ry * diff.w + start.rx, gIdx = goal.ry * diff.w + goal.rx;
@@ -398,8 +425,7 @@ function startStage(di, simple) {
   st.visits[sIdx] = 1;
   st.trailCol = makeTrail(st.theme);
   // 宝箱部屋の床：テーマに馴染む範囲で少し色を変え、通路と区別できるようにする
-  st.roomFloor = mixHex(st.theme.floor, st.theme.top, 0.33);
-  st.roomFloor2 = mixHex(st.theme.floor2, st.theme.top2, 0.33);
+  setRoomFloors(st);
   st.roomMask = new Uint8Array(m.bw * m.bh);
   for (const room of (m.rooms || [])) {
     for (let by = 2 * room.y + 1; by <= 2 * (room.y + room.h - 1) + 1; by++)
@@ -854,11 +880,10 @@ function buildReplayStage(rep) {
     visits: new Uint8Array(diff.w * diff.h), clones: [], cloneSpeed: 1, goalArrow: false,
     hintReadyAt: 0, hintCells: null, hintUntil: 0, brokenWalls: [],
   };
-  st.theme = THEMES[st.themeIdx];
+  st.theme = themeOf(st.themeIdx);
   st.cuts = new L.CutsceneCtrl(st.timer);
   st.trailCol = makeTrail(st.theme);
-  st.roomFloor = mixHex(st.theme.floor, st.theme.top, 0.33);
-  st.roomFloor2 = mixHex(st.theme.floor2, st.theme.top2, 0.33);
+  setRoomFloors(st);
   st.roomMask = new Uint8Array(m.bw * m.bh);
   st.goalDist = distMap(m, goal.rx, goal.ry);
   st.timer.ms = 0;
@@ -926,7 +951,7 @@ function buildResumeStage(snap) {
     hintReadyAt: Math.max(0, snap.hintReadyAt | 0), hintCells: null, hintUntil: 0,
     brokenWalls: Array.isArray(snap.brokenWalls) ? snap.brokenWalls.slice() : [],
   };
-  st.theme = THEMES[themeIdx];
+  st.theme = themeOf(themeIdx);
   st.cuts = new L.CutsceneCtrl(st.timer);
   // ハシゴ復元（非0のみ・方向値1〜4）
   if (Array.isArray(snap.ladders)) for (const pr of snap.ladders) {
@@ -942,8 +967,7 @@ function buildResumeStage(snap) {
   if (Array.isArray(snap.visits)) for (let i = 0; i < st.visits.length && i < snap.visits.length; i++) st.visits[i] = Math.min(3, snap.visits[i] | 0);
   st.visits[cRy * diff.w + cRx] = Math.max(1, st.visits[cRy * diff.w + cRx]);
   st.trailCol = makeTrail(st.theme);
-  st.roomFloor = mixHex(st.theme.floor, st.theme.top, 0.33);
-  st.roomFloor2 = mixHex(st.theme.floor2, st.theme.top2, 0.33);
+  setRoomFloors(st);
   st.roomMask = new Uint8Array(m.bw * m.bh);
   for (const room of (m.rooms || [])) {
     for (let by = 2 * room.y + 1; by <= 2 * (room.y + room.h - 1) + 1; by++)
@@ -1865,7 +1889,7 @@ function showScreen(name) {
   else if (name === 'diff') { $('diffSel').classList.remove('hidden'); buildDiffList(); Snd.bgm('title'); }
   else if (name === 'skill') { $('skillSel').classList.remove('hidden'); buildSkillCards(); Snd.bgm('skill'); } // 専用BGM
   else if (name === 'lang') { $('langSel').classList.remove('hidden'); buildLangList(); Snd.bgm('title'); }
-  else if (name === 'set') { $('setSel').classList.remove('hidden'); buildSettings(); Snd.bgm('title'); }
+  else if (name === 'set') { $('setSel').classList.remove('hidden'); bkArmed = false; buildSettings(); backupMsg(''); Snd.bgm('title'); }
   else if (name === 'replay') { $('replaySel').classList.remove('hidden'); buildReplayList(); Snd.bgm('title'); }
   else if (name === 'play') {
     $('hudTop').classList.remove('hidden'); $('hudBottom').classList.remove('hidden');
@@ -1919,7 +1943,125 @@ function buildSettings() {
   }
   $('guideLbl').textContent = t('guideTitle');
   $('btnGuide').textContent = t('guideAgain');
+  // 見やすい配色・きろくのバックアップ・版の数字（2026-11-11）。行は ここで作る＝Play版/Web版の index.html は そのまま
+  const mkRow = (id, html) => {
+    let r = $(id);
+    if (!r) { r = document.createElement('div'); r.className = 'setRow'; r.id = id; r.innerHTML = html; $('setSel').insertBefore(r, $('btnBackTitle4')); }
+    return r;
+  };
+  if (!$('hcRow')) {
+    mkRow('hcRow', '<div class="setLbl" id="hcLbl"></div><div class="row"><button id="hcToggle" class="langBtn"></button></div>');
+    $('hcToggle').onclick = () => { S.save.hc = !S.save.hc; persist(); Snd.sfx('tap'); buildSettings(); };
+  }
+  $('hcLbl').textContent = t('hc');
+  $('hcToggle').textContent = S.save.hc ? 'ON' : 'OFF';
+  $('hcToggle').classList.toggle('sel', !!S.save.hc);
+  $('hcToggle').setAttribute('aria-pressed', S.save.hc ? 'true' : 'false');
+  $('hcToggle').setAttribute('aria-label', t('hc'));
+  if (!$('bkRow')) {
+    mkRow('bkRow', '<div class="setLbl" id="bkLbl"></div><textarea id="bkText" rows="3" spellcheck="false" autocomplete="off" autocapitalize="off"></textarea>' +
+      '<div class="row"><button id="bkCopy" class="langBtn"></button><button id="bkLoad" class="langBtn"></button></div>' +
+      '<div id="bkMsg" class="bkMsg" role="status" aria-live="polite"></div>');
+    $('bkCopy').onclick = () => { Snd.sfx('tap'); backupCopy(); };
+    $('bkLoad').onclick = () => { Snd.sfx('tap'); backupLoadClick(); };
+    $('bkText').oninput = () => { bkArmed = false; };
+  }
+  $('bkLbl').textContent = t('backup');
+  $('bkText').setAttribute('aria-label', t('backup'));
+  $('bkText').placeholder = t('backupPh');
+  $('bkCopy').textContent = t('backupCopy');
+  $('bkLoad').textContent = t('backupLoad');
+  if (!$('verLine')) {
+    const v = document.createElement('div'); v.id = 'verLine'; v.className = 'setVer';
+    v.innerHTML = '<span id="verTxt" dir="ltr"></span><span id="verNote" role="status" aria-live="polite"></span>';
+    $('setSel').insertBefore(v, $('btnBackTitle4'));
+  }
+  $('verTxt').textContent = 'v' + APP_VER;
+  $('verNote').textContent = window.__swReloadPending ? t('updateReady') : '';
 }
+/* ---- きろくのバックアップ（2026-11-11）：きろく(せいせき・ベスト・ずかん・リプレイ・せってい)を もじにして コピー／はりつけて よみこむ ----
+   Capacitor の中では <a download> が効かないので、ファイルでなく文字にする。外へは送らない（端末の中だけ）。
+   よみこむときは 知っている項目だけを 型をたしかめて 取りこむ（ほかの人から もらった文字でも 画面がこわれないように） */
+const BK_PREFIX = 'TLAB1:';
+let bkArmed = false; // 「よみこむ」を1回押した（置きかわる注意を出した）状態
+function backupEncode() {
+  try { return BK_PREFIX + btoa(unescape(encodeURIComponent(JSON.stringify(S.save)))); } catch (e) { return ''; }
+}
+function backupDecode(txt) { // 形が合わなければ null
+  try {
+    txt = String(txt || '').replace(/\s+/g, '');
+    if (txt.indexOf(BK_PREFIX) !== 0) return null;
+    const o = JSON.parse(decodeURIComponent(escape(atob(txt.slice(BK_PREFIX.length)))));
+    if (!o || typeof o !== 'object' || Array.isArray(o)) return null;
+    if (typeof o.exp !== 'number' || !isFinite(o.exp) || o.exp < 0 || !Array.isArray(o.badges)) return null;
+    const num = v => typeof v === 'number' && isFinite(v);
+    const isInt = (v, lo, hi) => num(v) && Math.floor(v) === v && v >= lo && v <= hi;
+    const cnt = v => (num(v) && v > 0 ? Math.floor(v) : 0);
+    const out = {
+      gender: ['m', 'n', 'f'].indexOf(o.gender) >= 0 ? o.gender : 'm',
+      exp: Math.min(L.EXP_TOTAL_MAX, Math.floor(o.exp)),
+      badges: o.badges.slice(0, L.DIFFS.length).map(cnt),
+      equipped: Array.isArray(o.equipped) ? o.equipped.filter(v => typeof v === 'string').slice(0, 10) : null,
+      sound: true,
+      fontScale: isInt(o.fontScale, 0, 2) ? o.fontScale : 0,
+      volBgm: num(o.volBgm) ? Math.min(3, Math.max(0, o.volBgm)) : 1,
+      volSfx: num(o.volSfx) ? Math.min(3, Math.max(0, o.volSfx)) : 1,
+      replays: [],
+      themeClears: (Array.isArray(o.themeClears) ? o.themeClears : []).slice(0, THEMES.length).map(cnt),
+      zukanAllDone: !!o.zukanAllDone, lv99Celebrated: !!o.lv99Celebrated, masterCelebrated: !!o.masterCelebrated,
+      best: {}, vibe: !!o.vibe, hc: !!o.hc,
+    };
+    if (typeof o.lang === 'string' && I18N.dict[o.lang]) out.lang = o.lang;
+    if (o.best && typeof o.best === 'object' && !Array.isArray(o.best)) {
+      for (const k of Object.keys(o.best)) if (/^\d{1,2}s?$/.test(k) && num(o.best[k]) && o.best[k] > 0) out.best[k] = Math.round(o.best[k]);
+    }
+    for (const r of (Array.isArray(o.replays) ? o.replays : [])) { // リプレイは形の合うものだけ(9件まで)
+      if (out.replays.length >= 9) break;
+      if (!r || typeof r !== 'object' || !isInt(r.diffIdx, 0, L.DIFFS.length - 1)) continue;
+      const d = L.DIFFS[r.diffIdx];
+      if (!isInt(r.seed, 0, 4294967295) || !isInt(r.theme, 0, THEMES.length - 1)) continue;
+      if (!isInt(r.sx, 0, d.w - 1) || !isInt(r.sy, 0, d.h - 1) || !isInt(r.gx, 0, d.w - 1) || !isInt(r.gy, 0, d.h - 1)) continue;
+      if (!Array.isArray(r.fr) || r.fr.length % 4 !== 0 || !r.fr.every(num) || !num(r.ms) || r.ms < 0) continue;
+      out.replays.push({ v: 1, diffIdx: r.diffIdx, seed: r.seed, sx: r.sx, sy: r.sy, gx: r.gx, gy: r.gy, theme: r.theme, fr: r.fr, ms: r.ms, date: num(r.date) ? r.date : 0 });
+    }
+    return out;
+  } catch (e) { return null; }
+}
+function backupApply(o) {
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify(o)); } catch (e) { return false; }
+  loadSave(); applyLang(); applyFont(); Snd.setVolumes(S.save.volBgm, S.save.volSfx);
+  return true;
+}
+function backupMsg(key) { const el = $('bkMsg'); if (el) el.textContent = key ? t(key) : ''; }
+function backupCopy() {
+  const ta = $('bkText'), txt = backupEncode();
+  if (!txt) { backupMsg('backupManual'); return; }
+  ta.value = txt; bkArmed = false;
+  let ok = false;
+  try { ta.focus(); ta.select(); ta.setSelectionRange(0, txt.length); ok = !!(document.execCommand && document.execCommand('copy')); } catch (e) {}
+  if (ok) { try { ta.blur(); } catch (e) {} backupMsg('backupCopied'); return; }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(txt).then(() => backupMsg('backupCopied'), () => backupMsg('backupManual'));
+  } else backupMsg('backupManual');
+}
+function backupLoadClick() {
+  const o = backupDecode($('bkText').value);
+  if (!o) { bkArmed = false; backupMsg('backupBad'); return; }
+  if (!bkArmed) { bkArmed = true; backupMsg('backupSure'); return; } // いまの きろくが ぬりかわるので、1回目は 注意だけ
+  bkArmed = false;
+  if (backupApply(o)) { $('bkText').value = ''; buildSettings(); backupMsg('backupLoaded'); }
+  else backupMsg('saveFail');
+}
+/* Web版：新しい版が有効になったとき（index.html の controllerchange から）。タイトルの下と せっていに 一行出す（2026-11-11） */
+window.__swNotice = function () {
+  let el = $('updNote');
+  if (!el) {
+    el = document.createElement('p'); el.id = 'updNote'; el.className = 'credit'; el.setAttribute('role', 'status'); el.setAttribute('aria-live', 'polite');
+    $('title').appendChild(el);
+  }
+  el.textContent = t('updateReady');
+  const vn = $('verNote'); if (vn) vn.textContent = t('updateReady');
+};
 /* ---- 言語の適用と切替 ---- */
 function applyLang() {
   document.documentElement.lang = S.save.lang;
@@ -1949,6 +2091,7 @@ function applyLang() {
     $('timeTarget').textContent = t('target') + ' ' + fmt(S.stage.targetMs);
     descDefault();
   }
+  const updEl = $('updNote'); if (updEl) updEl.textContent = t('updateReady'); // 新しい版のお知らせも訳し直す（2026-11-11）
   if (guideOv && guideOv._draw) guideOv._draw(); // 開いている あそびかた も訳し直す（2026-09-30）
 }
 function buildLangList() {
@@ -2203,7 +2346,8 @@ function openGuide(first) {
   langRow.appendChild(langLbl); langRow.appendChild(sel);
   const h = mk('h2', 'guideH'), p = mk('p', 'guideP'), dots = mk('div', 'guideDots');
   dots.setAttribute('aria-hidden', 'true');
-  inner.appendChild(top); inner.appendChild(langRow); inner.appendChild(h); inner.appendChild(p); inner.appendChild(dots);
+  const simpleB = mk('button', 'guideSimple hidden'); simpleB.type = 'button'; // 最後のページだけ：やさしい（シンプル）へ直接（2026-11-11）
+  inner.appendChild(top); inner.appendChild(langRow); inner.appendChild(h); inner.appendChild(p); inner.appendChild(simpleB); inner.appendChild(dots);
   body.appendChild(inner);
   const row = mk('div', 'guideRow'), prevB = mk('button', 'guidePrev'), nextB = mk('button', 'guideNext');
   prevB.type = 'button'; nextB.type = 'button';
@@ -2225,6 +2369,8 @@ function openGuide(first) {
     prevB.textContent = t('guidePrev');
     prevB.style.visibility = (i === 0) ? 'hidden' : 'visible'; // 「つぎへ」の位置を変えない
     nextB.textContent = (i === n - 1) ? t('guideStart') : t('next');
+    simpleB.textContent = t('guideSimple');
+    simpleB.classList.toggle('hidden', i !== n - 1);
     body.scrollTop = 0;
   }
   function close() {
@@ -2239,6 +2385,7 @@ function openGuide(first) {
     if (first) minimizeApp(); else close();
   };
   prevB.onclick = () => { if (i > 0) { Snd.sfx('tap'); i--; draw(); } };
+  simpleB.onclick = () => { Snd.sfx('tap'); close(); startStage(0, true); }; // 読み終えた扱いにして、やさしい（シンプル）を始める
   nextB.onclick = () => { Snd.sfx('tap'); if (i < t('guideBodies').length - 1) { i++; draw(); } else close(); };
   guideOv = ov;
   draw();

@@ -137,6 +137,7 @@ if ('serviceWorker' in navigator && location.hostname !== 'localhost' && locatio
   navigator.serviceWorker.addEventListener('controllerchange', () => {
     if (!hadController) return;
     window.__swReloadPending = true; // プレイ中は発火させず、フラグだけ立てる
+    if (window.__swNotice) window.__swNotice(); // 「新しい版があります」を一行出す（2026-11-11）
   });
   addEventListener('load', () => {
     navigator.serviceWorker.register('sw.js').then(reg => {

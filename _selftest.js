@@ -341,5 +341,64 @@ console.log('6) 難易度テーブル単調性: 済');
   console.log('11) セーフエリア/版数: 済');
 }
 
+// 12) [2026-11-11] 版の表示・見やすい配色・きろくのバックアップ・あそびかたからシンプルへ
+{
+  const fs = require('fs'), path = require('path');
+  const I = require('./i18n.js');
+  const src = fs.readFileSync(path.join(__dirname, 'game.js'), 'utf8');
+  // 12-1) 新キー12個が19言語すべてに入っている・ダッシュ(— –)なし
+  const K12 = ['updateReady', 'hc', 'backup', 'backupCopy', 'backupLoad', 'backupPh', 'backupCopied', 'backupManual', 'backupLoaded', 'backupBad', 'backupSure', 'guideSimple'];
+  let miss = 0;
+  for (const [lg] of I.langs) for (const k of K12) {
+    const v = I.dict[lg][k];
+    if (typeof v !== 'string' || !v.trim() || /[—–]/.test(v)) { miss++; console.log('NG: ' + lg + ' ' + k); }
+  }
+  ok(I.langs.length === 19 && miss === 0, `12-1) 新12キー×19言語（問題${miss}件）`);
+  // 12-2) 画面の版(APP_VER)が version.txt と同じ（web側フォルダは version.txt が無いので飛ばす）
+  const verM = src.match(/const APP_VER = '([^']+)'/);
+  ok(!!verM, '12-2) APP_VER がある');
+  const vtxt = path.join(__dirname, 'version.txt');
+  if (verM && fs.existsSync(vtxt)) ok(verM[1] === fs.readFileSync(vtxt, 'utf8').trim(), `12-2) 画面の版 ${verM && verM[1]} と version.txt が同じ`);
+  // 12-3) 見やすい配色：9迷宮すべてで 壁の上(top)と床(floor)の明るさの比が 4.5 以上・元より大きい
+  const grab = (a, b) => { const i = src.indexOf(a), j = src.indexOf(b, i); if (i < 0 || j < 0) throw new Error('12) 見つからない: ' + a); return src.slice(i, j); };
+  const code = grab('const THEMES = [', 'const APP_VER') + grab('function hexRgb', 'function makeTrail') + grab('function mixHex', 'function distMap') +
+    grab('const HC_THEMES', 'function themeOf');
+  const mod = new Function(code + '; return { THEMES, hcTheme, contrastOf };')();
+  mod.THEMES.forEach((th, i) => {
+    const h = mod.hcTheme(i), c1 = mod.contrastOf(h.floor, h.top), c2 = mod.contrastOf(h.floor2, h.top2);
+    ok(c1 >= 4.5 && c2 >= 4.5, `12-3) ${th.name} の壁と床の比 ${c1.toFixed(1)}/${c2.toFixed(1)}（4.5以上）`);
+    ok(c1 > mod.contrastOf(th.floor, th.top), `12-3) ${th.name} は元より差が大きい`);
+    ok(['floor', 'floor2', 'top', 'top2', 'front', 'front2', 'line'].every(k => /^#[0-9a-f]{6}$/i.test(h[k])), `12-3) ${th.name} の色の形`);
+  });
+  // 12-4) バックアップ：書き出し→読み込みで同じ・壊れた文字や形違いは断る・知らない項目は入れない
+  const bcode = grab('const BK_PREFIX', 'function backupApply') + ';return { backupEncode, backupDecode };';
+  const rep = { v: 1, diffIdx: 2, seed: 7, sx: 0, sy: 0, gx: 10, gy: 8, theme: 3, fr: [0, 1, 1, 2, 66, 2, 1, 1], ms: 5000, date: 1 };
+  const S = { save: { gender: 'n', exp: 12345, badges: [3, 0, 2, 0, 0, 0, 0, 0], equipped: ['speed'], fontScale: 2, volBgm: 0.5, volSfx: 2,
+    themeClears: [1, 0, 0, 0, 0, 0, 0, 0, 2], best: { '3': 4800, '0s': 2100 }, vibe: true, hc: true, lang: 'de', replays: [rep] } };
+  const bk = new Function('S', 'L', 'THEMES', 'I18N', bcode)(S, L, mod.THEMES, I);
+  const enc = bk.backupEncode();
+  ok(/^TLAB1:[A-Za-z0-9+/=]+$/.test(enc), '12-4) 書き出しは TLAB1: ＋ 英数字だけ');
+  const dec = bk.backupDecode('  ' + enc.slice(0, 20) + '\n' + enc.slice(20) + ' ');
+  ok(dec && dec.exp === 12345 && dec.gender === 'n' && dec.best['3'] === 4800 && dec.best['0s'] === 2100 && dec.lang === 'de' && dec.hc === true &&
+     dec.vibe === true && dec.fontScale === 2 && dec.volBgm === 0.5 && dec.volSfx === 2 && dec.badges.join() === '3,0,2,0,0,0,0,0' &&
+     dec.themeClears[8] === 2 && dec.equipped.join() === 'speed' && dec.replays.length === 1 && JSON.stringify(dec.replays[0]) === JSON.stringify(rep),
+     '12-4) 書き出し→読み込みで同じ（途中の空白・改行は無視）');
+  const b64 = o => 'TLAB1:' + Buffer.from(JSON.stringify(o)).toString('base64');
+  ok(bk.backupDecode('') === null && bk.backupDecode('hello') === null && bk.backupDecode('TLAB1:%%%') === null && bk.backupDecode(b64([1])) === null, '12-4) 空・形違い・壊れた文字は断る');
+  ok(bk.backupDecode(b64({ exp: 'x', badges: [] })) === null && bk.backupDecode(b64({ exp: 1 })) === null, '12-4) exp が数でない・badges が無いものは断る');
+  const badRep = [{ fr: 5 }, { ...rep, diffIdx: 99 }, { ...rep, theme: 9 }, { ...rep, sx: 99 }, { ...rep, fr: [1, 2, 3] }, { ...rep, ms: '<b>' }, { ...rep, fr: [0, 'x', 1, 2] }, 7, null];
+  ok(bk.backupDecode(b64({ exp: 1, badges: [], replays: badRep })).replays.length === 0, '12-4) 形の合わないリプレイは捨てる');
+  ok(bk.backupDecode(b64({ exp: 1, badges: [], replays: Array(12).fill(rep) })).replays.length === 9, '12-4) リプレイは9件まで');
+  const odd = bk.backupDecode(b64({ exp: 9e9, badges: ['<img>', -1, 2.7], gender: 'x', fontScale: 7, volBgm: 99, volSfx: 'a', lang: 'xx', best: { a: 1, '2': -5, '1': '<b>' }, evil: '<script>' }));
+  ok(odd && odd.exp === L.EXP_TOTAL_MAX && odd.gender === 'm' && odd.fontScale === 0 && odd.volBgm === 3 && odd.volSfx === 1 && !('lang' in odd) &&
+     Object.keys(odd.best).length === 0 && odd.badges.join() === '0,0,2' && !('evil' in odd), '12-4) 上限超・型ちがい・知らない項目はならす');
+  // 12-5) あそびかたの最後のページの「やさしい（シンプル）」／新しい版の知らせを index.html からつなぐ
+  ok(/simpleB\.onclick = \(\) => \{[^}]*close\(\); startStage\(0, true\);/.test(src), '12-5) あそびかたの「やさしい（シンプル）」ボタン');
+  ok(/simpleB\.classList\.toggle\('hidden', i !== n - 1\)/.test(src), '12-5) そのボタンは最後のページだけ');
+  const idx = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf8');
+  ok(/window\.__swNotice\(\)/.test(idx) && /window\.__swNotice = /.test(src), '12-5) 新しい版の知らせ(__swNotice)を index.html と game.js でつなぐ');
+  console.log('12) 版・見やすい配色・バックアップ・シンプル入口: 済');
+}
+
 console.log(fails === 0 ? 'ALL OK' : 'FAILURES: ' + fails);
 process.exit(fails ? 1 : 0);

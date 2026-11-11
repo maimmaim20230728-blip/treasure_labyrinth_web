@@ -79,6 +79,7 @@ const I18N = {
     vCraft: 'どうぐ {n}かい', vWarp: 'ちかくワープ {n}%', vHansel: 'あしあと {n}だんかい', vClone: 'ぶんしん {n}にん',
     vCT: 'CT {n}びょう', vMaster: '🪙×{a}・💎×{b}', chooseLang: 'ことばを えらぶ', expMax: '（LV99 カンスト！）', treasureMaster: 'トレジャーマスター', masteryScore: 'やりこみスコア', simple: 'シンプル', replay: 'リプレイ', saveReplay: 'リプレイ保存', replaySaved: '保存しました', noReplays: 'まだリプレイがありません',
     special: 'スペシャル', saveFail: 'ほぞんできませんでした', zukan: 'めいきゅう ずかん', zukanAll: '9つの めいきゅう ぜんぶ クリア！', resume: 'つづきから', hint: 'ヒント', best: 'じこベスト', bestNew: '🎖 じこベスト こうしん！', vibe: 'しんどう',
+    updateReady: "あたらしい ばんが あります。ひらきなおして ください", hc: "みやすい はいしょく", backup: "きろくの バックアップ", backupCopy: "コピー", backupLoad: "よみこむ", backupPh: "コピーした もじを ここに はりつけて「よみこむ」を おして ください", backupCopied: "コピーしました。ほかの たんまつで はりつけて よみこめます", backupManual: "コピーできませんでした。もじを ながおしして コピーして ください", backupLoaded: "よみこみました", backupBad: "よみこめませんでした。もじが ぜんぶ はいっているか たしかめて ください", backupSure: "いまの きろくは ぬりかわります。よければ もういちど「よみこむ」を おして ください", guideSimple: "やさしい（シンプル）で あそぶ",
     /* はじめての あそびかた（game.js openGuide・2026-09-30）。guideHeads と guideBodies は同じ数。ボタン名は画面の文字と同じ（照らし合わせ=store/_back_check.js） */
     guideTitle: "あそびかた", guidePrev: "◀ まえへ", guideStart: "▶ あそぶ", guideAgain: "もういちど みる",
     guideHeads: [
@@ -144,6 +145,7 @@ const I18N = {
     vCraft: 'Tools ×{n}', vWarp: 'Near warp {n}%', vHansel: '{n} shades', vClone: '{n} clones',
     vCT: 'CT {n}s', vMaster: '🪙×{a} 💎×{b}', chooseLang: 'Choose language', expMax: '(MAX level!)', treasureMaster: 'TREASURE MASTER', masteryScore: 'Mastery Score', simple: 'Simple', replay: 'Replay', saveReplay: 'Save replay', replaySaved: 'Saved', noReplays: 'No replays yet',
     special: 'Special', saveFail: 'Could not save', zukan: 'Maze Collection', zukanAll: 'All 9 mazes cleared!', resume: 'Continue', hint: 'Hint', best: 'Best time', bestNew: '🎖 New best time!', vibe: 'Vibration',
+    updateReady: "A new version is ready. Please reopen the game", hc: "High contrast", backup: "Backup", backupCopy: "Copy", backupLoad: "Load", backupPh: "Paste the copied text here, then press “Load”", backupCopied: "Copied. Paste it on another device to load it", backupManual: "Could not copy. Press and hold the text to copy it", backupLoaded: "Loaded", backupBad: "Could not load. Check that the whole text was pasted", backupSure: "Your current records will be replaced. Press “Load” again to continue", guideSimple: "Play Easy (Simple)",
     /* はじめての あそびかた（game.js openGuide・2026-09-30）。guideHeads と guideBodies は同じ数。ボタン名は画面の文字と同じ（照らし合わせ=store/_back_check.js） */
     guideTitle: "How to play", guidePrev: "◀ Back", guideStart: "▶ Let's go!", guideAgain: "Show again",
     guideHeads: [
@@ -208,6 +210,7 @@ const I18N = {
     vCraft: '工具 {n}次', vWarp: '近点传送 {n}%', vHansel: '足迹 {n}级', vClone: '分身 {n}人',
     vCT: '冷却 {n}秒', vMaster: '🪙×{a}·💎×{b}', chooseLang: '选择语言', expMax: '（LV99 满级！）', treasureMaster: '宝藏大师', masteryScore: '成就分数', simple: '简约', replay: '回放', saveReplay: '保存回放', replaySaved: '已保存', noReplays: '还没有回放',
     special: '特别', saveFail: '无法保存', zukan: '迷宫图鉴', zukanAll: '9种迷宫全部通关！', resume: '继续', hint: '提示', best: '最佳纪录', bestNew: '🎖 刷新最佳纪录！', vibe: '震动',
+    updateReady: "有新版本。请重新打开游戏", hc: "高对比度", backup: "记录备份", backupCopy: "复制", backupLoad: "读取", backupPh: "把复制的文字粘贴到这里，再按“读取”", backupCopied: "已复制。可在其他设备上粘贴读取", backupManual: "复制失败。请长按文字进行复制", backupLoaded: "已读取", backupBad: "无法读取。请确认文字已完整粘贴", backupSure: "当前记录将被替换。确定的话请再按一次“读取”", guideSimple: "从简单（简约）开始玩",
     /* はじめての あそびかた（game.js openGuide・2026-09-30）。guideHeads と guideBodies は同じ数。ボタン名は画面の文字と同じ（照らし合わせ=store/_back_check.js） */
     guideTitle: "玩法", guidePrev: "◀ 上一页", guideStart: "▶ 开始玩！", guideAgain: "再看一次",
     guideHeads: [
@@ -272,6 +275,7 @@ const I18N = {
     vCraft: '工具 {n}次', vWarp: '近點傳送 {n}%', vHansel: '足跡 {n}級', vClone: '分身 {n}人',
     vCT: '冷卻 {n}秒', vMaster: '🪙×{a}·💎×{b}', chooseLang: '選擇語言', expMax: '（LV99 滿級！）', treasureMaster: '寶藏大師', masteryScore: '成就分數', simple: '簡約', replay: '重播', saveReplay: '儲存重播', replaySaved: '已儲存', noReplays: '還沒有重播',
     special: '特別', saveFail: '無法保存', zukan: '迷宮圖鑑', zukanAll: '9種迷宮全部通關！', resume: '繼續', hint: '提示', best: '最佳紀錄', bestNew: '🎖 刷新最佳紀錄！', vibe: '震動',
+    updateReady: "有新版本。請重新開啟遊戲", hc: "高對比", backup: "紀錄備份", backupCopy: "複製", backupLoad: "讀取", backupPh: "把複製的文字貼到這裡，再按「讀取」", backupCopied: "已複製。可在其他裝置上貼上讀取", backupManual: "複製失敗。請長按文字進行複製", backupLoaded: "已讀取", backupBad: "無法讀取。請確認文字已完整貼上", backupSure: "目前的紀錄將被取代。確定的話請再按一次「讀取」", guideSimple: "從簡單（簡約）開始玩",
     /* はじめての あそびかた（game.js openGuide・2026-09-30）。guideHeads と guideBodies は同じ数。ボタン名は画面の文字と同じ（照らし合わせ=store/_back_check.js） */
     guideTitle: "玩法", guidePrev: "◀ 上一頁", guideStart: "▶ 開始玩！", guideAgain: "再看一次",
     guideHeads: [
@@ -336,6 +340,7 @@ const I18N = {
     vCraft: '도구 {n}회', vWarp: '근접워프 {n}%', vHansel: '발자국 {n}단계', vClone: '분신 {n}명',
     vCT: '쿨 {n}초', vMaster: '🪙×{a}·💎×{b}', chooseLang: '언어 선택', expMax: '(LV99 만렙!)', treasureMaster: '트레저 마스터', masteryScore: '숙련 점수', simple: '심플', replay: '리플레이', saveReplay: '리플레이 저장', replaySaved: '저장됨', noReplays: '아직 리플레이가 없어요',
     special: '스페셜', saveFail: '저장하지 못했어요', zukan: '미로 도감', zukanAll: '9가지 미로 모두 클리어!', resume: '이어서 하기', hint: '힌트', best: '최고 기록', bestNew: '🎖 최고 기록 경신!', vibe: '진동',
+    updateReady: "새 버전이 있어요. 게임을 다시 열어 주세요", hc: "고대비 색상", backup: "기록 백업", backupCopy: "복사", backupLoad: "불러오기", backupPh: "복사한 글자를 여기에 붙여 넣고 “불러오기”를 눌러 주세요", backupCopied: "복사했어요. 다른 기기에서 붙여 넣어 불러올 수 있어요", backupManual: "복사하지 못했어요. 글자를 길게 눌러 복사해 주세요", backupLoaded: "불러왔어요", backupBad: "불러오지 못했어요. 글자가 모두 붙여 넣어졌는지 확인해 주세요", backupSure: "지금 기록이 바뀌어요. 괜찮다면 “불러오기”를 한 번 더 눌러 주세요", guideSimple: "쉬움(심플)으로 플레이",
     /* はじめての あそびかた（game.js openGuide・2026-09-30）。guideHeads と guideBodies は同じ数。ボタン名は画面の文字と同じ（照らし合わせ=store/_back_check.js） */
     guideTitle: "노는 법", guidePrev: "◀ 이전", guideStart: "▶ 놀아요!", guideAgain: "다시 보기",
     guideHeads: [
@@ -400,6 +405,7 @@ const I18N = {
     vCraft: 'Usos ×{n}', vWarp: 'Salto cercano {n}%', vHansel: '{n} tonos', vClone: '{n} clones',
     vCT: 'CT {n}s', vMaster: '🪙×{a} 💎×{b}', chooseLang: 'Elige idioma', expMax: '(¡Nivel MÁXIMO!)', treasureMaster: 'MAESTRO DEL TESORO', masteryScore: 'Puntuación de maestría', simple: 'Simple', replay: 'Repetición', saveReplay: 'Guardar repetición', replaySaved: 'Guardado', noReplays: 'Aún no hay repeticiones',
     special: 'Especial', saveFail: 'No se pudo guardar', zukan: 'Colección de laberintos', zukanAll: '¡Los 9 laberintos completados!', resume: 'Continuar', hint: 'Pista', best: 'Mejor tiempo', bestNew: '🎖 ¡Nuevo récord personal!', vibe: 'Vibración',
+    updateReady: "Hay una versión nueva. Vuelve a abrir el juego", hc: "Alto contraste", backup: "Copia de seguridad", backupCopy: "Copiar", backupLoad: "Cargar", backupPh: "Pega aquí el texto copiado y pulsa «Cargar»", backupCopied: "Copiado. Pégalo en otro dispositivo para cargarlo", backupManual: "No se pudo copiar. Mantén pulsado el texto para copiarlo", backupLoaded: "Cargado", backupBad: "No se pudo cargar. Comprueba que pegaste todo el texto", backupSure: "Tus registros actuales se reemplazarán. Pulsa «Cargar» otra vez para continuar", guideSimple: "Jugar Fácil (Simple)",
     /* はじめての あそびかた（game.js openGuide・2026-09-30）。guideHeads と guideBodies は同じ数。ボタン名は画面の文字と同じ（照らし合わせ=store/_back_check.js） */
     guideTitle: "Cómo se juega", guidePrev: "◀ Anterior", guideStart: "▶ ¡A jugar!", guideAgain: "Ver otra vez",
     guideHeads: [
@@ -464,6 +470,7 @@ const I18N = {
     vCraft: 'Usos ×{n}', vWarp: 'Salto perto {n}%', vHansel: '{n} tons', vClone: '{n} clones',
     vCT: 'CT {n}s', vMaster: '🪙×{a} 💎×{b}', chooseLang: 'Escolher idioma', expMax: '(Nível MÁXIMO!)', treasureMaster: 'MESTRE DO TESOURO', masteryScore: 'Pontuação de maestria', simple: 'Simples', replay: 'Replay', saveReplay: 'Salvar replay', replaySaved: 'Salvo', noReplays: 'Ainda sem replays',
     special: 'Especial', saveFail: 'Não foi possível salvar', zukan: 'Coleção de labirintos', zukanAll: 'Os 9 labirintos concluídos!', resume: 'Continuar', hint: 'Dica', best: 'Melhor tempo', bestNew: '🎖 Novo recorde pessoal!', vibe: 'Vibração',
+    updateReady: "Há uma versão nova. Abra o jogo de novo", hc: "Alto contraste", backup: "Backup", backupCopy: "Copiar", backupLoad: "Carregar", backupPh: "Cole aqui o texto copiado e toque em “Carregar”", backupCopied: "Copiado. Cole em outro aparelho para carregar", backupManual: "Não foi possível copiar. Mantenha o texto pressionado para copiar", backupLoaded: "Carregado", backupBad: "Não foi possível carregar. Confira se colou o texto inteiro", backupSure: "Seus registros atuais serão substituídos. Toque em “Carregar” de novo para continuar", guideSimple: "Jogar Fácil (Simples)",
     /* はじめての あそびかた（game.js openGuide・2026-09-30）。guideHeads と guideBodies は同じ数。ボタン名は画面の文字と同じ（照らし合わせ=store/_back_check.js） */
     guideTitle: "Como jogar", guidePrev: "◀ Anterior", guideStart: "▶ Vamos jogar!", guideAgain: "Ver de novo",
     guideHeads: [
@@ -528,6 +535,7 @@ const I18N = {
     vCraft: 'Usages ×{n}', vWarp: 'Saut proche {n}%', vHansel: '{n} teintes', vClone: '{n} clones',
     vCT: 'CT {n}s', vMaster: '🪙×{a} 💎×{b}', chooseLang: 'Choisir la langue', expMax: '(Niveau MAX !)', treasureMaster: 'MAÎTRE DU TRÉSOR', masteryScore: 'Score de maîtrise', simple: 'Simple', replay: 'Rejouer', saveReplay: 'Enregistrer', replaySaved: 'Enregistré', noReplays: 'Aucun replay',
     special: 'Spécial', saveFail: 'Échec de l\'enregistrement', zukan: 'Collection de labyrinthes', zukanAll: 'Les 9 labyrinthes terminés !', resume: 'Continuer', hint: 'Indice', best: 'Meilleur temps', bestNew: '🎖 Nouveau record personnel !', vibe: 'Vibrations',
+    updateReady: "Une nouvelle version est prête. Rouvre le jeu", hc: "Contraste élevé", backup: "Sauvegarde", backupCopy: "Copier", backupLoad: "Charger", backupPh: "Colle ici le texte copié, puis touche « Charger »", backupCopied: "Copié. Colle-le sur un autre appareil pour le charger", backupManual: "Copie impossible. Appuie longuement sur le texte pour le copier", backupLoaded: "Chargé", backupBad: "Chargement impossible. Vérifie que tout le texte est collé", backupSure: "Tes enregistrements actuels seront remplacés. Touche « Charger » de nouveau pour continuer", guideSimple: "Jouer en Facile (Simple)",
     /* はじめての あそびかた（game.js openGuide・2026-09-30）。guideHeads と guideBodies は同じ数。ボタン名は画面の文字と同じ（照らし合わせ=store/_back_check.js） */
     guideTitle: "Comment jouer", guidePrev: "◀ Précédent", guideStart: "▶ C’est parti !", guideAgain: "Revoir",
     guideHeads: [
@@ -592,6 +600,7 @@ const I18N = {
     vCraft: 'Nutzung ×{n}', vWarp: 'Nah-Warp {n}%', vHansel: '{n} Stufen', vClone: '{n} Klone',
     vCT: 'CT {n}s', vMaster: '🪙×{a} 💎×{b}', chooseLang: 'Sprache wählen', expMax: '(MAX-Level!)', treasureMaster: 'SCHATZMEISTER', masteryScore: 'Meisterschaftspunkte', simple: 'Schlicht', replay: 'Wiederholung', saveReplay: 'Speichern', replaySaved: 'Gespeichert', noReplays: 'Noch keine Wiederholungen',
     special: 'Spezial', saveFail: 'Speichern fehlgeschlagen', zukan: 'Labyrinth-Sammlung', zukanAll: 'Alle 9 Labyrinthe geschafft!', resume: 'Fortsetzen', hint: 'Hinweis', best: 'Bestzeit', bestNew: '🎖 Neue Bestzeit!', vibe: 'Vibration',
+    updateReady: "Eine neue Version ist bereit. Öffne das Spiel neu", hc: "Hoher Kontrast", backup: "Sicherung", backupCopy: "Kopieren", backupLoad: "Laden", backupPh: "Füge den kopierten Text hier ein und tippe auf „Laden“", backupCopied: "Kopiert. Füge ihn auf einem anderen Gerät ein, um ihn zu laden", backupManual: "Kopieren fehlgeschlagen. Halte den Text gedrückt, um ihn zu kopieren", backupLoaded: "Geladen", backupBad: "Laden fehlgeschlagen. Prüfe, ob der ganze Text eingefügt ist", backupSure: "Deine aktuellen Daten werden ersetzt. Tippe noch einmal auf „Laden“, um fortzufahren", guideSimple: "Leicht (Schlicht) spielen",
     /* はじめての あそびかた（game.js openGuide・2026-09-30）。guideHeads と guideBodies は同じ数。ボタン名は画面の文字と同じ（照らし合わせ=store/_back_check.js） */
     guideTitle: "So wird gespielt", guidePrev: "◀ Zurück", guideStart: "▶ Los geht’s!", guideAgain: "Nochmal ansehen",
     guideHeads: [
@@ -656,6 +665,7 @@ const I18N = {
     vCraft: 'Usi ×{n}', vWarp: 'Salto vicino {n}%', vHansel: '{n} tonalità', vClone: '{n} cloni',
     vCT: 'CT {n}s', vMaster: '🪙×{a} 💎×{b}', chooseLang: 'Scegli la lingua', expMax: '(Livello MAX!)', treasureMaster: 'MAESTRO DEL TESORO', masteryScore: 'Punteggio maestria', simple: 'Semplice', replay: 'Replay', saveReplay: 'Salva replay', replaySaved: 'Salvato', noReplays: 'Ancora nessun replay',
     special: 'Speciale', saveFail: 'Salvataggio non riuscito', zukan: 'Collezione di labirinti', zukanAll: 'Tutti i 9 labirinti completati!', resume: 'Continua', hint: 'Suggerimento', best: 'Miglior tempo', bestNew: '🎖 Nuovo record personale!', vibe: 'Vibrazione',
+    updateReady: "È pronta una nuova versione. Riapri il gioco", hc: "Contrasto elevato", backup: "Backup", backupCopy: "Copia", backupLoad: "Carica", backupPh: "Incolla qui il testo copiato e premi «Carica»", backupCopied: "Copiato. Incollalo su un altro dispositivo per caricarlo", backupManual: "Copia non riuscita. Tieni premuto il testo per copiarlo", backupLoaded: "Caricato", backupBad: "Caricamento non riuscito. Controlla di aver incollato tutto il testo", backupSure: "I dati attuali verranno sostituiti. Premi di nuovo «Carica» per continuare", guideSimple: "Gioca in Facile (Semplice)",
     /* はじめての あそびかた（game.js openGuide・2026-09-30）。guideHeads と guideBodies は同じ数。ボタン名は画面の文字と同じ（照らし合わせ=store/_back_check.js） */
     guideTitle: "Come si gioca", guidePrev: "◀ Indietro", guideStart: "▶ Si gioca!", guideAgain: "Rivedi",
     guideHeads: [
@@ -720,6 +730,7 @@ const I18N = {
     vCraft: 'Gebruik ×{n}', vWarp: 'Dichtbij-warp {n}%', vHansel: '{n} tinten', vClone: '{n} klonen',
     vCT: 'CT {n}s', vMaster: '🪙×{a} 💎×{b}', chooseLang: 'Kies taal', expMax: '(MAX level!)', treasureMaster: 'SCHATMEESTER', masteryScore: 'Meesterschapscore', simple: 'Simpel', replay: 'Herhaling', saveReplay: 'Opslaan', replaySaved: 'Opgeslagen', noReplays: 'Nog geen herhalingen',
     special: 'Speciaal', saveFail: 'Opslaan mislukt', zukan: 'Doolhofcollectie', zukanAll: 'Alle 9 doolhoven voltooid!', resume: 'Doorgaan', hint: 'Hint', best: 'Beste tijd', bestNew: '🎖 Nieuw persoonlijk record!', vibe: 'Trillen',
+    updateReady: "Er is een nieuwe versie. Open het spel opnieuw", hc: "Hoog contrast", backup: "Back-up", backupCopy: "Kopiëren", backupLoad: "Laden", backupPh: "Plak hier de gekopieerde tekst en tik op “Laden”", backupCopied: "Gekopieerd. Plak het op een ander apparaat om het te laden", backupManual: "Kopiëren mislukt. Houd de tekst ingedrukt om te kopiëren", backupLoaded: "Geladen", backupBad: "Laden mislukt. Controleer of de hele tekst is geplakt", backupSure: "Je huidige gegevens worden vervangen. Tik nogmaals op “Laden” om door te gaan", guideSimple: "Speel Makkelijk (Simpel)",
     /* はじめての あそびかた（game.js openGuide・2026-09-30）。guideHeads と guideBodies は同じ数。ボタン名は画面の文字と同じ（照らし合わせ=store/_back_check.js） */
     guideTitle: "Zo speel je", guidePrev: "◀ Vorige", guideStart: "▶ Spelen maar!", guideAgain: "Opnieuw bekijken",
     guideHeads: [
@@ -784,6 +795,7 @@ const I18N = {
     vCraft: 'Użycia ×{n}', vWarp: 'Bliski teleport {n}%', vHansel: '{n} odcienie', vClone: '{n} klonów',
     vCT: 'CT {n}s', vMaster: '🪙×{a} 💎×{b}', chooseLang: 'Wybierz język', expMax: '(MAX poziom!)', treasureMaster: 'MISTRZ SKARBÓW', masteryScore: 'Wynik mistrzostwa', simple: 'Prosty', replay: 'Powtórka', saveReplay: 'Zapisz powtórkę', replaySaved: 'Zapisano', noReplays: 'Brak powtórek',
     special: 'Specjalna', saveFail: 'Nie udało się zapisać', zukan: 'Kolekcja labiryntów', zukanAll: 'Wszystkie 9 labiryntów ukończone!', resume: 'Kontynuuj', hint: 'Podpowiedź', best: 'Najlepszy czas', bestNew: '🎖 Nowy rekord!', vibe: 'Wibracje',
+    updateReady: "Jest nowa wersja. Otwórz grę ponownie", hc: "Wysoki kontrast", backup: "Kopia zapasowa", backupCopy: "Kopiuj", backupLoad: "Wczytaj", backupPh: "Wklej tu skopiowany tekst i naciśnij „Wczytaj”", backupCopied: "Skopiowano. Wklej na innym urządzeniu, aby wczytać", backupManual: "Nie udało się skopiować. Przytrzymaj tekst, aby go skopiować", backupLoaded: "Wczytano", backupBad: "Nie udało się wczytać. Sprawdź, czy wklejono cały tekst", backupSure: "Obecne zapisy zostaną zastąpione. Naciśnij „Wczytaj” jeszcze raz, aby kontynuować", guideSimple: "Graj: Łatwy (Prosty)",
     /* はじめての あそびかた（game.js openGuide・2026-09-30）。guideHeads と guideBodies は同じ数。ボタン名は画面の文字と同じ（照らし合わせ=store/_back_check.js） */
     guideTitle: "Jak grać", guidePrev: "◀ Wstecz", guideStart: "▶ Gramy!", guideAgain: "Pokaż ponownie",
     guideHeads: [
@@ -848,6 +860,7 @@ const I18N = {
     vCraft: 'Исп. ×{n}', vWarp: 'Ближний тп {n}%', vHansel: '{n} оттенка', vClone: '{n} двойн.',
     vCT: 'КД {n}с', vMaster: '🪙×{a} 💎×{b}', chooseLang: 'Выбрать язык', expMax: '(МАКС. уровень!)', treasureMaster: 'МАСТЕР СОКРОВИЩ', masteryScore: 'Очки мастерства', simple: 'Простой', replay: 'Повтор', saveReplay: 'Сохранить повтор', replaySaved: 'Сохранено', noReplays: 'Пока нет повторов',
     special: 'Особая', saveFail: 'Не удалось сохранить', zukan: 'Коллекция лабиринтов', zukanAll: 'Все 9 лабиринтов пройдены!', resume: 'Продолжить', hint: 'Подсказка', best: 'Лучшее время', bestNew: '🎖 Новый рекорд!', vibe: 'Вибрация',
+    updateReady: "Есть новая версия. Открой игру заново", hc: "Высокая контрастность", backup: "Резервная копия", backupCopy: "Копировать", backupLoad: "Загрузить", backupPh: "Вставь сюда скопированный текст и нажми «Загрузить»", backupCopied: "Скопировано. Вставь на другом устройстве, чтобы загрузить", backupManual: "Не удалось скопировать. Удерживай текст, чтобы скопировать", backupLoaded: "Загружено", backupBad: "Не удалось загрузить. Проверь, что текст вставлен полностью", backupSure: "Текущие записи будут заменены. Нажми «Загрузить» ещё раз, чтобы продолжить", guideSimple: "Играть: Легко (Простой)",
     /* はじめての あそびかた（game.js openGuide・2026-09-30）。guideHeads と guideBodies は同じ数。ボタン名は画面の文字と同じ（照らし合わせ=store/_back_check.js） */
     guideTitle: "Как играть", guidePrev: "◀ Назад", guideStart: "▶ Играем!", guideAgain: "Показать снова",
     guideHeads: [
@@ -912,6 +925,7 @@ const I18N = {
     vCraft: 'Kullanım ×{n}', vWarp: 'Yakın ışınlanma {n}%', vHansel: '{n} ton', vClone: '{n} klon',
     vCT: 'CT {n}sn', vMaster: '🪙×{a} 💎×{b}', chooseLang: 'Dil seç', expMax: '(MAKS seviye!)', treasureMaster: 'HAZİNE USTASI', masteryScore: 'Ustalık Puanı', simple: 'Sade', replay: 'Tekrar', saveReplay: 'Tekrarı kaydet', replaySaved: 'Kaydedildi', noReplays: 'Henüz tekrar yok',
     special: 'Özel', saveFail: 'Kaydedilemedi', zukan: 'Labirent koleksiyonu', zukanAll: '9 labirentin hepsi tamamlandı!', resume: 'Devam et', hint: 'İpucu', best: 'En iyi süre', bestNew: '🎖 Yeni rekor!', vibe: 'Titreşim',
+    updateReady: "Yeni sürüm hazır. Oyunu yeniden aç", hc: "Yüksek kontrast", backup: "Yedekleme", backupCopy: "Kopyala", backupLoad: "Yükle", backupPh: "Kopyaladığın metni buraya yapıştır ve “Yükle”ye bas", backupCopied: "Kopyalandı. Yüklemek için başka bir cihazda yapıştır", backupManual: "Kopyalanamadı. Metne uzun basarak kopyala", backupLoaded: "Yüklendi", backupBad: "Yüklenemedi. Metnin tamamının yapıştırıldığını kontrol et", backupSure: "Mevcut kayıtların değiştirilecek. Devam etmek için “Yükle”ye tekrar bas", guideSimple: "Kolay (Sade) oyna",
     /* はじめての あそびかた（game.js openGuide・2026-09-30）。guideHeads と guideBodies は同じ数。ボタン名は画面の文字と同じ（照らし合わせ=store/_back_check.js） */
     guideTitle: "Nasıl oynanır", guidePrev: "◀ Geri", guideStart: "▶ Hadi oyna!", guideAgain: "Tekrar göster",
     guideHeads: [
@@ -976,6 +990,7 @@ const I18N = {
     vCraft: 'उपयोग ×{n}', vWarp: 'निकट वार्प {n}%', vHansel: '{n} स्तर', vClone: '{n} प्रतिरूप',
     vCT: 'CT {n}से', vMaster: '🪙×{a} 💎×{b}', chooseLang: 'भाषा चुनें', expMax: '(अधिकतम स्तर!)', treasureMaster: 'खज़ाना मास्टर', masteryScore: 'महारत स्कोर', simple: 'सरल', replay: 'रीप्ले', saveReplay: 'रीप्ले सहेजें', replaySaved: 'सहेजा गया', noReplays: 'अभी कोई रीप्ले नहीं',
     special: 'स्पेशल', saveFail: 'सहेज नहीं सका', zukan: 'भूलभुलैया संग्रह', zukanAll: 'सभी 9 भूलभुलैया पूरी!', resume: 'जारी रखें', hint: 'संकेत', best: 'सर्वश्रेष्ठ समय', bestNew: '🎖 नया सर्वश्रेष्ठ!', vibe: 'कंपन',
+    updateReady: "नया संस्करण तैयार है। गेम फिर से खोलें", hc: "अधिक कंट्रास्ट", backup: "बैकअप", backupCopy: "कॉपी", backupLoad: "लोड करें", backupPh: "कॉपी किया गया टेक्स्ट यहाँ चिपकाएँ और “लोड करें” दबाएँ", backupCopied: "कॉपी हो गया। दूसरे डिवाइस पर चिपकाकर लोड करें", backupManual: "कॉपी नहीं हो सका। टेक्स्ट को देर तक दबाकर कॉपी करें", backupLoaded: "लोड हो गया", backupBad: "लोड नहीं हो सका। जाँचें कि पूरा टेक्स्ट चिपकाया गया है", backupSure: "आपका मौजूदा रिकॉर्ड बदल जाएगा। जारी रखने के लिए “लोड करें” फिर दबाएँ", guideSimple: "आसान (सरल) खेलें",
     /* はじめての あそびかた（game.js openGuide・2026-09-30）。guideHeads と guideBodies は同じ数。ボタン名は画面の文字と同じ（照らし合わせ=store/_back_check.js） */
     guideTitle: "कैसे खेलें", guidePrev: "◀ पिछला", guideStart: "▶ चलिए खेलें!", guideAgain: "फिर से देखें",
     guideHeads: [
@@ -1040,6 +1055,7 @@ const I18N = {
     vCraft: 'Pakai ×{n}', vWarp: 'Warp dekat {n}%', vHansel: '{n} tingkat', vClone: '{n} klon',
     vCT: 'CT {n}dtk', vMaster: '🪙×{a} 💎×{b}', chooseLang: 'Pilih bahasa', expMax: '(Level MAKS!)', treasureMaster: 'MASTER HARTA', masteryScore: 'Skor Penguasaan', simple: 'Simpel', replay: 'Replay', saveReplay: 'Simpan replay', replaySaved: 'Tersimpan', noReplays: 'Belum ada replay',
     special: 'Spesial', saveFail: 'Gagal menyimpan', zukan: 'Koleksi labirin', zukanAll: 'Semua 9 labirin selesai!', resume: 'Lanjutkan', hint: 'Petunjuk', best: 'Waktu terbaik', bestNew: '🎖 Rekor baru!', vibe: 'Getaran',
+    updateReady: "Versi baru tersedia. Buka lagi game ini", hc: "Kontras tinggi", backup: "Cadangan", backupCopy: "Salin", backupLoad: "Muat", backupPh: "Tempel teks yang disalin di sini, lalu tekan “Muat”", backupCopied: "Tersalin. Tempel di perangkat lain untuk memuatnya", backupManual: "Gagal menyalin. Tekan lama teks untuk menyalinnya", backupLoaded: "Dimuat", backupBad: "Gagal memuat. Pastikan seluruh teks sudah ditempel", backupSure: "Catatanmu saat ini akan diganti. Tekan “Muat” sekali lagi untuk melanjutkan", guideSimple: "Main Mudah (Simpel)",
     /* はじめての あそびかた（game.js openGuide・2026-09-30）。guideHeads と guideBodies は同じ数。ボタン名は画面の文字と同じ（照らし合わせ=store/_back_check.js） */
     guideTitle: "Cara bermain", guidePrev: "◀ Sebelumnya", guideStart: "▶ Ayo main!", guideAgain: "Lihat lagi",
     guideHeads: [
@@ -1104,6 +1120,7 @@ const I18N = {
     vCraft: 'استخدام ×{n}', vWarp: 'انتقال قريب {n}%', vHansel: '{n} درجات', vClone: '{n} نسخ',
     vCT: 'انتظار {n}ث', vMaster: '🪙×{a} 💎×{b}', chooseLang: 'اختر اللغة', expMax: '(المستوى الأقصى!)', treasureMaster: 'سيد الكنوز', masteryScore: 'نقاط الإتقان', simple: 'بسيط', replay: 'إعادة', saveReplay: 'حفظ الإعادة', replaySaved: 'تم الحفظ', noReplays: 'لا إعادات بعد',
     special: 'مميز', saveFail: 'تعذّر الحفظ', zukan: 'مجموعة المتاهات', zukanAll: 'أُنجزت المتاهات التسع كلها!', resume: 'متابعة', hint: 'تلميح', best: 'أفضل وقت', bestNew: '🎖 رقم قياسي جديد!', vibe: 'اهتزاز',
+    updateReady: "يوجد إصدار جديد. أعد فتح اللعبة", hc: "تباين عالٍ", backup: "نسخة احتياطية", backupCopy: "نسخ", backupLoad: "تحميل", backupPh: "الصق النص المنسوخ هنا ثم اضغط «تحميل»", backupCopied: "تم النسخ. الصقه على جهاز آخر لتحميله", backupManual: "تعذّر النسخ. اضغط مطولًا على النص لنسخه", backupLoaded: "تم التحميل", backupBad: "تعذّر التحميل. تأكد من لصق النص كاملًا", backupSure: "ستُستبدل سجلاتك الحالية. اضغط «تحميل» مرة أخرى للمتابعة", guideSimple: "العب: سهل (بسيط)",
     /* はじめての あそびかた（game.js openGuide・2026-09-30）。guideHeads と guideBodies は同じ数。ボタン名は画面の文字と同じ（照らし合わせ=store/_back_check.js） */
     guideTitle: "طريقة اللعب", guidePrev: "السابق", guideStart: "▶ لنلعب!", guideAgain: "عرض مرة أخرى",
     guideHeads: [
@@ -1168,6 +1185,7 @@ const I18N = {
     vCraft: 'ব্যবহার ×{n}', vWarp: 'কাছের ওয়ার্প {n}%', vHansel: '{n} ধাপ', vClone: '{n} প্রতিরূপ',
     vCT: 'CT {n}সে', vMaster: '🪙×{a} 💎×{b}', chooseLang: 'ভাষা বাছো', expMax: '(সর্বোচ্চ লেভেল!)', treasureMaster: 'ট্রেজার মাস্টার', masteryScore: 'দক্ষতা স্কোর', simple: 'সরল', replay: 'রিপ্লে', saveReplay: 'রিপ্লে সংরক্ষণ', replaySaved: 'সংরক্ষিত', noReplays: 'এখনও কোন রিপ্লে নেই',
     special: 'স্পেশাল', saveFail: 'সংরক্ষণ হয়নি', zukan: 'গোলকধাঁধা সংগ্রহ', zukanAll: '৯টি গোলকধাঁধাই ক্লিয়ার!', resume: 'চালিয়ে যান', hint: 'ইঙ্গিত', best: 'সেরা সময়', bestNew: '🎖 নতুন সেরা সময়!', vibe: 'কম্পন',
+    updateReady: "নতুন সংস্করণ এসেছে। গেমটি আবার খোলো", hc: "উচ্চ কনট্রাস্ট", backup: "ব্যাকআপ", backupCopy: "কপি", backupLoad: "লোড", backupPh: "কপি করা লেখা এখানে পেস্ট করে “লোড” চাপো", backupCopied: "কপি হয়েছে। অন্য ডিভাইসে পেস্ট করে লোড করো", backupManual: "কপি করা যায়নি। লেখাটি চেপে ধরে কপি করো", backupLoaded: "লোড হয়েছে", backupBad: "লোড করা যায়নি। পুরো লেখা পেস্ট হয়েছে কিনা দেখো", backupSure: "তোমার বর্তমান রেকর্ড বদলে যাবে। চালিয়ে যেতে আবার “লোড” চাপো", guideSimple: "সহজ (সরল) খেলো",
     /* はじめての あそびかた（game.js openGuide・2026-09-30）。guideHeads と guideBodies は同じ数。ボタン名は画面の文字と同じ（照らし合わせ=store/_back_check.js） */
     guideTitle: "কীভাবে খেলবে", guidePrev: "◀ আগের", guideStart: "▶ চলো খেলি!", guideAgain: "আবার দেখো",
     guideHeads: [
@@ -1232,6 +1250,7 @@ const I18N = {
     vCraft: 'Matumizi ×{n}', vWarp: 'Warp karibu {n}%', vHansel: 'Vivuli {n}', vClone: 'Nakala {n}',
     vCT: 'CT {n}sek', vMaster: '🪙×{a} 💎×{b}', chooseLang: 'Chagua lugha', expMax: '(Kiwango cha JUU!)', treasureMaster: 'BINGWA WA HAZINA', masteryScore: 'Alama za Umahiri', simple: 'Rahisi', replay: 'Rudia', saveReplay: 'Hifadhi rudia', replaySaved: 'Imehifadhiwa', noReplays: 'Hakuna rudia bado',
     special: 'Maalum', saveFail: 'Imeshindwa kuhifadhi', zukan: 'Mkusanyiko wa labirinti', zukanAll: 'Labirinti zote 9 zimekamilika!', resume: 'Endelea', hint: 'Dokezo', best: 'Muda bora', bestNew: '🎖 Rekodi mpya!', vibe: 'Mtetemo',
+    updateReady: "Toleo jipya liko tayari. Fungua mchezo tena", hc: "Utofautishaji wa juu", backup: "Hifadhi nakala", backupCopy: "Nakili", backupLoad: "Pakia", backupPh: "Bandika maandishi uliyonakili hapa kisha bonyeza “Pakia”", backupCopied: "Imenakiliwa. Ibandike kwenye kifaa kingine kuipakia", backupManual: "Imeshindwa kunakili. Bonyeza maandishi kwa muda mrefu kuyanakili", backupLoaded: "Imepakiwa", backupBad: "Imeshindwa kupakia. Hakikisha maandishi yote yamebandikwa", backupSure: "Rekodi zako za sasa zitabadilishwa. Bonyeza “Pakia” tena kuendelea", guideSimple: "Cheza Rahisi",
     /* はじめての あそびかた（game.js openGuide・2026-09-30）。guideHeads と guideBodies は同じ数。ボタン名は画面の文字と同じ（照らし合わせ=store/_back_check.js） */
     guideTitle: "Jinsi ya kucheza", guidePrev: "◀ Nyuma", guideStart: "▶ Tucheze!", guideAgain: "Onyesha tena",
     guideHeads: [
